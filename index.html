@@ -1,0 +1,956 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ODOS</title>
+<meta name="description" content="ODOS — every choice is a path.">
+
+<!-- ============================================================
+  ODOS — single-file site
+  HOW TO EDIT THIS FILE:
+  1. Products are in the PRODUCTS array inside <script> near the
+     bottom. Each has colors + sizes where relevant.
+  2. Product photos: set "img" to a real path, e.g.
+     "images/washed-tank-top.jpg", once you upload your photos
+     next to this file (or in an /images folder).
+  3. This site uses Netlify Forms — once deployed, turn on email
+     notifications under Site settings → Forms in Netlify. No
+     backend or API keys needed.
+============================================================= -->
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Anton&display=swap" rel="stylesheet">
+
+<style>
+  :root{
+    --black: #0a0a0a;
+    --black-2: #121212;
+    --white: #f5f5f0;
+    --grey: #8a8a85;
+    --grey-line: #2a2a28;
+    --header-h: 76px;
+  }
+
+  *{ box-sizing: border-box; }
+  html{ scroll-behavior: smooth; }
+  body{
+    margin:0;
+    background: var(--black);
+    color: var(--white);
+    font-family: 'Anton', sans-serif;
+    font-weight: 400;
+    -webkit-font-smoothing: antialiased;
+  }
+  h1,h2,h3,h4,p,ul,li,form,input,textarea,select,button{
+    font-family: 'Anton', sans-serif;
+    margin:0; padding:0;
+  }
+  input,textarea,select,button{ font-size: inherit; color: inherit; }
+  a{ color: inherit; text-decoration:none; }
+  ::selection{ background: var(--white); color: var(--black); }
+  ::placeholder{ color: var(--grey); opacity:1; }
+
+  .copy{
+    font-family: 'Anton', sans-serif;
+    letter-spacing: 0.02em;
+    line-height: 1.65;
+    font-size: 15px;
+    color: #cfcfc8;
+  }
+
+  a:focus-visible, button:focus-visible, input:focus-visible, textarea:focus-visible, select:focus-visible{
+    outline: 2px solid var(--white);
+    outline-offset: 3px;
+  }
+
+  /* ---------- spray paint edges (page only, not header) ---------- */
+  .spray-layer{
+    position: fixed; top: var(--header-h); bottom: 0; width: 220px;
+    pointer-events: none; z-index: 1; opacity: 0.55;
+  }
+  .spray-left{ left:0; }
+  .spray-right{ right:0; transform: scaleX(-1); }
+  .spray-layer svg{ width:100%; height:100%; }
+
+  /* ---------- header ---------- */
+  header{
+    position: fixed; top:0; left:0; right:0; height: var(--header-h);
+    display:grid; grid-template-columns: 1fr auto 1fr; align-items:center;
+    padding: 0 22px; background: rgba(10,10,10,0.92); backdrop-filter: blur(6px);
+    border-bottom: 1px solid var(--grey-line); z-index: 50; gap:10px;
+  }
+  .header-left{ display:flex; align-items:center; gap:18px; }
+  .header-center{ display:flex; align-items:center; justify-content:center; }
+  .header-right{ justify-self:end; }
+  .menu-btn{ background:none; border:none; cursor:pointer; width:34px; height:26px; position:relative; }
+  .menu-btn span{ position:absolute; left:0; right:0; height:2px; background: var(--white); transition: transform .25s ease, opacity .25s ease; }
+  .menu-btn span:nth-child(1){ top:0; }
+  .menu-btn span:nth-child(2){ top:12px; }
+  .menu-btn span:nth-child(3){ top:24px; }
+  .menu-btn.open span:nth-child(1){ transform: translateY(12px) rotate(45deg); }
+  .menu-btn.open span:nth-child(2){ opacity:0; }
+  .menu-btn.open span:nth-child(3){ transform: translateY(-12px) rotate(-45deg); }
+  .logo{ font-size: 26px; letter-spacing: -0.045em; line-height:1; cursor:pointer; user-select:none; }
+  .header-right{ display:flex; align-items:center; gap:16px; }
+  .search-wrap{ display:flex; align-items:center; }
+  .search-wrap input{ background:transparent; border:none; border-bottom:1px solid transparent; color:var(--white); width:0; padding:6px 0; transition: width .3s ease, border-color .3s ease; letter-spacing:0.03em; font-size:14px; }
+  .search-wrap.active input{ width: 160px; border-bottom-color: var(--grey); }
+  .icon-btn{ background:none; border:none; cursor:pointer; color:var(--white); display:flex; align-items:center; justify-content:center; padding:6px; position:relative; }
+  .icon-btn svg{ width:22px; height:22px; }
+  .cart-count{ position:absolute; top:-2px; right:-2px; background:var(--white); color:var(--black); font-size:10px; min-width:16px; height:16px; border-radius:50%; display:flex; align-items:center; justify-content:center; padding:0 2px; }
+
+  /* ---------- side menu ---------- */
+  .overlay{ position: fixed; inset:0; background: rgba(0,0,0,0.55); opacity:0; pointer-events:none; transition: opacity .3s ease; z-index:55; }
+  .overlay.show{ opacity:1; pointer-events:auto; }
+  .side-menu{ position: fixed; top:0; bottom:0; left:0; width: min(320px, 84vw); background: var(--black-2); border-right:1px solid var(--grey-line); transform: translateX(-100%); transition: transform .32s ease; z-index:60; display:flex; flex-direction:column; padding: 22px 26px; overflow-y:auto; }
+  .side-menu.open{ transform: translateX(0); }
+  .side-menu .logo{ margin-bottom: 34px; }
+  .side-menu nav{ display:flex; flex-direction:column; gap:14px; }
+  .side-menu nav a{ font-size:17px; letter-spacing:0.02em; padding:6px 0; color:var(--white); }
+  .side-menu nav a:hover{ color:var(--grey); }
+  .side-menu .cat-label{ margin-top:30px; font-size:12px; letter-spacing:0.15em; color:var(--grey); }
+  .side-menu .categories{ display:flex; flex-direction:column; margin-top:12px; }
+  .side-menu .categories button{ background:none; border:none; text-align:left; color:var(--white); font-size:15px; padding:8px 0; cursor:pointer; letter-spacing:0.02em; border-bottom: 1px solid var(--grey-line); }
+  .side-menu .categories button:hover{ color: var(--grey); }
+  .side-menu .menu-contact{ margin-top:auto; padding-top:20px; border-top:1px solid var(--grey-line); }
+  .side-menu .menu-contact p{ font-size:12px; letter-spacing:0.1em; color:var(--grey); margin-bottom:8px; }
+  .side-menu .menu-contact a{ display:block; font-size:14px; margin-bottom:6px; }
+
+  /* ---------- layout ---------- */
+  main{ padding-top: var(--header-h); position:relative; z-index:2; }
+  .page{ display:none; }
+  .page.active{ display:block; }
+  .wrap{ max-width: 1180px; margin:0 auto; padding: 0 24px; }
+
+  /* ---------- home ---------- */
+  .hero{ min-height: 78vh; display:flex; flex-direction:column; justify-content:center; padding: 60px 24px; border-bottom:1px solid var(--grey-line); }
+  .hero-inner{ max-width: 1180px; margin:0 auto; width:100%; }
+  .hero h1{ font-size: clamp(48px, 11vw, 130px); line-height:0.92; letter-spacing:0.005em; }
+  .hero p.copy{ max-width: 480px; margin-top: 26px; font-size:16px; }
+  .hero-cta{ margin-top:36px; display:flex; gap:14px; flex-wrap:wrap; }
+  .btn{ display:inline-block; padding:14px 26px; font-size:14px; letter-spacing:0.04em; border:1px solid var(--white); background:transparent; color:var(--white); cursor:pointer; transition: background .2s ease, color .2s ease; }
+  .btn:hover{ background:var(--white); color:var(--black); }
+  .btn.ghost{ border-color: var(--grey-line); color:var(--grey); }
+  .btn.ghost:hover{ background:var(--white); color:var(--black); border-color:var(--white); }
+  .btn.small{ padding:10px 16px; font-size:12px; }
+  .btn.full{ width:100%; text-align:center; }
+  .btn:disabled{ opacity:0.4; cursor:not-allowed; }
+  .btn:disabled:hover{ background:transparent; color:var(--white); }
+  .section-heading{ display:flex; align-items:baseline; justify-content:space-between; padding: 50px 0 22px; gap:16px; flex-wrap:wrap; }
+  .section-heading h2{ font-size: clamp(28px, 4vw, 42px); letter-spacing:0.01em; }
+  .section-heading .copy{ max-width:340px; text-align:right; font-size:13px; }
+  .home-story{ padding: 70px 0; border-bottom:1px solid var(--grey-line); }
+  .home-story .copy{ max-width:640px; font-size:17px; }
+  .home-story h3{ font-size: clamp(24px,3vw,34px); margin-bottom:18px; }
+
+  /* ---------- products grid ---------- */
+  .grid{ display:grid; grid-template-columns: repeat(auto-fill, minmax(240px,1fr)); gap: 22px; padding-bottom: 60px; }
+  .card{ border:1px solid var(--grey-line); background: var(--black-2); display:flex; flex-direction:column; overflow:hidden; }
+  .card-img{ aspect-ratio: 4/5; background:#1a1a18; display:flex; align-items:center; justify-content:center; color:var(--grey); font-size:12px; letter-spacing:0.08em; text-align:center; padding:10px; overflow:hidden; cursor:pointer; }
+  .card-img img{ width:100%; height:100%; object-fit:cover; display:block; }
+  .card-body{ padding:16px; display:flex; flex-direction:column; gap:8px; flex:1; }
+  .card-cat{ font-size:11px; letter-spacing:0.12em; color:var(--grey); }
+  .card-name{ font-size:16px; letter-spacing:0.01em; cursor:pointer; }
+  .card-price{ font-size:14px; color:var(--grey); margin-top:auto; }
+  .card-actions{ display:flex; gap:8px; margin-top:6px; }
+  .filter-row{ display:flex; gap:10px; flex-wrap:wrap; padding: 30px 0 6px; }
+  .filter-row button{ background:none; border:1px solid var(--grey-line); color:var(--grey); padding:8px 14px; font-size:12px; letter-spacing:0.06em; cursor:pointer; }
+  .filter-row button.active{ border-color:var(--white); color:var(--white); }
+  .page-title{ padding: 50px 0 6px; font-size: clamp(34px,5vw,56px); }
+
+  /* ---------- product modal ---------- */
+  .modal-overlay{ position:fixed; inset:0; background:rgba(0,0,0,0.75); z-index:70; display:none; align-items:center; justify-content:center; padding:20px; }
+  .modal-overlay.show{ display:flex; }
+  .modal{ background: var(--black-2); border:1px solid var(--grey-line); max-width:780px; width:100%; max-height:88vh; overflow:auto; display:grid; grid-template-columns: 1fr; position:relative; }
+  @media(min-width:640px){ .modal{ grid-template-columns: 1fr 1fr; } }
+  .modal-close{ position:absolute; top:12px; right:12px; background:none; border:none; color:var(--white); font-size:22px; cursor:pointer; z-index:2; }
+  .modal-img{ background:#1a1a18; aspect-ratio:4/5; display:flex; align-items:center; justify-content:center; color:var(--grey); font-size:12px; text-align:center; padding:16px; }
+  .modal-img img{ width:100%; height:100%; object-fit:cover; }
+  .modal-thumbs{ display:flex; gap:8px; padding:10px; flex-wrap:wrap; grid-column: 1 / -1; }
+  @media(min-width:640px){ .modal-thumbs{ grid-column: 1; } }
+  .modal-thumbs button{ width:50px; height:50px; padding:0; border:1px solid var(--grey-line); background:#1a1a18; cursor:pointer; overflow:hidden; }
+  .modal-thumbs button.selected{ border-color:var(--white); }
+  .modal-thumbs button img{ width:100%; height:100%; object-fit:cover; display:block; }
+  .card-img{ position:relative; }
+  .modal-body{ padding: 30px; display:flex; flex-direction:column; gap:14px; }
+  .modal-body h3{ font-size:24px; }
+  .modal-body .price{ font-size:16px; color:var(--grey); }
+  .opt-label{ font-size:11px; letter-spacing:0.1em; color:var(--grey); margin-bottom:8px; }
+  .opt-row{ display:flex; flex-wrap:wrap; gap:8px; }
+  .opt-row button{ border:1px solid var(--grey-line); background:none; color:var(--white); padding:8px 12px; font-size:12px; cursor:pointer; letter-spacing:0.03em; }
+  .opt-row button.selected{ border-color:var(--white); background:var(--white); color:var(--black); }
+  .swatch{ width:30px; height:30px; border:1px solid var(--grey-line); cursor:pointer; padding:0; }
+  .swatch.selected{ outline: 2px solid var(--white); outline-offset:2px; }
+  .qty-row{ display:flex; align-items:center; gap:12px; }
+  .qty-row button{ width:32px; height:32px; border:1px solid var(--grey-line); background:none; color:var(--white); cursor:pointer; font-size:16px; }
+  .size-guide-link{ background:none; border:none; color:var(--grey); text-decoration:underline; font-size:11px; cursor:pointer; padding:0; align-self:flex-start; }
+  .size-guide-table{ display:none; border:1px solid var(--grey-line); font-size:11px; }
+  .size-guide-table.show{ display:table; width:100%; border-collapse:collapse; }
+  .size-guide-table th, .size-guide-table td{ border:1px solid var(--grey-line); padding:6px 8px; text-align:center; color:#cfcfc8; }
+  .size-guide-table th{ color:var(--white); }
+  .opt-warn{ font-size:11px; color:#e08; display:none; }
+  .opt-warn.show{ display:block; }
+
+  /* ---------- cart page ---------- */
+  .cart-layout{ display:grid; grid-template-columns:1fr; gap:40px; padding: 40px 0 80px; }
+  @media(min-width:860px){ .cart-layout{ grid-template-columns: 1.3fr 1fr; } }
+  .cart-item{ display:flex; gap:14px; padding:16px 0; border-bottom:1px solid var(--grey-line); align-items:center; }
+  .cart-item .thumb{ width:64px; height:64px; background:#1a1a18; flex-shrink:0; display:flex; align-items:center; justify-content:center; font-size:9px; color:var(--grey); overflow:hidden; }
+  .cart-item .thumb img{ width:100%; height:100%; object-fit:cover; }
+  .cart-item .info{ flex:1; min-width:0; }
+  .cart-item .info .name{ font-size:15px; }
+  .cart-item .info .meta{ font-size:12px; color:var(--grey); margin-top:4px; }
+  .cart-item .remove{ background:none; border:none; color:var(--grey); cursor:pointer; font-size:12px; text-decoration:underline; }
+  .cart-empty{ padding: 50px 0; color:var(--grey); }
+  .summary-box{ border:1px solid var(--grey-line); padding:24px; background:var(--black-2); }
+  .summary-row{ display:flex; justify-content:space-between; font-size:14px; padding:8px 0; color:var(--grey); }
+  .summary-row.total{ color:var(--white); font-size:18px; border-top:1px solid var(--grey-line); margin-top:10px; padding-top:14px; }
+  .field{ margin-bottom:16px; }
+  .field label{ display:block; font-size:11px; letter-spacing:0.1em; color:var(--grey); margin-bottom:7px; }
+  .field input, .field textarea, .field select{ width:100%; background:var(--black); border:1px solid var(--grey-line); color:var(--white); padding:11px 12px; letter-spacing:0.02em; font-size:14px; }
+  .field textarea{ resize:vertical; min-height:80px; }
+  .radio-group{ display:flex; flex-direction:column; gap:10px; }
+  .radio-option{ border:1px solid var(--grey-line); padding:12px; display:flex; gap:10px; align-items:flex-start; cursor:pointer; }
+  .radio-option input{ margin-top:3px; width:auto; }
+  .radio-option .rtext{ font-size:13px; }
+  .radio-option .rtext .sub{ display:block; color:var(--grey); font-size:12px; margin-top:4px; }
+  .form-msg{ font-size:13px; padding:12px; border:1px solid var(--grey-line); margin-top:14px; display:none; }
+  .form-msg.show{ display:block; }
+  .form-msg.ok{ border-color:#4a4; color:#8f8; }
+  .form-msg.err{ border-color:#a44; color:#f88; }
+
+  /* ---------- contact ---------- */
+  .contact-layout{ display:grid; grid-template-columns:1fr; gap:50px; padding:40px 0 80px; }
+  @media(min-width:860px){ .contact-layout{ grid-template-columns:1fr 1fr; } }
+  .contact-info a{ display:block; font-size:16px; padding:12px 0; border-bottom:1px solid var(--grey-line); }
+
+  /* ---------- faq ---------- */
+  .faq-list{ padding: 30px 0 80px; max-width:760px; }
+  .faq-item{ border-bottom:1px solid var(--grey-line); }
+  .faq-q{ width:100%; text-align:left; background:none; border:none; color:var(--white); padding:20px 0; font-size:16px; display:flex; justify-content:space-between; align-items:center; cursor:pointer; gap:16px; }
+  .faq-q .plus{ font-size:20px; transition: transform .2s ease; flex-shrink:0; }
+  .faq-item.open .faq-q .plus{ transform: rotate(45deg); }
+  .faq-a{ max-height:0; overflow:hidden; transition: max-height .3s ease; }
+  .faq-item.open .faq-a{ max-height:300px; }
+  .faq-a p{ padding-bottom:20px; }
+
+  /* ---------- footer ---------- */
+  footer{ border-top:1px solid var(--grey-line); padding: 50px 24px 30px; position:relative; z-index:2; }
+  .footer-inner{ max-width:1180px; margin:0 auto; display:grid; grid-template-columns:1fr; gap:34px; }
+  @media(min-width:720px){ .footer-inner{ grid-template-columns: 1.4fr 1fr 1fr; } }
+  .footer-inner .logo{ margin-bottom:14px; }
+  .footer-col h4{ font-size:12px; letter-spacing:0.12em; color:var(--grey); margin-bottom:14px; }
+  .footer-col a, .footer-col p{ display:block; font-size:14px; padding:5px 0; color:#cfcfc8; }
+  .footer-bottom{ max-width:1180px; margin: 34px auto 0; padding-top:20px; border-top:1px solid var(--grey-line); display:flex; justify-content:space-between; flex-wrap:wrap; gap:10px; font-size:11px; color:var(--grey); letter-spacing:0.06em; }
+
+  @media (prefers-reduced-motion: reduce){ *{ transition:none !important; scroll-behavior:auto !important; } }
+</style>
+</head>
+<body>
+
+<div class="spray-layer spray-left" aria-hidden="true">
+  <svg viewBox="0 0 220 1200" preserveAspectRatio="xMinYMid slice">
+    <defs><filter id="spray1"><feTurbulence type="fractalNoise" baseFrequency="0.012 0.03" numOctaves="3" seed="7" result="n"/><feDisplacementMap in="SourceGraphic" in2="n" scale="60"/></filter></defs>
+    <g filter="url(#spray1)" fill="var(--white)" opacity="0.5">
+      <circle cx="20" cy="120" r="70"/><circle cx="10" cy="420" r="50"/><circle cx="40" cy="760" r="90"/><circle cx="0" cy="1080" r="60"/>
+    </g>
+  </svg>
+</div>
+<div class="spray-layer spray-right" aria-hidden="true">
+  <svg viewBox="0 0 220 1200" preserveAspectRatio="xMinYMid slice">
+    <defs><filter id="spray2"><feTurbulence type="fractalNoise" baseFrequency="0.015 0.025" numOctaves="3" seed="21" result="n"/><feDisplacementMap in="SourceGraphic" in2="n" scale="55"/></filter></defs>
+    <g filter="url(#spray2)" fill="var(--white)" opacity="0.5">
+      <circle cx="20" cy="240" r="65"/><circle cx="0" cy="600" r="85"/><circle cx="30" cy="960" r="55"/>
+    </g>
+  </svg>
+</div>
+
+<header>
+  <div class="header-left">
+    <button class="menu-btn" id="menuBtn" aria-label="Open menu" aria-expanded="false"><span></span><span></span><span></span></button>
+  </div>
+  <div class="header-center">
+    <a href="#home" class="logo" data-nav="home">ODOS</a>
+  </div>
+  <div class="header-right">
+    <div class="search-wrap" id="searchWrap"><input type="text" id="searchInput" placeholder="Search products…"></div>
+    <button class="icon-btn" id="searchBtn" aria-label="Search"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></button>
+    <button class="icon-btn" id="cartBtn" aria-label="Cart" data-nav="cart">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg>
+      <span class="cart-count" id="cartCount" style="display:none;">0</span>
+    </button>
+  </div>
+</header>
+
+<div class="overlay" id="overlay"></div>
+<aside class="side-menu" id="sideMenu">
+  <span class="logo">ODOS</span>
+  <nav>
+    <a href="#home" data-nav="home">Home</a>
+    <a href="#products" data-nav="products">All Products</a>
+    <a href="#contact" data-nav="contact">Contact Us</a>
+    <a href="#faq" data-nav="faq">FAQ / Q&amp;A</a>
+    <a href="#story" data-nav="story">The Path &amp; The Moment</a>
+  </nav>
+  <p class="cat-label">CATEGORIES</p>
+  <div class="categories" id="menuCategories"></div>
+  <div class="menu-contact">
+    <p>Contact</p>
+    <a href="mailto:odostore11@gmail.com">odostore11@gmail.com</a>
+    <a href="https://wa.me/201556059711" target="_blank" rel="noopener">WhatsApp: 01556059711</a>
+    <a href="https://www.instagram.com/odos.store/" target="_blank" rel="noopener">@odos.store</a>
+  </div>
+</aside>
+
+<main>
+  <section class="page active" id="page-home">
+    <div class="hero">
+      <div class="hero-inner">
+        <h1>EVERY<br>CHOICE<br>IS A PATH.</h1>
+        <p class="copy">ODOS is a small, local goods brand — clothing, caps, mugs, bags and accessories built around one idea: the line you walk matters more than the destination.</p>
+        <div class="hero-cta">
+          <a class="btn" href="#products" data-nav="products">Shop All Products</a>
+          <a class="btn ghost" href="#faq" data-nav="faq">Read the FAQ</a>
+        </div>
+      </div>
+    </div>
+    <div class="wrap">
+      <div class="section-heading">
+        <h2>FEATURED</h2>
+        <p class="copy">A short list, picked by hand. The full range is one tap away.</p>
+      </div>
+      <div class="grid" id="featuredGrid"></div>
+    </div>
+    <div class="wrap home-story">
+      <h3>WHY "ODOS"</h3>
+      <p class="copy">Odos is Greek for "path" — the one we're all on, walking, running, sometimes just crawling through it. Nobody's really ahead of anybody. We're all just trying to figure ourselves out along the way. <strong>Execute.</strong></p>
+      <p class="copy">Kairos is Greek for "opportunity." It's not something you plan for — it just shows up. A moment, an opening, a shot you didn't see coming. You either take it and let it bend your path somewhere new, or it slips by and you keep walking the same way you were. <strong>Seize.</strong></p>
+      <p class="copy">Whatever you're trying to surpass or achieve — a final, a certain GPA, your dream job, a shot you've been waiting on — wear it. Every time you put it on, you remember why you started. <strong>Remember.</strong></p>
+      <a class="btn ghost" href="#story" data-nav="story" style="margin-top:16px; display:inline-block;">Read Our Story</a>
+    </div>
+  </section>
+
+  <section class="page" id="page-products">
+    <div class="wrap">
+      <h1 class="page-title">ALL PRODUCTS</h1>
+      <div class="filter-row" id="filterRow"></div>
+      <div class="grid" id="productsGrid"></div>
+    </div>
+  </section>
+
+  <section class="page" id="page-cart">
+    <div class="wrap">
+      <h1 class="page-title">YOUR CART</h1>
+      <div class="cart-layout">
+        <div>
+          <div id="cartItemsList"></div>
+          <p class="cart-empty copy" id="cartEmptyMsg" style="display:none;">Your cart is empty. <a href="#products" data-nav="products" style="text-decoration:underline;">Browse products →</a></p>
+        </div>
+        <div>
+          <div class="summary-box">
+            <div class="summary-row"><span>Subtotal</span><span id="cartSubtotal">EGP 0</span></div>
+            <div class="summary-row"><span>Delivery</span><span>Confirmed on contact</span></div>
+            <div class="summary-row total"><span>Total</span><span id="cartTotal">EGP 0</span></div>
+          </div>
+
+          <form name="order" method="POST" data-netlify="true" netlify-honeypot="bot-field" id="orderForm" style="margin-top:24px;">
+            <input type="hidden" name="form-name" value="order">
+            <p style="display:none;"><label>Don't fill this out: <input name="bot-field"></label></p>
+            <input type="hidden" name="order_details" id="orderDetailsField">
+            <input type="hidden" name="order_total" id="orderTotalField">
+
+            <div class="field"><label for="ord_name">Full name</label><input type="text" id="ord_name" name="name" required></div>
+            <div class="field"><label for="ord_phone">Phone number</label><input type="tel" id="ord_phone" name="phone" required></div>
+            <div class="field"><label for="ord_whatsapp">WhatsApp number</label><input type="tel" id="ord_whatsapp" name="whatsapp" placeholder="If different from phone number" required></div>
+            <div class="field"><label for="ord_address">Delivery address</label><textarea id="ord_address" name="address" required></textarea></div>
+            <div class="field"><label for="ord_city">City</label><input type="text" id="ord_city" name="city" required></div>
+
+            <div class="field">
+              <label>Payment method</label>
+              <div class="radio-group">
+                <label class="radio-option">
+                  <input type="radio" name="payment" value="Telda" required>
+                  <span class="rtext">Telda<span class="sub">Send to: @omarkhaled156</span></span>
+                </label>
+                <label class="radio-option">
+                  <input type="radio" name="payment" value="InstaPay">
+                  <span class="rtext">InstaPay<span class="sub">Send to: @janassamehaattia · or scan the QR code:</span><img src="images/instapay-qr.png" alt="InstaPay QR code" style="width:120px; height:120px; margin-top:8px; display:block; border:1px solid var(--grey-line);"></span>
+                </label>
+                <label class="radio-option">
+                  <input type="radio" name="payment" value="Vodafone Cash">
+                  <span class="rtext">Vodafone Cash<span class="sub">Send to: 01022478594</span></span>
+                </label>
+                <label class="radio-option">
+                  <input type="radio" name="payment" value="Cash on Delivery">
+                  <span class="rtext">Cash on Delivery<span class="sub">Pay when your order arrives</span></span>
+                </label>
+              </div>
+            </div>
+
+            <div class="field"><label for="ord_notes">Notes (anything else)</label><textarea id="ord_notes" name="notes"></textarea></div>
+
+            <button type="submit" class="btn full" id="orderSubmitBtn">Place Order</button>
+            <div class="form-msg" id="orderMsg"></div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="page" id="page-contact">
+    <div class="wrap">
+      <h1 class="page-title">CONTACT US</h1>
+      <div class="contact-layout">
+        <div>
+          <p class="copy" style="margin-bottom:20px; max-width:420px;">Questions about an order, a product, or a bulk request — reach out directly, or use the form and we'll get back to you.</p>
+          <div class="contact-info">
+            <a href="mailto:odostore11@gmail.com">odostore11@gmail.com</a>
+            <a href="https://wa.me/201556059711" target="_blank" rel="noopener">WhatsApp / Call: 01556059711</a>
+            <a href="https://www.instagram.com/odos.store/" target="_blank" rel="noopener">instagram.com/odos.store</a>
+          </div>
+        </div>
+        <form name="contact" method="POST" data-netlify="true" netlify-honeypot="bot-field" id="contactForm">
+          <input type="hidden" name="form-name" value="contact">
+          <p style="display:none;"><label>Don't fill this out: <input name="bot-field"></label></p>
+          <div class="field"><label for="c_name">Name</label><input type="text" id="c_name" name="name" required></div>
+          <div class="field"><label for="c_email">Email</label><input type="email" id="c_email" name="email" required></div>
+          <div class="field"><label for="c_message">Message</label><textarea id="c_message" name="message" required></textarea></div>
+          <button type="submit" class="btn full">Send Message</button>
+          <div class="form-msg" id="contactMsg"></div>
+        </form>
+      </div>
+    </div>
+  </section>
+
+  <section class="page" id="page-faq">
+    <div class="wrap">
+      <h1 class="page-title">FAQ / Q&amp;A</h1>
+      <div class="faq-list" id="faqList"></div>
+    </div>
+  </section>
+
+  <section class="page" id="page-story">
+    <div class="wrap">
+      <h1 class="page-title">THE PATH &amp; THE MOMENT</h1>
+      <div class="faq-list">
+        <div class="faq-item open">
+          <div class="faq-q"><span>What's ODOS?</span></div>
+          <div class="faq-a" style="max-height:none;"><p class="copy">Odos is Greek for "path". It's the one we're all on — walking, running, sometimes just crawling through it. Nobody's really ahead of anybody. We're all just trying to figure ourselves out along the way.<br><strong>Execute.</strong></p></div>
+        </div>
+        <div class="faq-item open">
+          <div class="faq-q"><span>What's KAIROS then?</span></div>
+          <div class="faq-a" style="max-height:none;"><p class="copy">Kairos is Greek for "opportunity". It's not something you plan for — it just shows up. A moment, an opening, a shot you didn't see coming. You either take it and let it bend your path somewhere new, or it slips by and you keep walking the same way you were.<br><strong>Seize.</strong></p></div>
+        </div>
+        <div class="faq-item open">
+          <div class="faq-q"><span>Why We Do It?</span></div>
+          <div class="faq-a" style="max-height:none;"><p class="copy">Whatever you're trying to surpass or achieve — a final, a certain GPA, your dream job, a shot you've been waiting on — wear it. Every time you put it on, you remember why you started.<br><strong>Remember.</strong></p></div>
+        </div>
+      </div>
+    </div>
+  </section>
+</main>
+
+<div class="modal-overlay" id="modalOverlay">
+  <div class="modal">
+    <button class="modal-close" id="modalClose" aria-label="Close">&times;</button>
+    <div>
+      <div class="modal-img" id="modalImg"></div>
+      <div class="modal-thumbs" id="modalThumbs"></div>
+    </div>
+    <div class="modal-body">
+      <span class="card-cat" id="modalCat"></span>
+      <h3 id="modalName"></h3>
+      <p class="copy" id="modalDesc"></p>
+      <span class="price" id="modalPrice"></span>
+
+      <div id="modalColorWrap" style="display:none;">
+        <p class="opt-label">COLOR: <span id="modalColorSelected"></span></p>
+        <div class="opt-row" id="modalColorRow"></div>
+      </div>
+
+      <div id="modalSizeWrap" style="display:none;">
+        <p class="opt-label">SIZE</p>
+        <div class="opt-row" id="modalSizeRow"></div>
+        <button class="size-guide-link" id="sizeGuideBtn" style="display:none; margin-top:8px;">Size Guide</button>
+        <table class="size-guide-table" id="sizeGuideTable"></table>
+      </div>
+
+      <p class="opt-warn" id="optWarn">Please select all options before adding to cart.</p>
+
+      <div class="qty-row">
+        <button id="qtyMinus" type="button">−</button>
+        <span id="qtyVal">1</span>
+        <button id="qtyPlus" type="button">+</button>
+      </div>
+      <button class="btn full" id="modalAddBtn">Add to Cart</button>
+    </div>
+  </div>
+</div>
+
+<footer>
+  <div class="footer-inner">
+    <div>
+      <span class="logo">ODOS</span>
+      <p class="copy" style="max-width:280px;">Every choice is a path. A local clothing and lifestyle brand.</p>
+    </div>
+    <div class="footer-col">
+      <h4>SITE</h4>
+      <a href="#home" data-nav="home">Home</a>
+      <a href="#products" data-nav="products">All Products</a>
+      <a href="#contact" data-nav="contact">Contact Us</a>
+      <a href="#faq" data-nav="faq">FAQ / Q&amp;A</a>
+      <a href="#story" data-nav="story">The Path &amp; The Moment</a>
+    </div>
+    <div class="footer-col">
+      <h4>CONTACT</h4>
+      <a href="mailto:odostore11@gmail.com">odostore11@gmail.com</a>
+      <a href="https://wa.me/201556059711" target="_blank" rel="noopener">01556059711</a>
+      <a href="https://www.instagram.com/odos.store/" target="_blank" rel="noopener">Instagram</a>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <span>© <span id="year"></span> ODOS. ALL RIGHTS RESERVED.</span>
+    <span>EGYPT</span>
+  </div>
+</footer>
+
+<script>
+(function(){
+  "use strict";
+
+  /* ============================================================
+     SIZE GUIDES (cm) — from your size-chart screenshots
+  ============================================================= */
+  var SIZE_GUIDES = {
+    sweatWH: { headers:["Size","Width","Length","User Height"], rows:[
+      ["S","33","50","Up to 170"],["M","35","51","Up to 180"],["L","37","52","Up to 185"],["XL","39","53","Up to 190"],["2XL","42","54","Up to 195"] ] },
+    sweatpantsWH: { headers:["Size","Width","Length","User Height"], rows:[
+      ["S","33","100","Up to 170"],["M","35","103","Up to 180"],["L","37","105","Up to 185"],["XL","39","107","Up to 190"],["2XL","42","109","Up to 195"] ] },
+    bandedSweatpants: { headers:["Size","Width","Length","User Height"], rows:[
+      ["S","31","95","Up to 165"],["M","32","105","Up to 175"],["L","33","107","Up to 180"],["XL","34","109","Up to 185"],["2XL","36","112","Up to 190"] ] },
+    polo: { headers:["Size","Width","Length","Avg. Weight (kg)"], rows:[
+      ["S","50","64","55–65"],["M","51","66","65–70"],["L","52","69","70–75"],["XL","55","72","80–90"],["2XL","58","74","90–100"] ] },
+    premiumCrewHood: { headers:["Size","Width","Length","Avg. Weight (kg)"], rows:[
+      ["S","56","69","50–65"],["M","58","70","65–75"],["L","62","73","75–85"],["XL","64","74","85–95"],["2XL","66","76","95–105"] ] },
+    parasola: { headers:["Size","Width","Length","Avg. Weight (kg)"], rows:[
+      ["S","56","70","55–65"],["M","59","72","65–75"],["L","62","73","75–85"],["XL","65","75","85–95"],["2XL","67","77","95–110"] ] },
+    washedHoodie: { headers:["Size","Width","Length","Avg. Weight (kg)"], rows:[
+      ["S","58","69","50–65"],["M","61","71","65–75"],["L","64","74","75–90"],["XL","68","80","95–110"] ] },
+    longHoodie: { headers:["Size","Width","Length","Avg. Weight (kg)"], rows:[
+      ["S","58","84","50–65"],["M","61","87","65–75"],["L","62","90","75–90"],["XL","64","92","90–105"] ] },
+    croppedHoodie: { headers:["Size","Width","Length","Avg. Weight (kg)"], rows:[
+      ["S","56","43","55–65"],["M","58","45","65–70"],["L","60","48","70–75"],["XL","64","50","80–90"] ] },
+    croppedTee: { headers:["Size","Width","Length","Avg. Weight (kg)"], rows:[
+      ["S","56","43","50–65"],["M","59","45","65–75"],["L","62","48","75–90"],["XL","65","50","90–105"] ] },
+    longSleeves: { headers:["Size","Width","Length","Avg. Weight (kg)"], rows:[
+      ["S","52","69","50–65"],["M","54","70","65–75"],["L","56","73","75–85"],["XL","58","74","85–95"],["2XL","60","76","95–105"] ] },
+    washedLongSleeves: { headers:["Size","Width","Length","Avg. Weight (kg)"], rows:[
+      ["M","59","72","65–75"],["L","62","73","75–85"],["XL","65","75","85–95"] ] },
+    boulevardTank: { headers:["Size","Width","Length","Avg. Weight (kg)"], rows:[
+      ["M","56","74","65–75"],["L","58","76","75–85"],["XL","60","78","85–95"] ] },
+    washedTank: { headers:["Size","Width","Length","Avg. Weight (kg)"], rows:[
+      ["M","56","74","65–75"],["L","58","76","75–85"],["XL","60","78","85–95"] ] },
+    boulevardTee: { headers:["Size","Width","Length","Avg. Weight (kg)"], rows:[
+      ["S","56","70","55–65"],["M","59","72","65–75"],["L","62","73","75–85"],["XL","65","75","85–95"],["2XL","67","77","95–110"] ] }
+  };
+
+  /* ============================================================
+     PRODUCT DATA — replace img:"" with a real relative path
+     once you have photos, e.g. "images/washed-tank-top.jpg"
+  ============================================================= */
+  var PRODUCTS = [
+    { id:"p01", name:"Washed Oversized Tank Top", category:"Clothing", price:435, img:"", images:["images/washed-tank-1.png","images/washed-tank-2.png","images/washed-tank-3.png"], colors:["Dark Grey"], sizes:["M","L","XL"], sizeGuide:"washedTank", desc:"Oversized, loose-shoulder fit in heavy washed cotton." },
+    { id:"p02", name:"Regular Long Sleeves", category:"Clothing", price:445, img:"", images:["images/regular-long-sleeves-1.png","images/regular-long-sleeves-2.png"], colors:["Black","White"], sizes:["S","M","L","XL","2XL"], sizeGuide:"longSleeves", desc:"Regular straight fit, suitable for everyday wear." },
+    { id:"p03", name:"Polo T-Shirt", category:"Clothing", price:495, img:"", images:["images/polo-tshirt-1.png"], colors:["Black","White","Grey"], sizes:["S","M","L","XL","2XL"], sizeGuide:"polo", desc:"Slim fit, suitable for a smart and semi-casual look." },
+    { id:"p04", name:"Cropped Oversized T-Shirt", category:"Clothing", price:445, img:"", images:["images/cropped-tee-1.png","images/cropped-tee-2.png","images/cropped-tee-3.png"], colors:["Black","White","Green","Beige"], sizes:["S","M","L","XL","2XL"], sizeGuide:"croppedTee", desc:"Oversized, loose-shoulder fit, cropped length." },
+    { id:"p05", name:"Premium Oversized Crewneck", category:"Clothing", price:605, img:"", images:["images/premium-crewneck-1.png","images/premium-crewneck-2.png","images/premium-crewneck-3.png","images/premium-crewneck-4.png"], colors:["Black","White","Blue","Green","Grey"], sizes:["S","M","L","XL","2XL"], sizeGuide:"premiumCrewHood", desc:"Oversized, loose fit, comfy inside out with a premium look." },
+    { id:"p06", name:"Premium Oversized Hoodie", category:"Clothing", price:625, img:"", images:["images/premium-hoodie-1.png","images/premium-hoodie-2.png","images/premium-hoodie-3.png","images/premium-hoodie-4.png"], colors:["Black","White","Blue","Green","Grey","Pink"], sizes:["S","M","L","XL","2XL"], sizeGuide:"premiumCrewHood", desc:"Oversized, loose fit, comfy from inside out with a premium look." },
+    { id:"p07", name:"Stitched Oversized T-Shirt", category:"Clothing", price:445, img:"", images:["images/stitched-tee-1.png","images/stitched-tee-2.png"], colors:["Black","White"], sizes:["S","M","L","XL"], desc:"Oversized fit with contrast stitched seams." },
+    { id:"p08", name:"Cropped Oversized Hoodie", category:"Clothing", price:635, img:"", images:["images/cropped-hoodie-1.png","images/cropped-hoodie-2.png"], colors:["Black","White"], sizes:["S","M","L","XL","2XL"], sizeGuide:"croppedHoodie", desc:"Oversized, loose-shoulder fit without bottom rib for a cooler, looser look." },
+    { id:"p09", name:"Standard Oversized Crewneck", category:"Clothing", price:525, img:"", images:["images/standard-crewneck-1.png","images/standard-crewneck-2.png","images/standard-crewneck-3.png","images/standard-crewneck-4.png"], colors:["Black","White","Grey"], sizes:["S","M","L","XL","2XL"], sizeGuide:"premiumCrewHood", desc:"Oversized, loose fit, suitable for everyday wear." },
+    { id:"p10", name:"Standard Oversized Hoodie", category:"Clothing", price:545, img:"", images:["images/standard-hoodie-1.png","images/standard-hoodie-2.png","images/standard-hoodie-3.png","images/standard-hoodie-4.png","images/standard-hoodie-5.png"], colors:["Black","White","Grey"], sizes:["S","M","L","XL","2XL"], sizeGuide:"premiumCrewHood", desc:"Oversized, loose fit, suitable for economical everyday use." },
+    { id:"p11", name:"Washed Cap", category:"Caps & Hats", price:345, img:"", images:["images/washed-cap-1.png"], colors:["Blue","Pink","Green","Dark Grey","Maroon","Beige","Brown","Yellow","Purple"], sizes:[], desc:"Washed cotton dad cap with a soft, broken-in look." },
+    { id:"p12", name:"Classic Cap", category:"Caps & Hats", price:275, img:"", images:["images/classic-cap-1.png"], colors:["Black","White","Green","Sky Blue","Navy","Red","Grey","Yellow"], sizes:[], desc:"Structured six-panel classic cap." },
+    { id:"p13", name:"Straight Leg Sweatpants", category:"Clothing", price:525, img:"", images:["images/straight-leg-sweatpants-1.png","images/straight-leg-sweatpants-2.png","images/straight-leg-sweatpants-3.png","images/straight-leg-sweatpants-4.png","images/straight-leg-sweatpants-5.png","images/straight-leg-sweatpants-6.png"], colors:["Black","Green","Grey"], sizes:["S","M","L","XL","2XL"], sizeGuide:"sweatpantsWH", desc:"Straight leg, elastic waist and slightly oversized." },
+    { id:"p14", name:"Regular Sweatshorts", category:"Clothing", price:460, img:"", images:["images/sweatshorts-1.png","images/sweatshorts-2.png","images/sweatshorts-3.png"], colors:["Black","Green","Grey"], sizes:["S","M","L","XL","2XL"], sizeGuide:"sweatWH", desc:"Regular, straight fit, suitable for comfy everyday wear." },
+    { id:"p15", name:"Washed Milton Sweatpants", category:"Clothing", price:615, img:"", images:["images/washed-milton-sweatpants-1.png","images/washed-milton-sweatpants-2.png"], colors:["Dark Grey"], sizes:["S","M","L","XL"], desc:"Heavy washed fleece sweatpants, relaxed fit." },
+    { id:"p16", name:"Banded Regular Sweatpants", category:"Clothing", price:525, img:"", images:["images/banded-sweatpants-1.png","images/banded-sweatpants-2.png"], colors:["Black","White","Grey"], sizes:["S","M","L","XL","2XL"], sizeGuide:"bandedSweatpants", desc:"Banded leg, slim fit, suitable for a comfy everyday fit." },
+    { id:"p17", name:"Magic Mug", category:"Mugs & Coasters", price:305, img:"", images:["images/magic-mug-1.png"], colors:["White (color-changing)"], sizes:[], desc:"Color-changing ceramic mug — reveals your design when filled with something hot." },
+    { id:"p18", name:"Boulevard Oversized T-Shirt", category:"Clothing", price:495, img:"", images:["images/boulevard-tee-1.png","images/boulevard-tee-2.png","images/boulevard-tee-3.png","images/boulevard-tee-4.png","images/boulevard-tee-5.png","images/boulevard-tee-6.png","images/boulevard-tee-7.png","images/boulevard-tee-8.png","images/boulevard-tee-9.png"], colors:["Black","White","Green","Maroon"], sizes:["S","M","L","XL","2XL"], sizeGuide:"boulevardTee", desc:"Oversized, loose-shoulder fit in heavy material for a premium look." },
+    { id:"p19", name:"Parasola Oversized T-Shirt", category:"Clothing", price:425, img:"", images:["images/parasola-tee-1.png","images/parasola-tee-2.png","images/parasola-tee-3.png","images/parasola-tee-4.png","images/parasola-tee-5.png","images/parasola-tee-6.png","images/parasola-tee-7.png"], colors:["Black","White","Blue","Green"], sizes:["S","M","L","XL","2XL"], sizeGuide:"parasola", desc:"Oversized, loose-shoulder fit, light material suitable for sunny days." },
+    { id:"p20", name:"Washed Oversized Long Sleeves", category:"Clothing", price:545, img:"", images:["images/washed-long-sleeves-1.png","images/washed-long-sleeves-2.png"], colors:["Dark Grey"], sizes:["M","L","XL"], sizeGuide:"washedLongSleeves", desc:"Oversized, loose-shoulder fit with wide sleeves." },
+    { id:"p21", name:"AirPods Pro Case", category:"Tech Accessories", price:225, img:"", images:["images/airpods-pro-case-1.png"], colors:[], sizes:["AirPods Pro","AirPods Pro 2"], desc:"Clear protective case with carabiner clip — customize with your own design." },
+    { id:"p22", name:"AirPods Case", category:"Tech Accessories", price:225, img:"", images:["images/airpods-case-1.png"], colors:[], sizes:["AirPods 1","AirPods 2","AirPods 3"], desc:"Clear protective case with carabiner clip — customize with your own design." },
+    { id:"p23", name:"Laptop Sleeve", category:"Bags & Sleeves", price:405, img:"", images:["images/laptop-sleeve-1.png"], colors:[], sizes:["12\"","13\"","14\"","15.6\"","17\""], desc:"Padded zip sleeve, available with or without a shoulder strap." },
+    { id:"p24", name:"Standard Tote Bag", category:"Bags & Sleeves", price:245, img:"", images:["images/tote-bag-1.png"], colors:["Black","Beige"], sizes:[], desc:"Durable canvas tote, everyday carry." },
+    { id:"p25", name:"Men Swim Shorts", category:"Clothing", price:535, img:"", images:["images/swim-shorts-1.png"], colors:["Custom Print"], sizes:["S","M","L","XL"], desc:"Quick-dry swim shorts with custom all-over print." },
+    { id:"p26", name:"Bucket Hat", category:"Caps & Hats", price:275, img:"", images:["images/bucket-hat-1.png","images/bucket-hat-2.png","images/bucket-hat-3.png","images/bucket-hat-4.png","images/bucket-hat-5.png"], colors:["Black","White","Pink","Beige","Navy"], sizes:[], desc:"Classic cotton bucket hat." },
+    { id:"p27", name:"Classic Mug", category:"Mugs & Coasters", price:260, img:"", images:["images/classic-mug-1.png"], colors:["White"], sizes:[], desc:"Simple ceramic mug, ready for your design." },
+    { id:"p28", name:"Trucker Cap", category:"Caps & Hats", price:315, img:"", images:["images/trucker-cap-1.png","images/trucker-cap-2.png","images/trucker-cap-3.png","images/trucker-cap-4.png","images/trucker-cap-5.png"], colors:["Front: Grey","Front: White","Body: Black","Body: Maroon","Body: Red"], sizes:[], desc:"Mesh-back trucker cap, two-tone front and body colors." },
+    { id:"p29", name:"Round Acrylic Coaster", category:"Mugs & Coasters", price:205, img:"", images:["images/round-acrylic-coaster-1.png"], colors:[], sizes:["9x9"], desc:"Glossy round acrylic coaster, custom print." },
+    { id:"p30", name:"Round Wooden Coaster", category:"Mugs & Coasters", price:175, img:"", images:["images/round-wooden-coaster-1.png"], colors:[], sizes:["9x9"], desc:"Round wooden coaster, custom print." },
+    { id:"p31", name:"Square Wooden Coaster", category:"Mugs & Coasters", price:175, img:"", images:["images/square-wooden-coaster-1.png"], colors:[], sizes:["9x9"], desc:"Square wooden coaster, custom print." },
+    { id:"p32", name:"Washed Oversized T-Shirt", category:"Clothing", price:525, img:"", images:["images/washed-os-tshirt-1.png","images/washed-os-tshirt-2.png","images/washed-os-tshirt-3.png","images/washed-os-tshirt-4.png","images/washed-os-tshirt-5.png"], colors:["Pink","Green","Dark Grey"], sizes:["S","M","L","XL","2XL"], desc:"Oversized fit in heavy washed cotton." },
+    { id:"p33", name:"Washed Oversized Hoodie", category:"Clothing", price:645, img:"", images:["images/washed-hoodie-1.png","images/washed-hoodie-2.png","images/washed-hoodie-3.png"], colors:["Pink","Black","Sky Blue"], sizes:["S","M","L","XL"], sizeGuide:"washedHoodie", desc:"Oversized, loose-shoulder fit, cotton plush inside for a warmer feel." },
+    { id:"p34", name:"Long Oversized Hoodie", category:"Clothing", price:695, img:"", images:["images/long-hoodie-1.png","images/long-hoodie-2.png","images/long-hoodie-3.png"], colors:["Black","White"], sizes:["S","M","L","XL","2XL"], sizeGuide:"longHoodie", desc:"Oversized, loose-shoulder fit, without bottom rib for a cooler, looser look." },
+    { id:"p35", name:"Boulevard Oversized Tank Top", category:"Clothing", price:425, img:"", images:["images/boulevard-tank-1.png","images/boulevard-tank-2.png","images/boulevard-tank-3.png","images/boulevard-tank-4.png"], colors:["Black","White"], sizes:["M","L","XL"], sizeGuide:"boulevardTank", desc:"Oversized, loose-shoulder fit, heavy material for a premium look." },
+    { id:"p36", name:"Regular T-Shirt", category:"Clothing", price:405, img:"", images:["images/regular-tee-1.png","images/regular-tee-2.png"], colors:["Black","White"], sizes:["S","M","L","XL","2XL"], desc:"Regular, straight fit, suitable for everyday wear." }
+  ];
+
+  var CATEGORIES = Array.from(new Set(PRODUCTS.map(function(p){ return p.category; })));
+
+  /* ============================================================
+     STATE — cart items keyed by id+color+size
+  ============================================================= */
+  var cart = JSON.parse(localStorage.getItem("odos_cart") || "[]");
+  var currentFilter = "All";
+  var modalProduct = null, modalQty = 1, modalColor = null, modalSize = null;
+
+  function saveCart(){ localStorage.setItem("odos_cart", JSON.stringify(cart)); renderCart(); renderCartCount(); }
+  function fmt(n){ return "EGP " + n.toLocaleString(); }
+  function findProduct(id){ return PRODUCTS.filter(function(p){ return p.id === id; })[0]; }
+  function variantKey(id,color,size){ return id + "|" + (color||"") + "|" + (size||""); }
+
+  function addToCart(id, color, size, qty){
+    qty = qty || 1;
+    var key = variantKey(id, color, size);
+    var existing = cart.filter(function(c){ return c.key === key; })[0];
+    if(existing){ existing.qty += qty; }
+    else { cart.push({ key:key, id:id, color:color||"", size:size||"", qty:qty }); }
+    saveCart();
+  }
+  function setQtyByKey(key, qty){
+    if(qty <= 0){ cart = cart.filter(function(c){ return c.key !== key; }); }
+    else { var item = cart.filter(function(c){ return c.key === key; })[0]; if(item) item.qty = qty; }
+    saveCart();
+  }
+
+  /* ============================================================
+     RENDERING — product cards
+  ============================================================= */
+  function primaryImg(p){
+    if(p.images && p.images.length) return p.images[0];
+    if(p.img) return p.img;
+    return "";
+  }
+  function imgBlock(p){
+    var src = primaryImg(p);
+    if(src){ return '<img src="'+src+'" alt="'+p.name+'">'; }
+    return p.name.toUpperCase() + " — ADD PHOTO";
+  }
+  function cardHTML(p){
+    return (
+      '<div class="card">' +
+        '<div class="card-img" data-open="'+p.id+'">'+imgBlock(p)+'</div>' +
+        '<div class="card-body">' +
+          '<span class="card-cat">'+p.category.toUpperCase()+'</span>' +
+          '<span class="card-name" data-open="'+p.id+'">'+p.name+'</span>' +
+          '<span class="card-price">'+fmt(p.price)+'</span>' +
+          '<div class="card-actions"><button class="btn small full" data-open="'+p.id+'">Select Options</button></div>' +
+        '</div>' +
+      '</div>'
+    );
+  }
+  function renderFeatured(){ document.getElementById("featuredGrid").innerHTML = PRODUCTS.slice(0,4).map(cardHTML).join(""); }
+  function renderProducts(){
+    var grid = document.getElementById("productsGrid");
+    var list = currentFilter === "All" ? PRODUCTS : PRODUCTS.filter(function(p){ return p.category === currentFilter; });
+    var q = (document.getElementById("searchInput").value || "").trim().toLowerCase();
+    if(q){ list = list.filter(function(p){ return p.name.toLowerCase().indexOf(q) !== -1 || p.category.toLowerCase().indexOf(q) !== -1; }); }
+    grid.innerHTML = list.length ? list.map(cardHTML).join("") : '<p class="copy" style="grid-column:1/-1; color:var(--grey);">No products match.</p>';
+  }
+  function renderFilters(){
+    var row = document.getElementById("filterRow");
+    var cats = ["All"].concat(CATEGORIES);
+    row.innerHTML = cats.map(function(c){ return '<button data-filter="'+c+'" class="'+(c===currentFilter?'active':'')+'">'+c+'</button>'; }).join("");
+  }
+  function renderMenuCategories(){
+    document.getElementById("menuCategories").innerHTML = CATEGORIES.map(function(c){ return '<button data-catgo="'+c+'">'+c+'</button>'; }).join("");
+  }
+
+  /* ============================================================
+     CART PAGE
+  ============================================================= */
+  function renderCart(){
+    var list = document.getElementById("cartItemsList");
+    var emptyMsg = document.getElementById("cartEmptyMsg");
+    if(cart.length === 0){
+      list.innerHTML = ""; emptyMsg.style.display = "block";
+    } else {
+      emptyMsg.style.display = "none";
+      list.innerHTML = cart.map(function(c){
+        var p = findProduct(c.id);
+        if(!p) return "";
+        var variantBits = [];
+        if(c.color) variantBits.push(c.color);
+        if(c.size) variantBits.push(c.size);
+        var variantText = variantBits.length ? variantBits.join(" / ") : "";
+        return (
+          '<div class="cart-item">' +
+            '<div class="thumb">'+(primaryImg(p) ? '<img src="'+primaryImg(p)+'" alt="'+p.name+'">' : p.name.slice(0,10))+'</div>' +
+            '<div class="info">' +
+              '<div class="name">'+p.name+'</div>' +
+              '<div class="meta">'+(variantText ? variantText+' · ' : '')+fmt(p.price)+' each</div>' +
+              '<div class="qty-row" style="margin-top:8px;">' +
+                '<button type="button" data-dec="'+c.key+'">−</button>' +
+                '<span>'+c.qty+'</span>' +
+                '<button type="button" data-inc="'+c.key+'">+</button>' +
+              '</div>' +
+            '</div>' +
+            '<div style="text-align:right;">' +
+              '<div>'+fmt(p.price * c.qty)+'</div>' +
+              '<button class="remove" data-remove="'+c.key+'">Remove</button>' +
+            '</div>' +
+          '</div>'
+        );
+      }).join("");
+    }
+    var total = cart.reduce(function(sum, c){ var p = findProduct(c.id); return sum + (p ? p.price * c.qty : 0); }, 0);
+    document.getElementById("cartSubtotal").textContent = fmt(total);
+    document.getElementById("cartTotal").textContent = fmt(total);
+    document.getElementById("orderSubmitBtn").disabled = cart.length === 0;
+  }
+  function renderCartCount(){
+    var count = cart.reduce(function(s,c){ return s + c.qty; }, 0);
+    var el = document.getElementById("cartCount");
+    if(count > 0){ el.style.display = "flex"; el.textContent = count; } else { el.style.display = "none"; }
+  }
+
+  /* ============================================================
+     FAQ (placeholders — kept as requested)
+  ============================================================= */
+  var FAQS = [
+    { q:"How long does delivery take?", a:"Orders inside Egypt typically arrive within 3–5 business days after confirmation. You'll be contacted directly to confirm delivery details." },
+    { q:"What payment methods do you accept?", a:"Telda, InstaPay, Vodafone Cash, and cash on delivery in most areas. You'll choose your method at checkout." },
+    { q:"Can I exchange a size?", a:"Yes — reach out within 7 days of receiving your order and we'll arrange an exchange, subject to stock." },
+    { q:"Do you ship outside Egypt?", a:"Not yet — right now ODOS ships within Egypt only. Follow our Instagram for updates on that." },
+    { q:"How do I know my order went through?", a:"After checkout you'll see a confirmation on screen, and we'll follow up directly by phone or email to confirm details and payment." },
+    { q:"Are the product photos accurate?", a:"Yes, all photos are of the actual product. Slight color variation can happen depending on your screen." },
+    { q:"What does \"ODOS\" mean?", a:"Odos is Greek for \"path\" — the one we're all on, walking, running, sometimes just crawling through it. Nobody's really ahead of anybody. We're all just trying to figure ourselves out along the way. Execute." },
+    { q:"What is KAIROS?", a:"Kairos is Greek for \"opportunity.\" It's not something you plan for — it just shows up, and you either take it and let it bend your path, or it slips by. KAIROS is our limited-drop line, built around that idea. Seize." },
+    { q:"Why do people wear ODOS?", a:"Whatever you're trying to surpass or achieve — a final, a GPA, your dream job, a shot you've been waiting on — wear it. Every time you put it on, you remember why you started. Remember." }
+  ];
+  function renderFAQ(){
+    document.getElementById("faqList").innerHTML = FAQS.map(function(f, i){
+      return '<div class="faq-item" data-faq="'+i+'"><button class="faq-q"><span>'+f.q+'</span><span class="plus">+</span></button><div class="faq-a"><p class="copy">'+f.a+'</p></div></div>';
+    }).join("");
+  }
+
+  /* ============================================================
+     NAVIGATION
+  ============================================================= */
+  var PAGES = ["home","products","cart","contact","faq","story"];
+  function goTo(page){
+    if(PAGES.indexOf(page) === -1) page = "home";
+    PAGES.forEach(function(p){ document.getElementById("page-"+p).classList.toggle("active", p === page); });
+    closeMenu();
+    window.scrollTo(0,0);
+    if(location.hash !== "#"+page) history.replaceState(null, "", "#"+page);
+    if(page === "products") renderProducts();
+  }
+  document.addEventListener("click", function(e){
+    var nav = e.target.closest("[data-nav]");
+    if(nav){ e.preventDefault(); goTo(nav.getAttribute("data-nav")); }
+  });
+  window.addEventListener("hashchange", function(){ goTo(location.hash.replace("#","")); });
+
+  /* ---------- side menu ---------- */
+  var menuBtn = document.getElementById("menuBtn");
+  var sideMenu = document.getElementById("sideMenu");
+  var overlay = document.getElementById("overlay");
+  function openMenu(){ sideMenu.classList.add("open"); overlay.classList.add("show"); menuBtn.classList.add("open"); menuBtn.setAttribute("aria-expanded","true"); }
+  function closeMenu(){ sideMenu.classList.remove("open"); overlay.classList.remove("show"); menuBtn.classList.remove("open"); menuBtn.setAttribute("aria-expanded","false"); }
+  menuBtn.addEventListener("click", function(){ sideMenu.classList.contains("open") ? closeMenu() : openMenu(); });
+  overlay.addEventListener("click", closeMenu);
+  document.getElementById("menuCategories").addEventListener("click", function(e){
+    var btn = e.target.closest("[data-catgo]"); if(!btn) return;
+    currentFilter = btn.getAttribute("data-catgo"); renderFilters(); goTo("products");
+  });
+
+  /* ---------- search ---------- */
+  var searchBtn = document.getElementById("searchBtn");
+  var searchWrap = document.getElementById("searchWrap");
+  var searchInput = document.getElementById("searchInput");
+  searchBtn.addEventListener("click", function(){ searchWrap.classList.toggle("active"); if(searchWrap.classList.contains("active")) searchInput.focus(); });
+  searchInput.addEventListener("input", function(){ if(document.getElementById("page-products").classList.contains("active")) renderProducts(); });
+  searchInput.addEventListener("keydown", function(e){ if(e.key === "Enter"){ goTo("products"); } });
+
+  /* ---------- filters ---------- */
+  document.getElementById("filterRow").addEventListener("click", function(e){
+    var btn = e.target.closest("[data-filter]"); if(!btn) return;
+    currentFilter = btn.getAttribute("data-filter"); renderFilters(); renderProducts();
+  });
+
+  /* ---------- delegated clicks: add/open/qty/remove/faq ---------- */
+  document.addEventListener("click", function(e){
+    var open = e.target.closest("[data-open]");
+    if(open){ openModal(open.getAttribute("data-open")); return; }
+    var inc = e.target.closest("[data-inc]");
+    if(inc){ var k1 = inc.getAttribute("data-inc"); var it1 = cart.filter(function(c){ return c.key===k1; })[0]; if(it1) setQtyByKey(k1, it1.qty+1); return; }
+    var dec = e.target.closest("[data-dec]");
+    if(dec){ var k2 = dec.getAttribute("data-dec"); var it2 = cart.filter(function(c){ return c.key===k2; })[0]; if(it2) setQtyByKey(k2, it2.qty-1); return; }
+    var rem = e.target.closest("[data-remove]");
+    if(rem){ setQtyByKey(rem.getAttribute("data-remove"), 0); return; }
+    var faq = e.target.closest(".faq-q");
+    if(faq){ faq.parentElement.classList.toggle("open"); return; }
+  });
+
+  /* ============================================================
+     PRODUCT MODAL (with color/size selection)
+  ============================================================= */
+  var modalOverlay = document.getElementById("modalOverlay");
+
+  function openModal(id){
+    modalProduct = findProduct(id);
+    if(!modalProduct) return;
+    modalQty = 1;
+    modalColor = modalProduct.colors && modalProduct.colors.length ? modalProduct.colors[0] : null;
+    modalSize = modalProduct.sizes && modalProduct.sizes.length ? modalProduct.sizes[0] : null;
+
+    document.getElementById("modalCat").textContent = modalProduct.category.toUpperCase();
+    document.getElementById("modalName").textContent = modalProduct.name;
+    document.getElementById("modalDesc").textContent = modalProduct.desc;
+    document.getElementById("modalPrice").textContent = fmt(modalProduct.price);
+    document.getElementById("modalImg").innerHTML = imgBlock(modalProduct);
+    document.getElementById("qtyVal").textContent = modalQty;
+
+    var thumbsWrap = document.getElementById("modalThumbs");
+    var gallery = (modalProduct.images && modalProduct.images.length) ? modalProduct.images : (modalProduct.img ? [modalProduct.img] : []);
+    if(gallery.length > 1){
+      thumbsWrap.style.display = "flex";
+      thumbsWrap.innerHTML = gallery.map(function(src, i){
+        return '<button type="button" data-idx="'+i+'" class="'+(i===0?'selected':'')+'"><img src="'+src+'" alt="'+modalProduct.name+' photo '+(i+1)+'"></button>';
+      }).join("");
+      thumbsWrap.querySelectorAll("button").forEach(function(b){
+        b.addEventListener("click", function(){
+          var idx = parseInt(b.getAttribute("data-idx"), 10);
+          document.getElementById("modalImg").innerHTML = '<img src="'+gallery[idx]+'" alt="'+modalProduct.name+'">';
+          thumbsWrap.querySelectorAll("button").forEach(function(x){ x.classList.remove("selected"); });
+          b.classList.add("selected");
+        });
+      });
+    } else {
+      thumbsWrap.style.display = "none";
+      thumbsWrap.innerHTML = "";
+    }
+    document.getElementById("optWarn").classList.remove("show");
+
+    var colorWrap = document.getElementById("modalColorWrap");
+    var colorRow = document.getElementById("modalColorRow");
+    if(modalProduct.colors && modalProduct.colors.length){
+      colorWrap.style.display = "block";
+      document.getElementById("modalColorSelected").textContent = modalColor;
+      colorRow.innerHTML = modalProduct.colors.map(function(c){
+        return '<button type="button" class="opt-row-btn" data-color="'+c+'">'+c+'</button>';
+      }).join("");
+      colorRow.querySelectorAll("button").forEach(function(b){
+        if(b.getAttribute("data-color") === modalColor) b.classList.add("selected");
+        b.addEventListener("click", function(){
+          modalColor = b.getAttribute("data-color");
+          document.getElementById("modalColorSelected").textContent = modalColor;
+          colorRow.querySelectorAll("button").forEach(function(x){ x.classList.remove("selected"); });
+          b.classList.add("selected");
+        });
+      });
+      colorRow.className = "opt-row";
+    } else { colorWrap.style.display = "none"; }
+
+    var sizeWrap = document.getElementById("modalSizeWrap");
+    var sizeRow = document.getElementById("modalSizeRow");
+    var guideBtn = document.getElementById("sizeGuideBtn");
+    var guideTable = document.getElementById("sizeGuideTable");
+    guideTable.classList.remove("show"); guideTable.innerHTML = "";
+    if(modalProduct.sizes && modalProduct.sizes.length){
+      sizeWrap.style.display = "block";
+      sizeRow.className = "opt-row";
+      sizeRow.innerHTML = modalProduct.sizes.map(function(s){ return '<button type="button" data-size="'+s+'">'+s+'</button>'; }).join("");
+      sizeRow.querySelectorAll("button").forEach(function(b){
+        if(b.getAttribute("data-size") === modalSize) b.classList.add("selected");
+        b.addEventListener("click", function(){
+          modalSize = b.getAttribute("data-size");
+          sizeRow.querySelectorAll("button").forEach(function(x){ x.classList.remove("selected"); });
+          b.classList.add("selected");
+        });
+      });
+      if(modalProduct.sizeGuide && SIZE_GUIDES[modalProduct.sizeGuide]){
+        guideBtn.style.display = "inline-block";
+        var g = SIZE_GUIDES[modalProduct.sizeGuide];
+        var thead = "<tr>" + g.headers.map(function(h){ return "<th>"+h+"</th>"; }).join("") + "</tr>";
+        var tbody = g.rows.map(function(r){ return "<tr>" + r.map(function(v){ return "<td>"+v+"</td>"; }).join("") + "</tr>"; }).join("");
+        guideTable.innerHTML = thead + tbody;
+        guideBtn.onclick = function(){ guideTable.classList.toggle("show"); };
+      } else { guideBtn.style.display = "none"; }
+    } else { sizeWrap.style.display = "none"; }
+
+    modalOverlay.classList.add("show");
+  }
+  function closeModal(){ modalOverlay.classList.remove("show"); modalProduct = null; }
+  document.getElementById("modalClose").addEventListener("click", closeModal);
+  modalOverlay.addEventListener("click", function(e){ if(e.target === modalOverlay) closeModal(); });
+  document.getElementById("qtyPlus").addEventListener("click", function(){ modalQty++; document.getElementById("qtyVal").textContent = modalQty; });
+  document.getElementById("qtyMinus").addEventListener("click", function(){ modalQty = Math.max(1, modalQty-1); document.getElementById("qtyVal").textContent = modalQty; });
+  document.getElementById("modalAddBtn").addEventListener("click", function(){
+    if(!modalProduct) return;
+    var needsColor = modalProduct.colors && modalProduct.colors.length;
+    var needsSize = modalProduct.sizes && modalProduct.sizes.length;
+    if((needsColor && !modalColor) || (needsSize && !modalSize)){
+      document.getElementById("optWarn").classList.add("show"); return;
+    }
+    addToCart(modalProduct.id, modalColor, modalSize, modalQty);
+    closeModal();
+  });
+  document.addEventListener("keydown", function(e){ if(e.key === "Escape"){ closeModal(); closeMenu(); } });
+
+  /* ============================================================
+     NETLIFY FORM SUBMISSION (AJAX, no page reload)
+  ============================================================= */
+  function encodeForm(form){ return new URLSearchParams(new FormData(form)).toString(); }
+  function submitNetlifyForm(form, msgEl, onSuccess){
+    fetch("/", { method:"POST", headers:{ "Content-Type":"application/x-www-form-urlencoded" }, body: encodeForm(form) })
+      .then(function(res){
+        if(res.ok){ msgEl.textContent = "Thanks — your message has been sent. We'll be in touch shortly."; msgEl.className = "form-msg show ok"; if(onSuccess) onSuccess(); }
+        else { throw new Error("Bad response"); }
+      })
+      .catch(function(){ msgEl.textContent = "Something went wrong sending this. Please try again, or contact us directly."; msgEl.className = "form-msg show err"; });
+  }
+
+  var orderForm = document.getElementById("orderForm");
+  orderForm.addEventListener("submit", function(e){
+    e.preventDefault();
+    if(cart.length === 0) return;
+    var total = cart.reduce(function(sum, c){ var p = findProduct(c.id); return sum + (p ? p.price*c.qty : 0); }, 0);
+    var lines = cart.map(function(c){
+      var p = findProduct(c.id); if(!p) return "";
+      var bits = []; if(c.color) bits.push(c.color); if(c.size) bits.push(c.size);
+      return p.name + (bits.length ? " ("+bits.join(" / ")+")" : "") + " x" + c.qty + " — " + fmt(p.price*c.qty);
+    });
+    document.getElementById("orderDetailsField").value = lines.join(" | ");
+    document.getElementById("orderTotalField").value = fmt(total);
+    submitNetlifyForm(orderForm, document.getElementById("orderMsg"), function(){ cart = []; saveCart(); orderForm.reset(); });
+  });
+
+  var contactForm = document.getElementById("contactForm");
+  contactForm.addEventListener("submit", function(e){
+    e.preventDefault();
+    submitNetlifyForm(contactForm, document.getElementById("contactMsg"), function(){ contactForm.reset(); });
+  });
+
+  /* ============================================================
+     INIT
+  ============================================================= */
+  document.getElementById("year").textContent = new Date().getFullYear();
+  renderFeatured();
+  renderFilters();
+  renderMenuCategories();
+  renderProducts();
+  renderCart();
+  renderCartCount();
+  renderFAQ();
+  goTo(location.hash ? location.hash.replace("#","") : "home");
+
+})();
+</script>
+</body>
+</html>
