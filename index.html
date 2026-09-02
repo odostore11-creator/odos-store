@@ -362,9 +362,9 @@
             <div class="summary-row total"><span>Total</span><span id="cartTotal">EGP 0</span></div>
           </div>
 
-          <form name="order" method="POST" data-netlify="true" netlify-honeypot="bot-field" id="orderForm" style="margin-top:24px;">
-            <input type="hidden" name="form-name" value="order">
-            <p style="display:none;"><label>Don't fill this out: <input name="bot-field"></label></p>
+          <form name="order" method="POST" action="https://formspree.io/f/xwlkoqya" id="orderForm" style="margin-top:24px;">
+            <input type="hidden" name="_subject" value="New ODOS Order">
+            <p style="display:none;"><label>Don't fill this out: <input name="_gotcha"></label></p>
             <input type="hidden" name="order_details" id="orderDetailsField">
             <input type="hidden" name="order_total" id="orderTotalField">
 
@@ -418,9 +418,9 @@
             <a href="https://www.instagram.com/odos.store/" target="_blank" rel="noopener">instagram.com/odos.store</a>
           </div>
         </div>
-        <form name="contact" method="POST" data-netlify="true" netlify-honeypot="bot-field" id="contactForm">
-          <input type="hidden" name="form-name" value="contact">
-          <p style="display:none;"><label>Don't fill this out: <input name="bot-field"></label></p>
+        <form name="contact" method="POST" action="https://formspree.io/f/xwlkoqya" id="contactForm">
+          <input type="hidden" name="_subject" value="New ODOS Contact Message">
+          <p style="display:none;"><label>Don't fill this out: <input name="_gotcha"></label></p>
           <div class="field"><label for="c_name">Name</label><input type="text" id="c_name" name="name" required></div>
           <div class="field"><label for="c_email">Email</label><input type="email" id="c_email" name="email" required></div>
           <div class="field"><label for="c_message">Message</label><textarea id="c_message" name="message" required></textarea></div>
@@ -911,11 +911,14 @@
   document.addEventListener("keydown", function(e){ if(e.key === "Escape"){ closeModal(); closeMenu(); } });
 
   /* ============================================================
-     NETLIFY FORM SUBMISSION (AJAX, no page reload)
+     FORMSPREE FORM SUBMISSION (AJAX, no page reload)
   ============================================================= */
-  function encodeForm(form){ return new URLSearchParams(new FormData(form)).toString(); }
   function submitNetlifyForm(form, msgEl, onSuccess){
-    fetch("/", { method:"POST", headers:{ "Content-Type":"application/x-www-form-urlencoded" }, body: encodeForm(form) })
+    fetch(form.action, {
+      method: "POST",
+      headers: { "Accept": "application/json" },
+      body: new FormData(form)
+    })
       .then(function(res){
         if(res.ok){ msgEl.textContent = "Thanks — your message has been sent. We'll be in touch shortly."; msgEl.className = "form-msg show ok"; if(onSuccess) onSuccess(); }
         else { throw new Error("Bad response"); }
