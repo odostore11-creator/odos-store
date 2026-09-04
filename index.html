@@ -5,7 +5,7 @@
 <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
 <link rel="shortcut icon" href="/favicon.ico" />
 <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
-<meta name="apple-mobile-web-app-title" content="ODOS" />
+<meta name="apple-mobile-web-app-title" content="MyWebSite" />
 <link rel="manifest" href="/site.webmanifest" />
 
 <meta charset="UTF-8">
@@ -371,13 +371,14 @@
         <div>
           <div class="summary-box">
             <div class="summary-row"><span>Subtotal</span><span id="cartSubtotal">EGP 0</span></div>
-            <div class="summary-row"><span>Delivery</span><span>FREE</span></div>
+            <div class="summary-row"><span>Delivery</span><span>Confirmed on contact</span></div>
             <div class="summary-row total"><span>Total</span><span id="cartTotal">EGP 0</span></div>
           </div>
 
-          <form name="order" method="POST" action="https://formspree.io/f/xwlkoqya" id="orderForm" style="margin-top:24px;">
-            <input type="hidden" name="_subject" value="New ODOS Order">
-            <p style="display:none;"><label>Don't fill this out: <input name="_gotcha"></label></p>
+          <form name="order" method="POST" action="https://api.web3forms.com/submit" id="orderForm" style="margin-top:24px;">
+            <input type="hidden" name="access_key" value="c256a4c4-f82f-4497-b84e-d465be6d74cf">
+            <input type="hidden" name="subject" value="New ODOS Order">
+            <input type="checkbox" name="botcheck" style="display:none;">
             <input type="hidden" name="order_details" id="orderDetailsField">
             <input type="hidden" name="order_total" id="orderTotalField">
 
@@ -431,9 +432,10 @@
             <a href="https://www.instagram.com/odos.store/" target="_blank" rel="noopener">instagram.com/odos.store</a>
           </div>
         </div>
-        <form name="contact" method="POST" action="https://formspree.io/f/xwlkoqya" id="contactForm">
-          <input type="hidden" name="_subject" value="New ODOS Contact Message">
-          <p style="display:none;"><label>Don't fill this out: <input name="_gotcha"></label></p>
+        <form name="contact" method="POST" action="https://api.web3forms.com/submit" id="contactForm">
+          <input type="hidden" name="access_key" value="c256a4c4-f82f-4497-b84e-d465be6d74cf">
+          <input type="hidden" name="subject" value="New ODOS Contact Message">
+          <input type="checkbox" name="botcheck" style="display:none;">
           <div class="field"><label for="c_name">Name</label><input type="text" id="c_name" name="name" required></div>
           <div class="field"><label for="c_email">Email</label><input type="email" id="c_email" name="email" required></div>
           <div class="field"><label for="c_message">Message</label><textarea id="c_message" name="message" required></textarea></div>
@@ -966,7 +968,7 @@
   document.addEventListener("keydown", function(e){ if(e.key === "Escape"){ closeModal(); closeMenu(); } });
 
   /* ============================================================
-     FORMSPREE FORM SUBMISSION (AJAX, no page reload)
+     WEB3FORMS SUBMISSION (AJAX, no page reload)
   ============================================================= */
   function submitNetlifyForm(form, msgEl, onSuccess){
     fetch(form.action, {
@@ -974,8 +976,9 @@
       headers: { "Accept": "application/json" },
       body: new FormData(form)
     })
-      .then(function(res){
-        if(res.ok){ msgEl.textContent = "Thanks — your message has been sent. We'll be in touch shortly."; msgEl.className = "form-msg show ok"; if(onSuccess) onSuccess(); }
+      .then(function(res){ return res.json().then(function(data){ return { ok: res.ok, data: data }; }); })
+      .then(function(result){
+        if(result.ok && result.data && result.data.success){ msgEl.textContent = "Thanks — your message has been sent. We'll be in touch shortly."; msgEl.className = "form-msg show ok"; if(onSuccess) onSuccess(); }
         else { throw new Error("Bad response"); }
       })
       .catch(function(){ msgEl.textContent = "Something went wrong sending this. Please try again, or contact us directly."; msgEl.className = "form-msg show err"; });
