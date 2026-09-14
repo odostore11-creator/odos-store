@@ -896,7 +896,7 @@
     { id:"p32", name:"Washed Oversized T-Shirt", category:"Clothing", price:499.99, img:"", images:["images/washed-os-tshirt-1.png","images/washed-os-tshirt-2.png","images/washed-os-tshirt-3.png","images/washed-os-tshirt-4.png","images/washed-os-tshirt-5.png"], colors:["Pink","Green","Dark Grey"], sizes:["S","M","L","XL","2XL"], desc:"Oversized fit in heavy washed cotton." },
     { id:"p33", name:"Washed Oversized Hoodie", category:"Clothing", price:619.99, img:"", images:["images/washed-hoodie-1.png","images/washed-hoodie-2.png","images/washed-hoodie-3.png"], colors:["Pink","Black","Sky Blue"], sizes:["S","M","L","XL"], sizeGuide:"washedHoodie", desc:"Oversized, loose-shoulder fit, cotton plush inside for a warmer feel." },
     { id:"p34", name:"Long Oversized Hoodie", category:"Clothing", price:649.99, img:"", images:["images/long-hoodie-1.png","images/long-hoodie-2.png","images/long-hoodie-3.png"], colors:["Black","White"], sizes:["S","M","L","XL","2XL"], sizeGuide:"longHoodie", desc:"Oversized, loose-shoulder fit, without bottom rib for a cooler, looser look." },
-    { id:"p35", name:"Boulevard Oversized Tank Top", category:"Clothing", price:399.99, img:"", images:["images/boulevard-tank-3.png","images/boulevard-tank-4.png","images/boulevard-tank-1.png","images/boulevard-tank-2.png"], colors:["Black","White"], sizes:["M","L","XL"], sizeGuide:"boulevardTank", desc:"Oversized, loose-shoulder fit, heavy material for a premium look." },
+    { id:"p35", name:"Boulevard Oversized Tank Top", category:"Clothing", price:399.99, img:"", images:["images/boulevard-tank-3.png","images/boulevard-tank-4.png","images/boulevard-tank-1.png","images/boulevard-tank-2.png","images/boulevard-tank-black-bold.png","images/boulevard-tank-black-drip.png","images/boulevard-tank-black-brush.png","images/boulevard-tank-white-bold.png","images/boulevard-tank-white-drip.png","images/boulevard-tank-white-brush.png"], colors:["Black","White"], sizes:["M","L","XL"], sizeGuide:"boulevardTank", designPhotos:{ Black:{ d3:"images/boulevard-tank-black-bold.png", d2:"images/boulevard-tank-black-drip.png", d1:"images/boulevard-tank-black-brush.png" }, White:{ d3:"images/boulevard-tank-white-bold.png", d2:"images/boulevard-tank-white-drip.png", d1:"images/boulevard-tank-white-brush.png" } }, desc:"Oversized, loose-shoulder fit, heavy material for a premium look." },
     { id:"p36", name:"Regular T-Shirt", category:"Clothing", price:379.99, img:"", images:["images/regular-tee-1.png","images/regular-tee-2.png"], colors:["Black","White"], sizes:["S","M","L","XL","2XL"], desc:"Regular, straight fit, suitable for everyday wear." },
     { id:"p37", name:"Tough Phone Case", category:"Tech Accessories", price:349.99, img:"", images:["images/tough-case-1.webp","images/tough-case-2.webp"], colors:["Black","White"], sizeAsSelect:true, sizeLabel:"PHONE MODEL", sizeGroups:[
       { label:"iPhone", options:["iPhone 17 Pro Max","iPhone 17 Pro","iPhone 17 Air","iPhone 17","iPhone 16 Pro Max","iPhone 16 Pro","iPhone 16 Plus","iPhone 16","iPhone 15 Pro Max","iPhone 15 Pro","iPhone 15 Plus","iPhone 15","iPhone 14 Pro Max","iPhone 14 Pro","iPhone 14 Plus","iPhone 14","iPhone 13 Pro Max","iPhone 13 Pro","iPhone 13","iPhone 13 Mini","iPhone 12 / 12 Pro","iPhone 12 Pro Max","iPhone 12 Mini","iPhone 11 Pro Max","iPhone 11 Pro","iPhone 11","iPhone X/XS","iPhone XS Max","iPhone XR","iPhone 7/8 Plus","iPhone 7/8","iPhone 7 SE","iPhone SE","iPhone 6s Plus","iPhone 6 Plus","iPhone 6/6s"] },
@@ -1150,6 +1150,19 @@
 
     var thumbsWrap = document.getElementById("modalThumbs");
     var gallery = (modalProduct.images && modalProduct.images.length) ? modalProduct.images : (modalProduct.img ? [modalProduct.img] : []);
+    function jumpToDesignPhoto(){
+      if(!modalProduct.designPhotos) return;
+      var colorMap = modalProduct.designPhotos[modalColor];
+      if(!colorMap) return;
+      var src = colorMap[modalDesign];
+      if(!src) return;
+      var idx = gallery.indexOf(src);
+      if(idx === -1) return;
+      document.getElementById("modalImg").innerHTML = '<img src="'+gallery[idx]+'" alt="'+modalProduct.name+'">';
+      thumbsWrap.querySelectorAll("button").forEach(function(x){ x.classList.remove("selected"); });
+      var btn = thumbsWrap.querySelector('[data-idx="'+idx+'"]');
+      if(btn) btn.classList.add("selected");
+    }
     if(gallery.length > 1){
       thumbsWrap.style.display = "flex";
       thumbsWrap.innerHTML = gallery.map(function(src, i){
@@ -1184,6 +1197,7 @@
           document.getElementById("modalColorSelected").textContent = modalColor;
           colorRow.querySelectorAll("button").forEach(function(x){ x.classList.remove("selected"); });
           b.classList.add("selected");
+          if(modalDesign) jumpToDesignPhoto();
         });
       });
       colorRow.className = "opt-row";
@@ -1250,6 +1264,7 @@
         designRow.querySelectorAll("button").forEach(function(x){ x.classList.remove("selected"); });
         b.classList.add("selected");
         updateModalPrice();
+        if(modalDesign) jumpToDesignPhoto();
       });
     });
 
