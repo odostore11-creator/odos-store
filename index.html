@@ -190,7 +190,8 @@
   .modal-overlay.show{ display:flex; }
   .modal{ background: var(--black-2); border:1px solid var(--grey-line); border-radius: var(--radius-lg); max-width:780px; width:100%; max-height:88vh; overflow:auto; display:grid; grid-template-columns: 1fr; position:relative; }
   @media(min-width:640px){ .modal{ grid-template-columns: 1fr 1fr; } }
-  .modal-close{ position:absolute; top:12px; right:12px; background:none; border:none; color:var(--white); font-size:22px; cursor:pointer; z-index:2; }
+  .modal-close{ position:absolute; top:10px; right:10px; width:40px; height:40px; display:flex; align-items:center; justify-content:center; background:rgba(10,10,10,0.55); border:1px solid var(--grey-line); border-radius:50%; color:var(--white); font-size:26px; line-height:1; cursor:pointer; z-index:2; }
+  .modal-close:hover{ background:var(--white); color:var(--black); border-color:var(--white); }
   .modal-img{ background:#1a1a18; aspect-ratio:4/5; display:flex; align-items:center; justify-content:center; color:var(--grey); font-size:12px; text-align:center; padding:16px; }
   .modal-img img{ width:100%; height:100%; object-fit:cover; }
   .modal-thumbs{ display:flex; gap:8px; padding:10px; flex-wrap:wrap; grid-column: 1 / -1; }
@@ -229,8 +230,20 @@
   .size-guide-table.show{ display:table; width:100%; border-collapse:collapse; }
   .size-guide-table th, .size-guide-table td{ border:1px solid var(--grey-line); padding:6px 8px; text-align:center; color:#cfcfc8; }
   .size-guide-table th{ color:var(--white); }
+  .qr-lightbox{ position:fixed; inset:0; background:rgba(0,0,0,0.85); z-index:90; display:none; align-items:center; justify-content:center; padding:24px; }
+  .qr-lightbox.show{ display:flex; }
+  .qr-lightbox-box{ background:var(--white); padding:22px; border-radius: var(--radius); display:flex; flex-direction:column; align-items:center; gap:12px; max-width:90vw; }
+  .qr-lightbox-box img{ width:min(72vw,340px); height:min(72vw,340px); display:block; }
+  .qr-lightbox-box p{ color:var(--black); font-size:12px; letter-spacing:0.04em; text-align:center; }
+  .qr-lightbox-close{ width:40px; height:40px; border-radius:50%; border:1px solid var(--grey-line); background:rgba(10,10,10,0.55); color:var(--white); font-size:26px; line-height:1; display:flex; align-items:center; justify-content:center; cursor:pointer; position:fixed; top:16px; right:16px; z-index:91; }
+  .qr-lightbox-close:hover{ background:var(--white); color:var(--black); border-color:var(--white); }
+  .qr-trigger{ cursor:pointer; transition: transform .15s ease; }
+  .qr-trigger:hover{ transform: scale(1.04); }
+  .qr-hint{ font-size:10px; color:var(--grey); margin-top:4px; text-decoration:underline; }
+
   .opt-warn{ font-size:11px; color:#e08; display:none; }
   .opt-warn.show{ display:block; }
+
 
   /* ---------- cart page ---------- */
   .cart-layout{ display:grid; grid-template-columns:1fr; gap:40px; padding: 40px 0 80px; }
@@ -419,7 +432,7 @@
                 </label>
                 <label class="radio-option">
                   <input type="radio" name="payment" value="InstaPay">
-                  <span class="rtext">InstaPay<span class="sub">Send to: @omarkhaled2611 · or scan the QR code:</span><img src="images/instapay-qr.png" alt="InstaPay QR code" style="width:120px; height:120px; margin-top:8px; display:block; border:1px solid var(--grey-line);"></span>
+                  <span class="rtext">InstaPay<span class="sub">Send to: @omarkhaled2611 · tap the QR code to enlarge:</span><img src="images/instapay-qr.png" alt="InstaPay QR code — tap to enlarge" class="qr-trigger" id="instapayQr" style="width:120px; height:120px; margin-top:8px; display:block; border:1px solid var(--grey-line); border-radius: var(--radius-sm);"><span class="qr-hint">Tap to enlarge</span></span>
                 </label>
                 <label class="radio-option">
                   <input type="radio" name="payment" value="Vodafone Cash">
@@ -495,6 +508,14 @@
     </div>
   </section>
 </main>
+
+<div class="qr-lightbox" id="qrLightbox">
+  <button class="qr-lightbox-close" id="qrLightboxClose" aria-label="Close">&times;</button>
+  <div class="qr-lightbox-box">
+    <img src="images/instapay-qr.png" alt="InstaPay QR code, enlarged">
+    <p>Scan or screenshot this to pay via InstaPay</p>
+  </div>
+</div>
 
 <div class="modal-overlay" id="modalOverlay">
   <div class="modal">
@@ -1234,6 +1255,13 @@
   }
   function closeModal(){ modalOverlay.classList.remove("show"); modalProduct = null; }
   document.getElementById("modalClose").addEventListener("click", closeModal);
+  var qrTrigger = document.getElementById("instapayQr");
+  var qrLightbox = document.getElementById("qrLightbox");
+  if(qrTrigger && qrLightbox){
+    qrTrigger.addEventListener("click", function(){ qrLightbox.classList.add("show"); });
+    document.getElementById("qrLightboxClose").addEventListener("click", function(){ qrLightbox.classList.remove("show"); });
+    qrLightbox.addEventListener("click", function(e){ if(e.target === qrLightbox) qrLightbox.classList.remove("show"); });
+  }
   modalOverlay.addEventListener("click", function(e){ if(e.target === modalOverlay) closeModal(); });
   document.getElementById("qtyPlus").addEventListener("click", function(){ modalQty++; document.getElementById("qtyVal").textContent = modalQty; });
   document.getElementById("qtyMinus").addEventListener("click", function(){ modalQty = Math.max(1, modalQty-1); document.getElementById("qtyVal").textContent = modalQty; });
@@ -1247,7 +1275,7 @@
     addToCart(modalProduct.id, modalColor, modalSize, modalQty, modalDesign);
     closeModal();
   });
-  document.addEventListener("keydown", function(e){ if(e.key === "Escape"){ closeModal(); closeMenu(); } });
+  document.addEventListener("keydown", function(e){ if(e.key === "Escape"){ closeModal(); closeMenu(); if(qrLightbox) qrLightbox.classList.remove("show"); } });
 
   /* ============================================================
      WEB3FORMS SUBMISSION (AJAX, no page reload)
