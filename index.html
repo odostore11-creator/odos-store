@@ -281,36 +281,6 @@
   .form-msg.ok{ border-color:#4a4; color:#8f8; }
   .form-msg.err{ border-color:#a44; color:#f88; }
 
-  /* ---------- newsletter discount popup (small, non-blocking) ---------- */
-  .newsletter-popup{
-    position: fixed; left: 18px; bottom: 18px; z-index: 65;
-    width: min(300px, calc(100vw - 36px));
-    background: var(--black-2); border: 1px solid var(--grey-line); border-radius: var(--radius);
-    padding: 18px 18px 16px; box-shadow: 0 10px 30px rgba(0,0,0,0.5);
-    transform: translateY(140%); opacity: 0; transition: transform .4s ease, opacity .4s ease;
-    pointer-events: none;
-  }
-  .newsletter-popup.show{ transform: translateY(0); opacity: 1; pointer-events: auto; }
-  .newsletter-popup .np-close{
-    position:absolute; top:8px; right:8px; width:26px; height:26px; display:flex; align-items:center;
-    justify-content:center; background:none; border:none; color:var(--grey); font-size:18px; line-height:1;
-    cursor:pointer;
-  }
-  .newsletter-popup .np-close:hover{ color: var(--white); }
-  .newsletter-popup h4{ font-size:15px; letter-spacing:0.03em; padding-right:18px; margin-bottom:6px; }
-  .newsletter-popup p{ font-family:'Anton', sans-serif; font-size:12px; letter-spacing:0.02em; line-height:1.5; color: var(--grey); margin-bottom:12px; }
-  .newsletter-popup form{ display:flex; flex-direction:column; gap:8px; }
-  .newsletter-popup input[type="email"]{
-    background: var(--black); border:1px solid var(--grey-line); border-radius: var(--radius-sm);
-    padding:10px 12px; color: var(--white); font-size:13px; width:100%;
-  }
-  .newsletter-popup button[type="submit"]{
-    background: var(--white); color: var(--black); border:none; border-radius: var(--radius-sm);
-    padding:10px 12px; font-size:13px; letter-spacing:0.05em; text-transform:uppercase; cursor:pointer;
-  }
-  .newsletter-popup button[type="submit"]:hover{ background: var(--grey); }
-  .newsletter-popup .form-msg{ font-size:11px; padding:8px; margin-top:8px; }
-
   /* ---------- contact ---------- */
   .contact-layout{ display:grid; grid-template-columns:1fr; gap:50px; padding:40px 0 80px; }
   @media(min-width:860px){ .contact-layout{ grid-template-columns:1fr 1fr; } }
@@ -342,20 +312,6 @@
 <!-- End Cloudflare Web Analytics -->
 </head>
 <body>
-
-<div class="newsletter-popup" id="newsletterPopup">
-  <button type="button" class="np-close" id="newsletterClose" aria-label="Close">&times;</button>
-  <h4>GET 10% OFF</h4>
-  <p>Join the newsletter and get a 10% discount code sent to your inbox.</p>
-  <form id="newsletterForm">
-    <input type="hidden" name="access_key" value="c256a4c4-f82f-4497-b84e-d465be6d74cf">
-    <input type="hidden" name="subject" value="New newsletter signup — 10% discount">
-    <input type="hidden" name="from_name" value="ODOS Newsletter Popup">
-    <input type="email" name="email" placeholder="Your email" required>
-    <button type="submit">Get My Code</button>
-    <div class="form-msg" id="newsletterMsg"></div>
-  </form>
-</div>
 
 <div class="path-bg" aria-hidden="true"><canvas id="pathCanvas"></canvas></div>
 
@@ -461,18 +417,8 @@
         <div>
           <div class="summary-box">
             <div class="summary-row"><span>Subtotal</span><span id="cartSubtotal">EGP 0</span></div>
-            <div class="summary-row" id="discountRow" style="display:none;"><span id="discountLabel">Discount</span><span id="discountAmount">−EGP 0</span></div>
             <div class="summary-row"><span>Delivery</span><span>FREE</span></div>
             <div class="summary-row total"><span>Total</span><span id="cartTotal">EGP 0</span></div>
-
-            <div class="field" style="margin-top:16px;">
-              <label for="discountCodeInput">Discount code</label>
-              <div style="display:flex; gap:8px;">
-                <input type="text" id="discountCodeInput" placeholder="Enter code" style="flex:1;" autocomplete="off">
-                <button type="button" class="btn small" id="discountApplyBtn">Apply</button>
-              </div>
-              <div class="form-msg" id="discountMsg"></div>
-            </div>
           </div>
 
           <form name="order" method="POST" action="https://api.web3forms.com/submit" id="orderForm" style="margin-top:24px;">
@@ -481,8 +427,6 @@
             <input type="checkbox" name="botcheck" style="display:none;">
             <input type="hidden" name="order_details" id="orderDetailsField">
             <input type="hidden" name="order_total" id="orderTotalField">
-            <input type="hidden" name="discount_code" id="orderDiscountCodeField">
-            <input type="hidden" name="discount_amount" id="orderDiscountAmountField">
 
             <div class="field"><label for="ord_name">Full name</label><input type="text" id="ord_name" name="name" required></div>
             <div class="field"><label for="ord_phone">Phone number</label><input type="tel" id="ord_phone" name="phone" required></div>
@@ -998,11 +942,6 @@
   var currentFilter = "All";
   var modalProduct = null, modalQty = 1, modalColor = null, modalSize = null, modalDesign = "";
 
-  /* ---------- discount codes ---------- */
-  var DISCOUNT_CODES = { "WELCOME10": 10 };
-  var appliedDiscountCode = "";
-  var appliedDiscountPercent = 0;
-
   function saveCart(){ localStorage.setItem("odos_cart", JSON.stringify(cart)); renderCart(); renderCartCount(); }
   function fmt(n){ n = Math.round(n*100)/100; return "EGP " + n.toLocaleString(undefined,{minimumFractionDigits: (n%1!==0?2:0), maximumFractionDigits:2}); }
   function findProduct(id){ return PRODUCTS.filter(function(p){ return p.id === id; })[0]; }
@@ -1117,17 +1056,7 @@
     }
     var total = cart.reduce(function(sum, c){ var p = findProduct(c.id); return sum + (p ? itemPrice(p, c.design) * c.qty : 0); }, 0);
     document.getElementById("cartSubtotal").textContent = fmt(total);
-    var discountRow = document.getElementById("discountRow");
-    var discountAmountVal = 0;
-    if(appliedDiscountPercent > 0 && cart.length > 0){
-      discountAmountVal = total * (appliedDiscountPercent / 100);
-      document.getElementById("discountLabel").textContent = "Discount (" + appliedDiscountCode + " · " + appliedDiscountPercent + "%)";
-      document.getElementById("discountAmount").textContent = "−" + fmt(discountAmountVal);
-      discountRow.style.display = "flex";
-    } else {
-      discountRow.style.display = "none";
-    }
-    document.getElementById("cartTotal").textContent = fmt(total - discountAmountVal);
+    document.getElementById("cartTotal").textContent = fmt(total);
     document.getElementById("orderSubmitBtn").disabled = cart.length === 0;
   }
   function renderCartCount(){
@@ -1389,29 +1318,17 @@
      WEB3FORMS SUBMISSION (AJAX, no page reload)
   ============================================================= */
   function submitNetlifyForm(form, msgEl, onSuccess){
-    var formData = new FormData(form);
-    var payload = {};
-    formData.forEach(function(value, key){ payload[key] = value; });
     fetch(form.action, {
       method: "POST",
-      headers: { "Content-Type": "application/json", "Accept": "application/json" },
-      body: JSON.stringify(payload)
+      headers: { "Accept": "application/json" },
+      body: new FormData(form)
     })
       .then(function(res){ return res.json().then(function(data){ return { ok: res.ok, data: data }; }); })
       .then(function(result){
         if(result.ok && result.data && result.data.success){ msgEl.textContent = "Thanks — your message has been sent. We'll be in touch shortly."; msgEl.className = "form-msg show ok"; if(onSuccess) onSuccess(); }
-        else {
-          console.error("Web3Forms error:", result.data);
-          var apiMsg = result.data && result.data.message ? result.data.message : null;
-          msgEl.textContent = apiMsg ? ("Something went wrong: " + apiMsg) : "Something went wrong sending this. Please try again, or contact us directly.";
-          msgEl.className = "form-msg show err";
-        }
+        else { throw new Error("Bad response"); }
       })
-      .catch(function(err){
-        console.error("Web3Forms network error:", err);
-        msgEl.textContent = "Something went wrong sending this. Please try again, or contact us directly.";
-        msgEl.className = "form-msg show err";
-      });
+      .catch(function(){ msgEl.textContent = "Something went wrong sending this. Please try again, or contact us directly."; msgEl.className = "form-msg show err"; });
   }
 
   var orderForm = document.getElementById("orderForm");
@@ -1419,8 +1336,6 @@
     e.preventDefault();
     if(cart.length === 0) return;
     var total = cart.reduce(function(sum, c){ var p = findProduct(c.id); return sum + (p ? itemPrice(p, c.design)*c.qty : 0); }, 0);
-    var discountAmountVal = appliedDiscountPercent > 0 ? total * (appliedDiscountPercent / 100) : 0;
-    var finalTotal = total - discountAmountVal;
     var lines = cart.map(function(c){
       var p = findProduct(c.id); if(!p) return "";
       var bits = []; if(c.color) bits.push(c.color); if(c.size) bits.push(c.size);
@@ -1429,42 +1344,8 @@
       return p.name + (bits.length ? " ("+bits.join(" / ")+")" : "") + " x" + c.qty + " — " + fmt(unit*c.qty);
     });
     document.getElementById("orderDetailsField").value = lines.join(" | ");
-    document.getElementById("orderTotalField").value = fmt(finalTotal);
-    document.getElementById("orderDiscountCodeField").value = appliedDiscountCode || "None";
-    document.getElementById("orderDiscountAmountField").value = discountAmountVal > 0 ? fmt(discountAmountVal) : "EGP 0";
-    submitNetlifyForm(orderForm, document.getElementById("orderMsg"), function(){
-      cart = []; saveCart(); orderForm.reset();
-      appliedDiscountCode = ""; appliedDiscountPercent = 0;
-      document.getElementById("discountCodeInput").value = "";
-      document.getElementById("discountCodeInput").disabled = false;
-      document.getElementById("discountApplyBtn").disabled = false;
-      var dMsg = document.getElementById("discountMsg"); dMsg.className = "form-msg"; dMsg.textContent = "";
-      renderCart();
-    });
-  });
-
-  /* ---------- discount code apply ---------- */
-  var discountApplyBtn = document.getElementById("discountApplyBtn");
-  var discountCodeInput = document.getElementById("discountCodeInput");
-  var discountMsg = document.getElementById("discountMsg");
-  discountApplyBtn.addEventListener("click", function(){
-    var raw = discountCodeInput.value.trim();
-    if(!raw){ return; }
-    var code = raw.toUpperCase();
-    if(DISCOUNT_CODES.hasOwnProperty(code)){
-      appliedDiscountCode = code;
-      appliedDiscountPercent = DISCOUNT_CODES[code];
-      discountMsg.textContent = "Code applied — " + appliedDiscountPercent + "% off.";
-      discountMsg.className = "form-msg show ok";
-      discountCodeInput.disabled = true;
-      discountApplyBtn.disabled = true;
-      renderCart();
-    } else {
-      appliedDiscountCode = ""; appliedDiscountPercent = 0;
-      discountMsg.textContent = "That code isn't valid.";
-      discountMsg.className = "form-msg show err";
-      renderCart();
-    }
+    document.getElementById("orderTotalField").value = fmt(total);
+    submitNetlifyForm(orderForm, document.getElementById("orderMsg"), function(){ cart = []; saveCart(); orderForm.reset(); });
   });
 
   var contactForm = document.getElementById("contactForm");
@@ -1472,39 +1353,6 @@
     e.preventDefault();
     submitNetlifyForm(contactForm, document.getElementById("contactMsg"), function(){ contactForm.reset(); });
   });
-
-  /* ============================================================
-     NEWSLETTER DISCOUNT POPUP
-  ============================================================= */
-  (function(){
-    var popup = document.getElementById("newsletterPopup");
-    var closeBtn = document.getElementById("newsletterClose");
-    var form = document.getElementById("newsletterForm");
-    var msgEl = document.getElementById("newsletterMsg");
-    var STORAGE_KEY = "odosNewsletterPopupDismissed";
-
-    function dismiss(){
-      popup.classList.remove("show");
-      try{ localStorage.setItem(STORAGE_KEY, "1"); }catch(e){}
-    }
-
-    var alreadyDismissed = false;
-    try{ alreadyDismissed = localStorage.getItem(STORAGE_KEY) === "1"; }catch(e){}
-
-    if(!alreadyDismissed){
-      setTimeout(function(){ popup.classList.add("show"); }, 2000);
-    }
-
-    closeBtn.addEventListener("click", dismiss);
-
-    form.addEventListener("submit", function(e){
-      e.preventDefault();
-      submitNetlifyForm(form, msgEl, function(){
-        form.reset();
-        setTimeout(dismiss, 1800);
-      });
-    });
-  })();
 
   /* ============================================================
      INIT
