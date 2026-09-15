@@ -1161,7 +1161,7 @@
     document.getElementById("modalName").textContent = modalProduct.name;
     document.getElementById("modalDesc").textContent = modalProduct.desc;
     updateModalPrice();
-    document.getElementById("modalImg").innerHTML = imgBlock(modalProduct);
+    document.getElementById("modalImg").innerHTML = primaryImg(modalProduct) ? '<img src="'+primaryImg(modalProduct)+'" alt="'+modalProduct.name+'">' : '<span class="img-placeholder">'+modalProduct.name.toUpperCase()+' — ADD PHOTO</span>';
     document.getElementById("qtyVal").textContent = modalQty;
 
     var thumbsWrap = document.getElementById("modalThumbs");
