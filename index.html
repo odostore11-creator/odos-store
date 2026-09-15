@@ -461,8 +461,18 @@
         <div>
           <div class="summary-box">
             <div class="summary-row"><span>Subtotal</span><span id="cartSubtotal">EGP 0</span></div>
+            <div class="summary-row" id="discountRow" style="display:none;"><span id="discountLabel">Discount</span><span id="discountAmount">−EGP 0</span></div>
             <div class="summary-row"><span>Delivery</span><span>FREE</span></div>
             <div class="summary-row total"><span>Total</span><span id="cartTotal">EGP 0</span></div>
+
+            <div class="field" style="margin-top:16px;">
+              <label for="discountCodeInput">Discount code</label>
+              <div style="display:flex; gap:8px;">
+                <input type="text" id="discountCodeInput" placeholder="Enter code" style="flex:1;" autocomplete="off">
+                <button type="button" class="btn small" id="discountApplyBtn">Apply</button>
+              </div>
+              <div class="form-msg" id="discountMsg"></div>
+            </div>
           </div>
 
           <form name="order" method="POST" action="https://api.web3forms.com/submit" id="orderForm" style="margin-top:24px;">
@@ -471,6 +481,8 @@
             <input type="checkbox" name="botcheck" style="display:none;">
             <input type="hidden" name="order_details" id="orderDetailsField">
             <input type="hidden" name="order_total" id="orderTotalField">
+            <input type="hidden" name="discount_code" id="orderDiscountCodeField">
+            <input type="hidden" name="discount_amount" id="orderDiscountAmountField">
 
             <div class="field"><label for="ord_name">Full name</label><input type="text" id="ord_name" name="name" required></div>
             <div class="field"><label for="ord_phone">Phone number</label><input type="tel" id="ord_phone" name="phone" required></div>
@@ -986,6 +998,11 @@
   var currentFilter = "All";
   var modalProduct = null, modalQty = 1, modalColor = null, modalSize = null, modalDesign = "";
 
+  /* ---------- discount codes ---------- */
+  var DISCOUNT_CODES = { "WELCOME10": 10 };
+  var appliedDiscountCode = "";
+  var appliedDiscountPercent = 0;
+
   function saveCart(){ localStorage.setItem("odos_cart", JSON.stringify(cart)); renderCart(); renderCartCount(); }
   function fmt(n){ n = Math.round(n*100)/100; return "EGP " + n.toLocaleString(undefined,{minimumFractionDigits: (n%1!==0?2:0), maximumFractionDigits:2}); }
   function findProduct(id){ return PRODUCTS.filter(function(p){ return p.id === id; })[0]; }
@@ -1100,7 +1117,17 @@
     }
     var total = cart.reduce(function(sum, c){ var p = findProduct(c.id); return sum + (p ? itemPrice(p, c.design) * c.qty : 0); }, 0);
     document.getElementById("cartSubtotal").textContent = fmt(total);
-    document.getElementById("cartTotal").textContent = fmt(total);
+    var discountRow = document.getElementById("discountRow");
+    var discountAmountVal = 0;
+    if(appliedDiscountPercent > 0 && cart.length > 0){
+      discountAmountVal = total * (appliedDiscountPercent / 100);
+      document.getElementById("discountLabel").textContent = "Discount (" + appliedDiscountCode + " · " + appliedDiscountPercent + "%)";
+      document.getElementById("discountAmount").textContent = "−" + fmt(discountAmountVal);
+      discountRow.style.display = "flex";
+    } else {
+      discountRow.style.display = "none";
+    }
+    document.getElementById("cartTotal").textContent = fmt(total - discountAmountVal);
     document.getElementById("orderSubmitBtn").disabled = cart.length === 0;
   }
   function renderCartCount(){
@@ -1380,6 +1407,8 @@
     e.preventDefault();
     if(cart.length === 0) return;
     var total = cart.reduce(function(sum, c){ var p = findProduct(c.id); return sum + (p ? itemPrice(p, c.design)*c.qty : 0); }, 0);
+    var discountAmountVal = appliedDiscountPercent > 0 ? total * (appliedDiscountPercent / 100) : 0;
+    var finalTotal = total - discountAmountVal;
     var lines = cart.map(function(c){
       var p = findProduct(c.id); if(!p) return "";
       var bits = []; if(c.color) bits.push(c.color); if(c.size) bits.push(c.size);
@@ -1388,8 +1417,42 @@
       return p.name + (bits.length ? " ("+bits.join(" / ")+")" : "") + " x" + c.qty + " — " + fmt(unit*c.qty);
     });
     document.getElementById("orderDetailsField").value = lines.join(" | ");
-    document.getElementById("orderTotalField").value = fmt(total);
-    submitNetlifyForm(orderForm, document.getElementById("orderMsg"), function(){ cart = []; saveCart(); orderForm.reset(); });
+    document.getElementById("orderTotalField").value = fmt(finalTotal);
+    document.getElementById("orderDiscountCodeField").value = appliedDiscountCode || "None";
+    document.getElementById("orderDiscountAmountField").value = discountAmountVal > 0 ? fmt(discountAmountVal) : "EGP 0";
+    submitNetlifyForm(orderForm, document.getElementById("orderMsg"), function(){
+      cart = []; saveCart(); orderForm.reset();
+      appliedDiscountCode = ""; appliedDiscountPercent = 0;
+      document.getElementById("discountCodeInput").value = "";
+      document.getElementById("discountCodeInput").disabled = false;
+      document.getElementById("discountApplyBtn").disabled = false;
+      var dMsg = document.getElementById("discountMsg"); dMsg.className = "form-msg"; dMsg.textContent = "";
+      renderCart();
+    });
+  });
+
+  /* ---------- discount code apply ---------- */
+  var discountApplyBtn = document.getElementById("discountApplyBtn");
+  var discountCodeInput = document.getElementById("discountCodeInput");
+  var discountMsg = document.getElementById("discountMsg");
+  discountApplyBtn.addEventListener("click", function(){
+    var raw = discountCodeInput.value.trim();
+    if(!raw){ return; }
+    var code = raw.toUpperCase();
+    if(DISCOUNT_CODES.hasOwnProperty(code)){
+      appliedDiscountCode = code;
+      appliedDiscountPercent = DISCOUNT_CODES[code];
+      discountMsg.textContent = "Code applied — " + appliedDiscountPercent + "% off.";
+      discountMsg.className = "form-msg show ok";
+      discountCodeInput.disabled = true;
+      discountApplyBtn.disabled = true;
+      renderCart();
+    } else {
+      appliedDiscountCode = ""; appliedDiscountPercent = 0;
+      discountMsg.textContent = "That code isn't valid.";
+      discountMsg.className = "form-msg show err";
+      renderCart();
+    }
   });
 
   var contactForm = document.getElementById("contactForm");
