@@ -1389,17 +1389,29 @@
      WEB3FORMS SUBMISSION (AJAX, no page reload)
   ============================================================= */
   function submitNetlifyForm(form, msgEl, onSuccess){
+    var formData = new FormData(form);
+    var payload = {};
+    formData.forEach(function(value, key){ payload[key] = value; });
     fetch(form.action, {
       method: "POST",
-      headers: { "Accept": "application/json" },
-      body: new FormData(form)
+      headers: { "Content-Type": "application/json", "Accept": "application/json" },
+      body: JSON.stringify(payload)
     })
       .then(function(res){ return res.json().then(function(data){ return { ok: res.ok, data: data }; }); })
       .then(function(result){
         if(result.ok && result.data && result.data.success){ msgEl.textContent = "Thanks — your message has been sent. We'll be in touch shortly."; msgEl.className = "form-msg show ok"; if(onSuccess) onSuccess(); }
-        else { throw new Error("Bad response"); }
+        else {
+          console.error("Web3Forms error:", result.data);
+          var apiMsg = result.data && result.data.message ? result.data.message : null;
+          msgEl.textContent = apiMsg ? ("Something went wrong: " + apiMsg) : "Something went wrong sending this. Please try again, or contact us directly.";
+          msgEl.className = "form-msg show err";
+        }
       })
-      .catch(function(){ msgEl.textContent = "Something went wrong sending this. Please try again, or contact us directly."; msgEl.className = "form-msg show err"; });
+      .catch(function(err){
+        console.error("Web3Forms network error:", err);
+        msgEl.textContent = "Something went wrong sending this. Please try again, or contact us directly.";
+        msgEl.className = "form-msg show err";
+      });
   }
 
   var orderForm = document.getElementById("orderForm");
