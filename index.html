@@ -266,6 +266,16 @@
   .cart-empty{ padding: 50px 0; color:var(--grey); }
   .summary-box{ border:1px solid var(--grey-line); border-radius: var(--radius); padding:24px; background:var(--black-2); }
   .summary-row{ display:flex; justify-content:space-between; font-size:14px; padding:8px 0; color:var(--grey); }
+  .discount-box{ padding:6px 0 4px; }
+  .discount-line{ display:flex; gap:8px; }
+  .discount-line input{ flex:1; min-width:0; background:var(--black); border:1px solid var(--grey-line); border-radius:var(--radius-sm); color:var(--white); padding:10px 12px; font-size:13px; letter-spacing:0.08em; text-transform:uppercase; }
+  .discount-line input::placeholder{ text-transform:none; letter-spacing:0.02em; }
+  .discount-line .btn{ padding:10px 16px; font-size:13px; }
+  .discount-msg{ font-size:12px; margin:8px 0 0; min-height:0; display:none; }
+  .discount-msg.show{ display:block; }
+  .discount-msg.ok{ color:#8f8; }
+  .discount-msg.err{ color:#f99; }
+  .discount-remove{ background:none; border:none; color:var(--grey); text-decoration:underline; cursor:pointer; font-size:12px; padding:0 0 0 8px; }
   .summary-row.total{ color:var(--white); font-size:18px; border-top:1px solid var(--grey-line); margin-top:10px; padding-top:14px; }
   .field{ margin-bottom:16px; }
   .field label{ display:block; font-size:11px; letter-spacing:0.1em; color:var(--grey); margin-bottom:7px; }
@@ -306,6 +316,32 @@
   .footer-bottom{ max-width:1180px; margin: 34px auto 0; padding-top:20px; border-top:1px solid var(--grey-line); display:flex; justify-content:space-between; flex-wrap:wrap; gap:10px; font-size:11px; color:var(--grey); letter-spacing:0.06em; }
 
   @media (prefers-reduced-motion: reduce){ *{ transition:none !important; scroll-behavior:auto !important; } }
+
+  /* ---- Newsletter pop-up (10% off) ---- */
+  .nl-pop{ position:fixed; right:20px; bottom:20px; width:min(340px, calc(100vw - 32px)); background:var(--black-2); border:1px solid var(--grey-line); border-radius:var(--radius-lg); padding:22px 20px 20px; z-index:60; box-shadow:0 18px 50px rgba(0,0,0,0.55); opacity:0; transform:translateY(16px); pointer-events:none; visibility:hidden; transition:opacity .35s ease, transform .35s ease, visibility 0s linear .35s; }
+  .nl-pop.show{ opacity:1; transform:none; pointer-events:auto; visibility:visible; transition:opacity .35s ease, transform .35s ease; }
+  .nl-close{ position:absolute; top:8px; right:8px; width:36px; height:36px; border:none; background:none; color:var(--grey); font-size:22px; line-height:1; cursor:pointer; border-radius:50%; }
+  .nl-close:hover{ color:var(--white); }
+  .nl-eyebrow{ margin:0 0 6px; font-size:11px; letter-spacing:0.16em; color:var(--grey); }
+  .nl-title{ margin:0 28px 6px 0; font-size:19px; line-height:1.25; font-weight:600; letter-spacing:0.01em; }
+  .nl-sub{ margin:0 0 14px; font-size:13px; color:var(--grey); line-height:1.5; }
+  .nl-form{ display:flex; flex-direction:column; gap:10px; }
+  .nl-form input[type="email"]{ width:100%; background:var(--black); border:1px solid var(--grey-line); border-radius:var(--radius-sm); color:var(--white); padding:12px; font-size:14px; letter-spacing:0.02em; }
+  .nl-form .btn{ width:100%; text-align:center; }
+  .nl-form .btn[disabled]{ opacity:.6; cursor:default; }
+  .nl-trap{ position:absolute; left:-9999px; width:1px; height:1px; opacity:0; }
+  .nl-msg{ margin:12px 0 0; font-size:13px; line-height:1.5; padding:10px 12px; border:1px solid var(--grey-line); border-radius:var(--radius-sm); display:none; }
+  .nl-msg.show{ display:block; }
+  .nl-msg.ok{ border-color:#4a4; color:#8f8; }
+  .nl-msg.err{ border-color:#a44; color:#f99; }
+  .nl-code{ display:none; margin-top:14px; }
+  .nl-code.show{ display:block; }
+  .nl-code-label{ margin:0 0 8px; font-size:11px; letter-spacing:0.16em; color:var(--grey); }
+  .nl-code-row{ display:flex; align-items:center; gap:10px; border:1px dashed var(--grey); border-radius:var(--radius-sm); padding:8px 8px 8px 14px; }
+  .nl-code-text{ flex:1; min-width:0; font-family:ui-monospace, Menlo, Consolas, monospace; font-size:17px; letter-spacing:0.08em; word-break:break-all; user-select:all; }
+  .nl-copy{ padding:9px 16px; font-size:13px; }
+  .nl-code-hint{ margin:10px 0 0; font-size:12px; color:var(--grey); }
+  @media (max-width:520px){ .nl-pop{ right:16px; left:16px; bottom:16px; width:auto; } }
 </style>
 <!-- Cloudflare Web Analytics -->
 <script type='module' src='https://static.cloudflareinsights.com/beacon.min.js' data-cf-beacon='{"token": "5c914474db464af9860e68bc267b4720"}'></script>
@@ -417,6 +453,14 @@
         <div>
           <div class="summary-box">
             <div class="summary-row"><span>Subtotal</span><span id="cartSubtotal">EGP 0</span></div>
+            <div class="discount-box">
+              <div class="discount-line">
+                <input type="text" id="discountInput" placeholder="Discount code" autocomplete="off" autocapitalize="characters" aria-label="Discount code">
+                <button type="button" class="btn" id="discountApply">Apply</button>
+              </div>
+              <p class="discount-msg" id="discountMsg" role="status"></p>
+            </div>
+            <div class="summary-row" id="discountRow" style="display:none;"><span id="discountLabel">Discount</span><span id="discountAmount">−EGP 0</span></div>
             <div class="summary-row"><span>Delivery</span><span>FREE</span></div>
             <div class="summary-row total"><span>Total</span><span id="cartTotal">EGP 0</span></div>
           </div>
@@ -427,6 +471,8 @@
             <input type="checkbox" name="botcheck" style="display:none;">
             <input type="hidden" name="order_details" id="orderDetailsField">
             <input type="hidden" name="order_total" id="orderTotalField">
+            <input type="hidden" name="discount_code" id="orderDiscountCodeField">
+            <input type="hidden" name="discount_amount" id="orderDiscountAmountField">
 
             <div class="field"><label for="ord_name">Full name</label><input type="text" id="ord_name" name="name" required></div>
             <div class="field"><label for="ord_phone">Phone number</label><input type="tel" id="ord_phone" name="phone" required></div>
@@ -943,6 +989,82 @@
   var modalProduct = null, modalQty = 1, modalColor = null, modalSize = null, modalDesign = "";
 
   function saveCart(){ localStorage.setItem("odos_cart", JSON.stringify(cart)); renderCart(); renderCartCount(); }
+  /* ---- Discount codes: add or change codes here (percent off) ---- */
+  /* ---- Discount codes ----
+     Only scrambled (PBKDF2-SHA256) fingerprints of the codes are stored here, so the real codes
+     can't be read from the page source. To add more codes, ask Claude to generate new fingerprints. */
+  var DISCOUNT_SALT = "903ed2f3d4dc3420c845ae031ee361e3";
+  var DISCOUNT_ITER = 150000;
+  var DISCOUNT_HASHES = {
+    "54d462ab939f267506f98ab2b62dedf2d3e20a5d549df679a41c19793af1459a": 10,
+    "d9d6ec25649428f26dc9d6099c3d7de9754fe0537ad634c8cf883d2dc9734a39": 10,
+    "f50c227e3eb664f904aae328bc4766010abed755f2c636ac7164b2bcbe3255b0": 10,
+    "aa3617e5c82f9480f40b87929e15b5a12b649355a9c82a2024b9cd2931a39ecf": 10,
+    "f0105d4f29b60ae187565c16f61ca96b326b92498d838c8e2a9e37a53a315ee0": 10,
+    "91d337839c58b7f8ce505a849c28dafd63f0f56910954b102515d8697c36ffa4": 10,
+    "a29a40911589f11a6d170a60eddf207b0e1f7fa860a9d2be0f57cfee61e0ada0": 10,
+    "df8a203bde635a70c76cfc70704f2b34849395aa009e144206e6cf8f66f70075": 10,
+    "dd0213ad298566db3137b54b4a2d3d9a237064c8cf8df4ef4b24dc15dec2ebdf": 10,
+    "1c09a130b9e16b9e0a7164feed1cee0dde3d879dd2dd86baa2dadfa5c889b4f3": 10,
+    "3d8c3565d09b3bf6ea51480bdca700942029fb9983dc56dfa92ba3a9e99226b6": 10,
+    "c4a02b42c828e1ed83d7542d8e51682faaaf742c6a9a63f6331d9134a344e580": 10,
+    "6c5ef18e3d9c2c620fbb028d942e52b1cbc6827654b3886efdefaad90afdbe09": 10,
+    "8492dd38bb2131c09e5ecd7216bd521a622bedff290803b36d48988b1bd0bc93": 10,
+    "07eddfc1c36b14124a9baf1e9c31e7e0139aeb8612aab193a9fba5f7185de898": 10,
+    "55c5eaf601de7e0dafdfe783932e6d9bdc3f6d299e115807fe76bfebc8b204a3": 10,
+    "522daeb7a2a4ab186ba0b9ba6bb4b603d9a9c2a10683c25f590c296c6e158cb5": 10,
+    "ff0a347f4bc0d2ced2b0d3253838a7f00101b50cfe1b875a65d580ef1745bd67": 10,
+    "1ca80836a8adbb2dc2d59ae676ae127412684f3aa9a0d1b9d7de2015af14d915": 10,
+    "e8dd7e34fe07dd4f223fe2953d1f2ac1ac7d11694909491d4e66922ce888f25d": 10
+  };
+  var appliedCode = null, appliedPct = 0;
+  function normCode(c){ return String(c || "").toUpperCase().replace(/[^A-Z0-9]/g, ""); }
+  function showCode(c){ return c.replace(/^ODOS/, "ODOS-"); }
+  function verifyPool(code){
+    return new Promise(function(resolve, reject){
+      var subtle = window.crypto && window.crypto.subtle;
+      if(!subtle){ reject(new Error("nosubtle")); return; }
+      var enc = new TextEncoder();
+      subtle.importKey("raw", enc.encode(code), "PBKDF2", false, ["deriveBits"])
+        .then(function(key){ return subtle.deriveBits({ name:"PBKDF2", salt: enc.encode(DISCOUNT_SALT), iterations: DISCOUNT_ITER, hash:"SHA-256" }, key, 256); })
+        .then(function(bits){
+          var hex = Array.prototype.map.call(new Uint8Array(bits), function(b){ return ("0" + b.toString(16)).slice(-2); }).join("");
+          resolve(DISCOUNT_HASHES[hex] || 0);
+        })
+        .catch(reject);
+    });
+  }
+  /* Welcome codes: a random part + a 3-character check part, so each signup gets its own valid-looking code */
+  var CODE_ALPHA = "ABCDEFGHJKMNPQRSTUVWXYZ23456789";
+  var WELCOME_SALT = "8105470548845fd2565bcb8c01a6f0e7";
+  function welcomeCheck(rand4){
+    var subtle = window.crypto && window.crypto.subtle;
+    if(!subtle) return Promise.reject(new Error("nosubtle"));
+    var enc = new TextEncoder();
+    return subtle.importKey("raw", enc.encode("welcome|" + rand4), "PBKDF2", false, ["deriveBits"])
+      .then(function(key){ return subtle.deriveBits({ name:"PBKDF2", salt: enc.encode(WELCOME_SALT), iterations: 5000, hash:"SHA-256" }, key, 24); })
+      .then(function(bits){ return Array.prototype.map.call(new Uint8Array(bits), function(b){ return CODE_ALPHA.charAt(b % CODE_ALPHA.length); }).join(""); });
+  }
+  function verifyCode(code){
+    return verifyPool(code).then(function(pct){
+      if(pct) return pct;
+      if(!/^ODOS[ABCDEFGHJKMNPQRSTUVWXYZ23456789]{7}$/.test(code)) return 0;
+      return welcomeCheck(code.slice(4, 8)).then(function(chk){ return chk === code.slice(8) ? 10 : 0; });
+    });
+  }
+  window.odosMakeCode = function(){
+    var bytes = new Uint8Array(4); window.crypto.getRandomValues(bytes);
+    var rand4 = Array.prototype.map.call(bytes, function(b){ return CODE_ALPHA.charAt(b % CODE_ALPHA.length); }).join("");
+    return welcomeCheck(rand4).then(function(chk){ return "ODOS" + rand4 + chk; });
+  };
+  try{
+    var savedCode = localStorage.getItem("odos_code");
+    if(savedCode){ verifyCode(savedCode).then(function(pct){ if(pct){ appliedCode = savedCode; appliedPct = pct; renderCart(); } }).catch(function(){}); }
+  }catch(e){}
+  function saveCode(){ try{ if(appliedCode) localStorage.setItem("odos_code", appliedCode); else localStorage.removeItem("odos_code"); }catch(e){} }
+  function cartSubtotal(){ return cart.reduce(function(sum, c){ var p = findProduct(c.id); return sum + (p ? itemPrice(p, c.design) * c.qty : 0); }, 0); }
+  function discountFor(subtotal){ return appliedCode ? Math.round(subtotal * appliedPct) / 100 : 0; }
+  function discountMsg(text, kind){ var m = document.getElementById("discountMsg"); m.textContent = text; m.className = "discount-msg" + (text ? " show " + kind : ""); }
   function fmt(n){ n = Math.round(n*100)/100; return "EGP " + n.toLocaleString(undefined,{minimumFractionDigits: (n%1!==0?2:0), maximumFractionDigits:2}); }
   function findProduct(id){ return PRODUCTS.filter(function(p){ return p.id === id; })[0]; }
   function variantKey(id,color,size,design){ return id + "|" + (color||"") + "|" + (size||"") + "|" + (design||""); }
@@ -1054,9 +1176,16 @@
         );
       }).join("");
     }
-    var total = cart.reduce(function(sum, c){ var p = findProduct(c.id); return sum + (p ? itemPrice(p, c.design) * c.qty : 0); }, 0);
-    document.getElementById("cartSubtotal").textContent = fmt(total);
-    document.getElementById("cartTotal").textContent = fmt(total);
+    var subtotal = cartSubtotal();
+    var disc = discountFor(subtotal);
+    document.getElementById("cartSubtotal").textContent = fmt(subtotal);
+    var dRow = document.getElementById("discountRow");
+    if(appliedCode){
+      dRow.style.display = "flex";
+      document.getElementById("discountLabel").innerHTML = "Discount (" + showCode(appliedCode) + ")<button type=\"button\" class=\"discount-remove\" id=\"discountRemove\">Remove</button>";
+      document.getElementById("discountAmount").textContent = "−" + fmt(disc);
+    } else { dRow.style.display = "none"; }
+    document.getElementById("cartTotal").textContent = fmt(subtotal - disc);
     document.getElementById("orderSubmitBtn").disabled = cart.length === 0;
   }
   function renderCartCount(){
@@ -1331,11 +1460,34 @@
       .catch(function(){ msgEl.textContent = "Something went wrong sending this. Please try again, or contact us directly."; msgEl.className = "form-msg show err"; });
   }
 
+  function applyDiscount(){
+    var input = document.getElementById("discountInput");
+    var btnA = document.getElementById("discountApply");
+    var code = normCode(input.value);
+    if(!code){ discountMsg("Enter your discount code.", "err"); return; }
+    btnA.disabled = true; btnA.textContent = "Checking…";
+    verifyCode(code).then(function(pct){
+      if(!pct){ discountMsg("That code isn't valid.", "err"); return; }
+      appliedCode = code; appliedPct = pct; saveCode(); input.value = "";
+      discountMsg(pct + "% off applied.", "ok");
+      renderCart();
+    }).catch(function(err){
+      discountMsg(err && err.message === "nosubtle" ? "Please open the secure (https) version of the site to use a code." : "Couldn't check the code. Please try again.", "err");
+    }).then(function(){ btnA.disabled = false; btnA.textContent = "Apply"; });
+  }
+  document.getElementById("discountApply").addEventListener("click", applyDiscount);
+  document.getElementById("discountInput").addEventListener("keydown", function(e){ if(e.key === "Enter"){ e.preventDefault(); applyDiscount(); } });
+  document.getElementById("discountRow").addEventListener("click", function(e){
+    if(e.target && e.target.id === "discountRemove"){ appliedCode = null; appliedPct = 0; saveCode(); discountMsg("Code removed.", "ok"); renderCart(); }
+  });
+
   var orderForm = document.getElementById("orderForm");
   orderForm.addEventListener("submit", function(e){
     e.preventDefault();
     if(cart.length === 0) return;
-    var total = cart.reduce(function(sum, c){ var p = findProduct(c.id); return sum + (p ? itemPrice(p, c.design)*c.qty : 0); }, 0);
+    var subtotal = cartSubtotal();
+    var disc = discountFor(subtotal);
+    var total = subtotal - disc;
     var lines = cart.map(function(c){
       var p = findProduct(c.id); if(!p) return "";
       var bits = []; if(c.color) bits.push(c.color); if(c.size) bits.push(c.size);
@@ -1344,8 +1496,10 @@
       return p.name + (bits.length ? " ("+bits.join(" / ")+")" : "") + " x" + c.qty + " — " + fmt(unit*c.qty);
     });
     document.getElementById("orderDetailsField").value = lines.join(" | ");
-    document.getElementById("orderTotalField").value = fmt(total);
-    submitNetlifyForm(orderForm, document.getElementById("orderMsg"), function(){ cart = []; saveCart(); orderForm.reset(); });
+    document.getElementById("orderTotalField").value = fmt(total) + (appliedCode ? " (after " + showCode(appliedCode) + " discount)" : "");
+    document.getElementById("orderDiscountCodeField").value = appliedCode ? showCode(appliedCode) : "none";
+    document.getElementById("orderDiscountAmountField").value = appliedCode ? fmt(disc) : "EGP 0";
+    submitNetlifyForm(orderForm, document.getElementById("orderMsg"), function(){ cart = []; appliedCode = null; appliedPct = 0; saveCode(); saveCart(); orderForm.reset(); document.getElementById("discountInput").value = ""; discountMsg("", ""); });
   });
 
   var contactForm = document.getElementById("contactForm");
@@ -1367,6 +1521,133 @@
   renderFAQ();
   goTo(location.hash ? location.hash.replace("#","") : "home");
 
+})();
+</script>
+
+<aside class="nl-pop" id="nlPop" role="dialog" aria-labelledby="nlTitle" aria-live="polite">
+  <button type="button" class="nl-close" id="nlClose" aria-label="Close">&times;</button>
+  <p class="nl-eyebrow">JOIN THE LIST</p>
+  <h3 class="nl-title" id="nlTitle">Get 10% off your first order</h3>
+  <p class="nl-sub">Sign up with your email and your discount code appears right here.</p>
+  <form class="nl-form" id="nlForm" novalidate>
+    <input type="email" id="nlEmail" name="email" placeholder="Your email" autocomplete="email" inputmode="email" aria-label="Email address" required>
+    <input type="text" name="botcheck" class="nl-trap" tabindex="-1" autocomplete="off" aria-hidden="true">
+    <button type="submit" class="btn" id="nlBtn">Get 10% Off</button>
+  </form>
+  <p class="nl-msg" id="nlMsg" role="status"></p>
+  <div class="nl-code" id="nlCode">
+    <p class="nl-code-label">YOUR 10% OFF CODE</p>
+    <div class="nl-code-row">
+      <span class="nl-code-text" id="nlCodeText"></span>
+      <button type="button" class="btn nl-copy" id="nlCopy">Copy</button>
+    </div>
+    <p class="nl-code-hint">Paste it in the discount box in your cart at checkout.</p>
+  </div>
+</aside>
+
+<script>
+(function(){
+  var ACCESS_KEY = "c256a4c4-f82f-4497-b84e-d465be6d74cf";   /* Web3Forms access key */
+  var ENDPOINT = "https://api.web3forms.com/submit";
+  var STORE_KEY = "odos_newsletter";
+  var SHOW_AFTER_MS = 8000;
+  var REAPPEAR_DAYS = 7;
+
+  var pop = document.getElementById("nlPop");
+  var form = document.getElementById("nlForm");
+  var emailEl = document.getElementById("nlEmail");
+  var btn = document.getElementById("nlBtn");
+  var msg = document.getElementById("nlMsg");
+
+  function getState(){ try{ return JSON.parse(localStorage.getItem(STORE_KEY) || "null"); }catch(e){ return null; } }
+  function setState(status){ try{ localStorage.setItem(STORE_KEY, JSON.stringify({ status: status, at: Date.now() })); }catch(e){} }
+
+  function shouldShow(){
+    var st = getState();
+    if(!st) return true;
+    if(st.status === "subscribed") return false;
+    return (Date.now() - st.at) > REAPPEAR_DAYS * 86400000;
+  }
+  function open(){ pop.classList.add("show"); }
+  function close(status){ pop.classList.remove("show"); if(status) setState(status); }
+  function say(text, kind){ msg.textContent = text; msg.className = "nl-msg show " + kind; }
+
+  if(shouldShow()){ setTimeout(open, SHOW_AFTER_MS); }
+
+  document.getElementById("nlClose").addEventListener("click", function(){ close("dismissed"); });
+  document.addEventListener("keydown", function(e){ if(e.key === "Escape" && pop.classList.contains("show")) close("dismissed"); });
+
+  document.getElementById("nlCopy").addEventListener("click", function(){
+    var text = document.getElementById("nlCodeText").textContent;
+    var b = this;
+    function done(ok){ b.textContent = ok ? "Copied!" : "Press & hold to copy"; setTimeout(function(){ b.textContent = "Copy"; }, 2200); }
+    function fallback(){
+      try{
+        var r = document.createRange(); r.selectNodeContents(document.getElementById("nlCodeText"));
+        var sel = window.getSelection(); sel.removeAllRanges(); sel.addRange(r);
+        done(document.execCommand("copy"));
+      }catch(e){ done(false); }
+    }
+    if(navigator.clipboard && navigator.clipboard.writeText){ navigator.clipboard.writeText(text).then(function(){ done(true); }, fallback); }
+    else fallback();
+  });
+
+  form.addEventListener("submit", function(e){
+    e.preventDefault();
+    var email = (emailEl.value || "").trim();
+    if(!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email)){ say("Please enter a valid email address.", "err"); emailEl.focus(); return; }
+
+    /* honeypot: bots fill this hidden field, people never see it */
+    if(form.elements["botcheck"].value){ say("You're in!", "ok"); return; }
+
+    btn.disabled = true; btn.textContent = "Sending…"; msg.className = "nl-msg";
+
+    var makeCode = (window.odosMakeCode ? window.odosMakeCode() : Promise.reject(new Error("nocode")));
+    makeCode.catch(function(){ return null; }).then(function(code){
+      var shown = code ? code.replace(/^ODOS/, "ODOS-") : "";
+      return fetch(ENDPOINT, {
+        method: "POST",
+        headers: { "Content-Type": "application/json", "Accept": "application/json" },
+        body: JSON.stringify({
+          access_key: ACCESS_KEY,
+          subject: "New ODOS newsletter signup (10% off)",
+          from_name: "ODOS Newsletter",
+          email: email,
+          message: "New newsletter signup. " + (shown ? ("Discount code shown to this customer: " + shown) : "No code could be generated on their device — please send them a 10% code.")
+        })
+      })
+      .then(function(res){
+        return res.text().then(function(t){
+          var data = null; try{ data = JSON.parse(t); }catch(err){}
+          return { ok: res.ok, status: res.status, data: data, raw: t };
+        });
+      })
+      .then(function(r){
+        if(r.ok && r.data && r.data.success){
+          setState("subscribed");
+          form.style.display = "none";
+          if(shown){
+            say("You're in! Here's your code:", "ok");
+            document.getElementById("nlCodeText").textContent = shown;
+            document.getElementById("nlCode").classList.add("show");
+          } else {
+            say("You're in! We'll email your 10% off code shortly.", "ok");
+          }
+        } else {
+          var reason = (r.data && r.data.message) ? r.data.message : ("Unexpected response (" + r.status + ")");
+          console.error("ODOS newsletter signup failed:", r.status, r.raw);
+          throw new Error(reason);
+        }
+      });
+    })
+    .catch(function(err){
+      console.error("ODOS newsletter signup error:", err);
+      var offline = (typeof navigator !== "undefined" && navigator.onLine === false);
+      say(offline ? "You seem to be offline. Please check your connection and try again."
+                  : "Couldn't sign you up: " + (err && err.message ? err.message : "please try again") + ". You can also email us directly.", "err");
+      btn.disabled = false; btn.textContent = "Get 10% Off";
+    });
+  });
 })();
 </script>
 </body>
