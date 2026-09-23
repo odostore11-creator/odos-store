@@ -34,9 +34,10 @@
   2. Product photos: set "img" to a real path, e.g.
      "images/washed-tank-top.jpg", once you upload your photos
      next to this file (or in an /images folder).
-  3. This site uses Netlify Forms — once deployed, turn on email
-     notifications under Site settings → Forms in Netlify. No
-     backend or API keys needed.
+  3. This site is hosted on GitHub Pages and uses Web3Forms for
+     form submissions (see the Web3Forms ACCESS_KEY further down).
+     No backend or API keys of your own needed — just keep the
+     Web3Forms account's email up to date to receive submissions.
 ============================================================= -->
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -1110,11 +1111,11 @@
     var second = (p.images && p.images.length > 1) ? p.images[1] : null;
     if(second){
       return '<div class="img-swap-wrap">' +
-        '<img class="img-primary" src="'+src+'" alt="'+p.name+'">' +
-        '<img class="img-secondary" src="'+second+'" alt="'+p.name+'">' +
+        '<img class="img-primary" src="'+src+'" alt="'+p.name+'" loading="lazy" decoding="async">' +
+        '<img class="img-secondary" src="'+second+'" alt="'+p.name+'" loading="lazy" decoding="async">' +
       '</div>';
     }
-    return '<img src="'+src+'" alt="'+p.name+'">';
+    return '<img src="'+src+'" alt="'+p.name+'" loading="lazy" decoding="async">';
   }
   function cardHTML(p){
     return (
@@ -1171,7 +1172,7 @@
         var variantText = variantBits.length ? variantBits.join(" / ") : "";
         return (
           '<div class="cart-item">' +
-            '<div class="thumb">'+(primaryImg(p) ? '<img src="'+primaryImg(p)+'" alt="'+p.name+'">' : p.name.slice(0,10))+'</div>' +
+            '<div class="thumb">'+(primaryImg(p) ? '<img src="'+primaryImg(p)+'" alt="'+p.name+'" loading="lazy" decoding="async">' : p.name.slice(0,10))+'</div>' +
             '<div class="info">' +
               '<div class="name">'+p.name+'</div>' +
               '<div class="meta">'+(variantText ? variantText+' · ' : '')+fmt(unitPrice)+' each</div>' +
@@ -1324,7 +1325,7 @@
     if(gallery.length > 1){
       thumbsWrap.style.display = "flex";
       thumbsWrap.innerHTML = gallery.map(function(src, i){
-        return '<button type="button" data-idx="'+i+'" class="'+(i===0?'selected':'')+'"><img src="'+src+'" alt="'+modalProduct.name+' photo '+(i+1)+'"></button>';
+        return '<button type="button" data-idx="'+i+'" class="'+(i===0?'selected':'')+'"><img src="'+src+'" alt="'+modalProduct.name+' photo '+(i+1)+'" loading="lazy" decoding="async"></button>';
       }).join("");
       thumbsWrap.querySelectorAll("button").forEach(function(b){
         b.addEventListener("click", function(){
