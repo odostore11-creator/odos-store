@@ -201,6 +201,7 @@
   .card-name{ font-size:16px; letter-spacing:0.01em; cursor:pointer; }
   .card-price{ font-size:14px; color:var(--grey); margin-top:auto; }
   .card-actions{ display:flex; gap:8px; margin-top:6px; }
+  .card-badge{ position:absolute; top:10px; left:10px; z-index:2; background:var(--white); color:var(--black); font-size:10px; font-weight:700; letter-spacing:0.08em; text-transform:uppercase; padding:5px 10px; border-radius:20px; pointer-events:none; }
   .filter-row{ display:flex; gap:10px; flex-wrap:wrap; padding: 30px 0 6px; }
   .filter-row button{ background:none; border:1px solid var(--grey-line); border-radius: var(--radius-sm); color:var(--grey); padding:8px 14px; font-size:12px; letter-spacing:0.06em; cursor:pointer; }
   .filter-row button.active{ border-color:var(--white); color:var(--white); }
@@ -962,7 +963,7 @@
     { id:"p29", name:"Round Acrylic Coaster", category:"Mugs & Coasters", price:212.49, img:"", images:["images/round-acrylic-coaster-1.png"], colors:[], sizes:["9x9"], desc:"Glossy round acrylic coaster, custom print." },
     { id:"p30", name:"Round Wooden Coaster", category:"Mugs & Coasters", price:162.49, img:"", images:["images/round-wooden-coaster-1.png"], colors:[], sizes:["9x9"], desc:"Round wooden coaster, custom print." },
     { id:"p31", name:"Square Wooden Coaster", category:"Mugs & Coasters", price:162.49, img:"", images:["images/square-wooden-coaster-1.png"], colors:[], sizes:["9x9"], desc:"Square wooden coaster, custom print." },
-    { id:"p32", name:"Washed Oversized T-Shirt", category:"Clothing", price:624.99, img:"", images:["images/washed-os-tshirt-1.png","images/washed-os-tshirt-2.png","images/washed-os-tshirt-3.png","images/washed-os-tshirt-4.png","images/washed-os-tshirt-5.png"], colors:["Pink","Green","Dark Grey"], sizes:["S","M","L","XL","2XL"], desc:"Oversized fit in heavy washed cotton." },
+    { id:"p32", name:"Washed Oversized T-Shirt", category:"Clothing", price:624.99, img:"", images:["images/washed-os-tshirt-1.png","images/washed-os-tshirt-2.png","images/washed-os-tshirt-3.png","images/washed-os-tshirt-4.png","images/washed-os-tshirt-5.png"], colors:["Pink","Green","Dark Grey"], sizes:["S","M","L","XL","2XL"], bestSeller:true, desc:"Oversized fit in heavy washed cotton." },
     { id:"p33", name:"Washed Oversized Hoodie", category:"Clothing", price:774.99, img:"", images:["images/washed-hoodie-1.png","images/washed-hoodie-2.png","images/washed-hoodie-3.png"], colors:["Pink","Black","Sky Blue"], sizes:["S","M","L","XL"], sizeGuide:"washedHoodie", desc:"Oversized, loose-shoulder fit, cotton plush inside for a warmer feel." },
     { id:"p34", name:"Long Oversized Hoodie", category:"Clothing", price:812.49, img:"", images:["images/long-hoodie-1.png","images/long-hoodie-2.png","images/long-hoodie-3.png"], colors:["Black","White"], sizes:["S","M","L","XL","2XL"], sizeGuide:"longHoodie", desc:"Oversized, loose-shoulder fit, without bottom rib for a cooler, looser look." },
     { id:"p35", name:"Boulevard Oversized Tank Top", category:"Clothing", price:499.99, img:"", images:["images/boulevard-tank-3.png","images/boulevard-tank-4.png","images/boulevard-tank-1.png","images/boulevard-tank-2.png","images/boulevard-tank-black-bold.png","images/boulevard-tank-black-drip.png","images/boulevard-tank-black-brush.png","images/boulevard-tank-white-bold.png","images/boulevard-tank-white-drip.png","images/boulevard-tank-white-brush.png"], colors:["Black","White"], sizes:["M","L","XL"], sizeGuide:"boulevardTank", designPhotos:{ Black:{ d3:"images/boulevard-tank-black-bold.png", d2:"images/boulevard-tank-black-drip.png", d1:"images/boulevard-tank-black-brush.png" }, White:{ d3:"images/boulevard-tank-white-bold.png", d2:"images/boulevard-tank-white-drip.png", d1:"images/boulevard-tank-white-brush.png" } }, desc:"Oversized, loose-shoulder fit, heavy material for a premium look." },
@@ -1120,7 +1121,7 @@
   function cardHTML(p){
     return (
       '<div class="card">' +
-        '<div class="card-img" data-open="'+p.id+'">'+imgBlock(p)+'</div>' +
+        '<div class="card-img" data-open="'+p.id+'">'+(p.bestSeller ? '<span class="card-badge">Best Seller</span>' : '')+imgBlock(p)+'</div>' +
         '<div class="card-body">' +
           '<span class="card-cat">'+p.category.toUpperCase()+'</span>' +
           '<span class="card-name" data-open="'+p.id+'">'+p.name+'</span>' +
