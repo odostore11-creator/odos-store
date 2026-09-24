@@ -31,18 +31,22 @@
   HOW TO EDIT THIS FILE:
   1. Products are in the PRODUCTS array inside <script> near the
      bottom. Each has colors + sizes where relevant.
-  2. Product photos: set "img" to a real path, e.g.
-     "images/washed-tank-top.jpg", once you upload your photos
-     next to this file (or in an /images folder).
+  2. Product photos are hosted on Supabase Storage — each product's
+     "images" list already points at those URLs. To swap a photo,
+     upload the replacement to that same Supabase bucket and update
+     the URL here.
   3. This site is hosted on GitHub Pages and uses Web3Forms for
      form submissions (see the Web3Forms ACCESS_KEY further down).
-     No backend or API keys of your own needed — just keep the
-     Web3Forms account's email up to date to receive submissions.
+     Discount codes are verified live against a Supabase database
+     (see supabaseClient below) instead of being hardcoded here.
+  4. Optional: price, stock, and the Best Seller/New badges can be
+     edited from a published Google Sheet instead of this file —
+     see the SHEET_CSV_URL note above the PRODUCTS array for setup.
 ============================================================= -->
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Anton&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Anton&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 
 <style>
   :root{
@@ -64,7 +68,7 @@
     margin:0;
     background: var(--black);
     color: var(--white);
-    font-family: 'Anton', sans-serif;
+    font-family: 'Inter', sans-serif;
     font-weight: 400;
     -webkit-font-smoothing: antialiased;
   }
@@ -75,9 +79,24 @@
   }
   .path-bg canvas{ position:absolute; inset:0; width:100%; height:100%; opacity:0.85; }
   @media (prefers-reduced-motion: reduce){ .path-bg{ display:none; } }
-  h1,h2,h3,h4,p,ul,li,form,input,textarea,select,button{
+
+  /* ---------- grain overlay: subtle texture over the flat black ---------- */
+  .grain-overlay{
+    position: fixed; inset:0; z-index:1; pointer-events:none;
+    opacity:0.06; mix-blend-mode:screen;
+    background-image: url("data:image/svg+xml;charset=UTF-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+    background-repeat: repeat;
+  }
+  h1,h2,h3,h4{
     font-family: 'Anton', sans-serif;
     margin:0; padding:0;
+  }
+  p,ul,li,form,input,textarea,select,button{
+    font-family: 'Inter', sans-serif;
+    margin:0; padding:0;
+  }
+  .logo, .btn, .side-menu nav a{
+    font-family: 'Anton', sans-serif;
   }
   input,textarea,select,button{ font-size: inherit; color: inherit; }
   a{ color: inherit; text-decoration:none; }
@@ -85,8 +104,8 @@
   ::placeholder{ color: var(--grey); opacity:1; }
 
   .copy{
-    font-family: 'Anton', sans-serif;
-    letter-spacing: 0.02em;
+    font-family: 'Inter', sans-serif;
+    letter-spacing: 0;
     line-height: 1.65;
     font-size: 15px;
     color: #cfcfc8;
@@ -166,6 +185,19 @@
   /* ---------- home ---------- */
   .hero{ min-height: 78vh; display:flex; flex-direction:column; justify-content:center; padding: 60px 24px; border-bottom:1px solid var(--grey-line); }
   .hero-inner{ max-width: 1180px; margin:0 auto; width:100%; }
+  .hero-inner.has-image{ display:flex; flex-direction:column-reverse; gap:36px; }
+  .hero-img{
+    aspect-ratio: 5/4; border-radius: var(--radius-lg); overflow:hidden;
+    background:#1a1a18; border:1px solid var(--grey-line);
+    display:flex; align-items:center; justify-content:center;
+    color:var(--grey); font-size:12px; letter-spacing:0.08em; text-align:center;
+  }
+  .hero-img img{ width:100%; height:100%; object-fit:cover; display:block; }
+  @media(min-width:900px){
+    .hero-inner.has-image{ flex-direction:row; align-items:center; gap:56px; }
+    .hero-text{ flex:1.1; }
+    .hero-img{ flex:1; aspect-ratio: 4/5; max-height:560px; }
+  }
   .hero h1{ font-size: clamp(48px, 11vw, 130px); line-height:0.92; letter-spacing:0.005em; }
   .hero p.copy{ max-width: 480px; margin-top: 26px; font-size:16px; }
   .hero-cta{ margin-top:36px; display:flex; gap:14px; flex-wrap:wrap; }
@@ -191,6 +223,7 @@
   .card-img{ aspect-ratio: 4/5; background:#1a1a18; display:flex; align-items:center; justify-content:center; color:var(--grey); font-size:12px; letter-spacing:0.08em; text-align:center; overflow:hidden; cursor:pointer; }
   .card-img img{ width:100%; height:100%; object-fit:cover; display:block; }
   .card-img .img-placeholder{ padding:10px; }
+  .hero-img .img-placeholder{ padding:16px; }
   .card-img .img-swap-wrap{ position:relative; width:100%; height:100%; }
   .card-img .img-swap-wrap img{ position:absolute; top:0; left:0; width:100%; height:100%; object-fit:cover; display:block; transition: opacity .5s ease; }
   .card-img .img-swap-wrap img.img-secondary{ opacity:0; }
@@ -201,10 +234,42 @@
   .card-name{ font-size:16px; letter-spacing:0.01em; cursor:pointer; }
   .card-price{ font-size:14px; color:var(--grey); margin-top:auto; }
   .card-actions{ display:flex; gap:8px; margin-top:6px; }
-  .card-badge{ position:absolute; top:10px; left:10px; z-index:2; background:var(--white); color:var(--black); font-size:10px; font-weight:700; letter-spacing:0.08em; text-transform:uppercase; padding:5px 10px; border-radius:20px; pointer-events:none; }
-  .filter-row{ display:flex; gap:10px; flex-wrap:wrap; padding: 30px 0 6px; }
+  .card-badges{ position:absolute; top:0; left:0; width:100%; height:100%; z-index:2; pointer-events:none; overflow:hidden; }
+  .card-badge{
+    position:absolute; top:16px; left:-38px; width:140px;
+    background:var(--white); color:var(--black);
+    font-size:10px; font-weight:700; letter-spacing:0.08em; text-transform:uppercase;
+    text-align:center; padding:5px 0;
+    transform: rotate(-45deg);
+    box-shadow: 0 2px 6px rgba(0,0,0,0.35);
+  }
+  .card-badge.outline{ background:var(--black-2); color:var(--white); border:1px solid var(--white); }
+  .wish-btn{
+    position:absolute; top:8px; right:8px; z-index:2; width:32px; height:32px; border-radius:50%;
+    background:rgba(10,10,10,0.55); border:1px solid var(--grey-line); color:var(--white);
+    display:flex; align-items:center; justify-content:center; cursor:pointer; padding:0;
+  }
+  .wish-btn svg{ width:16px; height:16px; }
+  .wish-btn.active{ background:var(--white); border-color:var(--white); color:var(--black); }
+  .wish-btn.active svg{ fill:currentColor; }
+  .wish-btn:hover{ border-color:var(--white); }
+  .products-toolbar{ display:flex; align-items:flex-end; justify-content:space-between; gap:16px; flex-wrap:wrap; padding: 30px 0 6px; }
+  .filter-row{ display:flex; gap:10px; flex-wrap:wrap; }
   .filter-row button{ background:none; border:1px solid var(--grey-line); border-radius: var(--radius-sm); color:var(--grey); padding:8px 14px; font-size:12px; letter-spacing:0.06em; cursor:pointer; }
   .filter-row button.active{ border-color:var(--white); color:var(--white); }
+  .sort-wrap{ display:flex; flex-direction:column; gap:6px; margin-left:auto; }
+  .sort-wrap .opt-label{ margin-bottom:0; }
+  .sort-select{
+    appearance:none; -webkit-appearance:none; -moz-appearance:none;
+    background:var(--black-2) url("data:image/svg+xml;charset=UTF-8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23ffffff' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E") no-repeat right 12px center;
+    background-size: 14px 14px;
+    color: var(--white); border:1px solid var(--grey-line); border-radius: var(--radius-sm);
+    padding:8px 34px 8px 14px; font-size:12px; letter-spacing:0.06em; font-family:inherit; cursor:pointer;
+    min-width:190px;
+  }
+  .sort-select:focus{ outline:none; border-color:var(--white); }
+  .sort-select option{ background:var(--black-2); color:var(--white); }
+  @media(max-width:520px){ .sort-wrap{ margin-left:0; width:100%; } .sort-select{ width:100%; } }
   .page-title{ padding: 50px 0 6px; font-size: clamp(34px,5vw,56px); }
 
   /* ---------- product modal ---------- */
@@ -214,6 +279,8 @@
   @media(min-width:640px){ .modal{ grid-template-columns: 1fr 1fr; } }
   .modal-close{ position:absolute; top:10px; right:10px; width:40px; height:40px; display:flex; align-items:center; justify-content:center; background:rgba(10,10,10,0.55); border:1px solid var(--grey-line); border-radius:50%; color:var(--white); font-size:26px; line-height:1; cursor:pointer; z-index:2; }
   .modal-close:hover{ background:var(--white); color:var(--black); border-color:var(--white); }
+  .modal-media{ position:relative; }
+  .modal-media .wish-btn{ top:10px; left:10px; right:auto; }
   .modal-img{ background:#1a1a18; aspect-ratio:4/5; display:flex; align-items:center; justify-content:center; color:var(--grey); font-size:12px; text-align:center; overflow:hidden; }
   .modal-img img{ width:100%; height:100%; object-fit:cover; }
   .modal-img .img-placeholder{ padding:16px; }
@@ -223,7 +290,15 @@
   .modal-thumbs button.selected{ border-color:var(--white); }
   .modal-thumbs button img{ width:100%; height:100%; object-fit:cover; display:block; }
   .card-img{ position:relative; }
-  .modal-body{ padding: 30px; display:flex; flex-direction:column; gap:14px; }
+  .modal-body{ padding: 30px; display:flex; flex-direction:column; gap:14px; min-width:0; }
+  .modal-related{ margin-top:6px; }
+  .modal-related-title{ font-size:11px; letter-spacing:0.1em; color:var(--grey); margin-bottom:10px; }
+  .modal-related-row{ display:flex; gap:10px; overflow-x:auto; padding-bottom:4px; }
+  .modal-related-row .card{ min-width:128px; max-width:128px; flex:0 0 auto; }
+  .modal-related-row .card-body{ padding:10px; gap:4px; }
+  .modal-related-row .card-name{ font-size:12px; }
+  .modal-related-row .card-price{ font-size:12px; }
+  .modal-related-row .card-actions{ display:none; }
   .modal-body h3{ font-size:24px; }
   .modal-body .price{ font-size:16px; color:var(--grey); }
   .opt-label{ font-size:11px; letter-spacing:0.1em; color:var(--grey); margin-bottom:8px; }
@@ -260,6 +335,16 @@
   .qr-lightbox-box p{ color:var(--black); font-size:12px; letter-spacing:0.04em; text-align:center; }
   .qr-lightbox-close{ width:40px; height:40px; border-radius:50%; border:1px solid var(--grey-line); background:rgba(10,10,10,0.55); color:var(--white); font-size:26px; line-height:1; display:flex; align-items:center; justify-content:center; cursor:pointer; position:fixed; top:16px; right:16px; z-index:91; }
   .qr-lightbox-close:hover{ background:var(--white); color:var(--black); border-color:var(--white); }
+
+  /* ---------- toast (micro-interaction feedback) ---------- */
+  .toast{
+    position:fixed; left:50%; bottom:24px; transform:translateX(-50%) translateY(16px);
+    background:var(--white); color:var(--black); font-size:13px; font-weight:700; letter-spacing:0.03em;
+    padding:12px 22px; border-radius:999px; box-shadow:0 12px 30px rgba(0,0,0,0.4);
+    z-index:95; opacity:0; pointer-events:none; transition:opacity .25s ease, transform .25s ease;
+    max-width: calc(100vw - 32px); text-align:center;
+  }
+  .toast.show{ opacity:1; transform:translateX(-50%) translateY(0); }
   .qr-trigger{ cursor:pointer; transition: transform .15s ease; }
   .qr-trigger:hover{ transform: scale(1.04); }
   .qr-hint{ font-size:10px; color:var(--grey); margin-top:4px; text-decoration:underline; }
@@ -366,6 +451,7 @@
 <body>
 
 <div class="path-bg" aria-hidden="true"><canvas id="pathCanvas"></canvas></div>
+<div class="grain-overlay" aria-hidden="true"></div>
 
 <div class="spray-layer spray-left" aria-hidden="true">
   <svg viewBox="0 0 220 1200" preserveAspectRatio="xMinYMid slice">
@@ -395,6 +481,10 @@
   <div class="header-right">
     <div class="search-wrap" id="searchWrap"><input type="text" id="searchInput" placeholder="Search products…"></div>
     <button class="icon-btn" id="searchBtn" aria-label="Search"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></button>
+    <button class="icon-btn" id="wishBtn" aria-label="Wishlist" data-nav="wishlist">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 21s-7.5-4.6-10-9.3C.5 8 2 4 6 4c2 0 3.5 1 4 2.5C10.5 5 12 4 14 4c4 0 5.5 4 4 7.7C19.5 16.4 12 21 12 21z"/></svg>
+      <span class="cart-count" id="wishCount" style="display:none;">0</span>
+    </button>
     <button class="icon-btn" id="cartBtn" aria-label="Cart" data-nav="cart">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg>
       <span class="cart-count" id="cartCount" style="display:none;">0</span>
@@ -425,12 +515,20 @@
 <main>
   <section class="page active" id="page-home">
     <div class="hero">
-      <div class="hero-inner">
-        <h1>EVERY<br>CHOICE<br>IS A PATH.</h1>
-        <p class="copy">ODOS is a small, local goods brand — clothing, caps, mugs, bags and accessories built around one idea: the line you walk matters more than the destination.</p>
-        <div class="hero-cta">
-          <a class="btn" href="#products" data-nav="products">Shop All Products</a>
-          <a class="btn ghost" href="#faq" data-nav="faq">Read the FAQ</a>
+      <div class="hero-inner has-image">
+        <div class="hero-text">
+          <h1>EVERY<br>CHOICE<br>IS A PATH.</h1>
+          <p class="copy">ODOS is a small, local goods brand — clothing, caps, mugs, bags and accessories built around one idea: the line you walk matters more than the destination.</p>
+          <div class="hero-cta">
+            <a class="btn" href="#products" data-nav="products">Shop All Products</a>
+            <a class="btn ghost" href="#faq" data-nav="faq">Read the FAQ</a>
+          </div>
+        </div>
+        <div class="hero-img">
+          <!-- Swap this for a real photo once you have one: upload it to
+               the same Supabase bucket as your product photos and set
+               this <span> to <img src="...your-url..." alt="ODOS"> -->
+          <span class="img-placeholder">ODOS — ADD HERO PHOTO</span>
         </div>
       </div>
     </div>
@@ -453,8 +551,28 @@
   <section class="page" id="page-products">
     <div class="wrap">
       <h1 class="page-title">ALL PRODUCTS</h1>
-      <div class="filter-row" id="filterRow"></div>
+      <div class="products-toolbar">
+        <div class="filter-row" id="filterRow"></div>
+        <div class="sort-wrap">
+          <label for="sortSelect" class="opt-label">SORT BY</label>
+          <select class="sort-select" id="sortSelect">
+            <option value="featured">Featured</option>
+            <option value="name-asc">Name: A–Z</option>
+            <option value="name-desc">Name: Z–A</option>
+            <option value="price-asc">Price: Low to High</option>
+            <option value="price-desc">Price: High to Low</option>
+          </select>
+        </div>
+      </div>
       <div class="grid" id="productsGrid"></div>
+    </div>
+  </section>
+
+  <section class="page" id="page-wishlist">
+    <div class="wrap">
+      <h1 class="page-title">YOUR WISHLIST</h1>
+      <p class="cart-empty copy" id="wishlistEmptyMsg" style="display:none;">Nothing saved yet. <a href="#products" data-nav="products" style="text-decoration:underline;">Browse products →</a></p>
+      <div class="grid" id="wishlistGrid"></div>
     </div>
   </section>
 
@@ -593,7 +711,8 @@
 <div class="modal-overlay" id="modalOverlay">
   <div class="modal">
     <button class="modal-close" id="modalClose" aria-label="Close">&times;</button>
-    <div>
+    <div class="modal-media">
+      <button type="button" class="wish-btn" id="modalWishBtn" aria-label="Wishlist"></button>
       <div class="modal-img" id="modalImg"></div>
       <div class="modal-thumbs" id="modalThumbs"></div>
     </div>
@@ -629,9 +748,16 @@
         <button id="qtyPlus" type="button">+</button>
       </div>
       <button class="btn full" id="modalAddBtn">Add to Cart</button>
+
+      <div class="modal-related" id="modalRelated" style="display:none;">
+        <p class="modal-related-title">YOU MIGHT ALSO LIKE</p>
+        <div class="modal-related-row" id="modalRelatedRow"></div>
+      </div>
     </div>
   </div>
 </div>
+
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
 
 <footer>
   <div class="footer-inner">
@@ -787,6 +913,15 @@
   var forkT = 0, forkState = "idle"; // idle -> drawing -> fading -> done
   var FORK_DRAW_MS = 520, FORK_FADE_MS = 700;
 
+  /* Pause the animation loop while the tab isn't visible — no point
+     burning battery/CPU drawing a canvas nobody's looking at. */
+  var animPaused = false;
+  function scheduleFrame(){ if(!animPaused) requestAnimationFrame(frame); }
+  document.addEventListener("visibilitychange", function(){
+    if(document.hidden){ animPaused = true; }
+    else if(animPaused){ animPaused = false; last = performance.now(); scheduleFrame(); }
+  });
+
   function frame(now){
     var dt = now-last; last = now;
     ctx.clearRect(0,0,W,H);
@@ -882,9 +1017,9 @@
       }
     }
 
-    requestAnimationFrame(frame);
+    scheduleFrame();
   }
-  requestAnimationFrame(frame);
+  scheduleFrame();
 })();
 </script>
 
@@ -929,8 +1064,43 @@
   };
 
   /* ============================================================
-     PRODUCT DATA — replace img:"" with a real relative path
-     once you have photos, e.g. "images/washed-tank-top.jpg"
+     LIVE SHEET OVERRIDES (optional) — edit price, stock, the
+     Best Seller/New badges, and descriptions from a spreadsheet
+     instead of this file, without a redeploy.
+
+     Images, colors, sizes, and size/design data stay coded below —
+     they're nested/structured data (multiple photos, phone-model
+     lists, per-color design photos, etc.) that don't translate
+     cleanly to spreadsheet rows, and they change far less often
+     than price/stock/badges.
+
+     HOW TO SET IT UP:
+     1. Make a Google Sheet with these exact headers in row 1:
+          id | price | stock | bestseller | new | desc
+        - id: must match a product's "id" below exactly (e.g. p15)
+        - price: a plain number, e.g. 724.99 — leave blank to keep
+          the coded price
+        - stock: leave blank for "in stock", or type low / out
+        - bestseller: type yes to show the Best Seller badge,
+          leave blank to hide it
+        - new: type yes to show the New badge, leave blank to hide it
+        - desc: leave blank to keep the coded description, or type
+          a new one to replace it
+        Add one row per product you want to control this way —
+        any product without a row (or with an id that doesn't
+        match) is simply left exactly as coded below.
+     2. File → Share → Publish to web → pick the sheet → CSV → Publish.
+     3. Paste the generated link into SHEET_CSV_URL below.
+     4. That's it — on every page load the site fetches that CSV
+        and applies it over the built-in data below. If the fetch
+        fails or SHEET_CSV_URL is blank, the coded data is used
+        as-is, so the site always works even if the sheet is down.
+  ============================================================= */
+  var SHEET_CSV_URL = ""; // paste your published Google Sheet CSV link here
+
+  /* ============================================================
+     PRODUCT DATA — photos live on Supabase Storage (see "images"
+     on each product below); update a URL there to swap a photo.
   ============================================================= */
   var PRODUCTS = [
     { id:"p01", name:"Washed Oversized Tank Top", category:"Clothing", price:499.99, img:"", images:["https://pqznwgluuiuncdgdkpbp.supabase.co/storage/v1/object/public/images/images/washed-tank-1.webp","https://pqznwgluuiuncdgdkpbp.supabase.co/storage/v1/object/public/images/images/washed-tank-2.webp","https://pqznwgluuiuncdgdkpbp.supabase.co/storage/v1/object/public/images/images/washed-tank-3.webp"], colors:["Dark Grey"], sizes:["M","L","XL"], sizeGuide:"washedTank", desc:"Oversized, loose-shoulder fit in heavy washed cotton." },
@@ -943,14 +1113,14 @@
     { id:"p08", name:"Cropped Oversized Hoodie", category:"Clothing", price:749.99, img:"", images:["https://pqznwgluuiuncdgdkpbp.supabase.co/storage/v1/object/public/images/images/cropped-hoodie-1.webp","https://pqznwgluuiuncdgdkpbp.supabase.co/storage/v1/object/public/images/images/cropped-hoodie-2.webp"], colors:["Black","White"], sizes:["S","M","L","XL","2XL"], sizeGuide:"croppedHoodie", desc:"Oversized, loose-shoulder fit without bottom rib for a cooler, looser look." },
     { id:"p09", name:"Standard Oversized Crewneck", category:"Clothing", price:624.99, img:"", images:["https://pqznwgluuiuncdgdkpbp.supabase.co/storage/v1/object/public/images/images/standard-crewneck-1.webp","https://pqznwgluuiuncdgdkpbp.supabase.co/storage/v1/object/public/images/images/standard-crewneck-2.webp","https://pqznwgluuiuncdgdkpbp.supabase.co/storage/v1/object/public/images/images/standard-crewneck-3.webp","https://pqznwgluuiuncdgdkpbp.supabase.co/storage/v1/object/public/images/images/standard-crewneck-4.webp"], colors:["Black","White","Grey"], sizes:["S","M","L","XL","2XL"], sizeGuide:"premiumCrewHood", desc:"Oversized, loose fit, suitable for everyday wear." },
     { id:"p10", name:"Standard Oversized Hoodie", category:"Clothing", price:649.99, img:"", images:["https://pqznwgluuiuncdgdkpbp.supabase.co/storage/v1/object/public/images/images/standard-hoodie-1.webp","https://pqznwgluuiuncdgdkpbp.supabase.co/storage/v1/object/public/images/images/standard-hoodie-2.webp","https://pqznwgluuiuncdgdkpbp.supabase.co/storage/v1/object/public/images/images/standard-hoodie-3.webp","https://pqznwgluuiuncdgdkpbp.supabase.co/storage/v1/object/public/images/images/standard-hoodie-4.webp","https://pqznwgluuiuncdgdkpbp.supabase.co/storage/v1/object/public/images/images/standard-hoodie-5.webp"], colors:["Black","White","Grey"], sizes:["S","M","L","XL","2XL"], sizeGuide:"premiumCrewHood", desc:"Oversized, loose fit, suitable for economical everyday use." },
-    { id:"p11", name:"Washed Cap", category:"Caps & Hats", price:374.99, img:"", images:["https://pqznwgluuiuncdgdkpbp.supabase.co/storage/v1/object/public/images/images/washed-cap-1.webp"], colors:["Blue","Pink","Green","Dark Grey","Maroon","Beige","Brown","Yellow","Purple"], sizes:[], desc:"Washed cotton dad cap with a soft, broken-in look." },
+    { id:"p11", name:"Washed Cap", category:"Caps & Hats", price:374.99, img:"", images:["https://pqznwgluuiuncdgdkpbp.supabase.co/storage/v1/object/public/images/images/washed-cap-1.webp"], colors:["Blue","Pink","Green","Dark Grey","Maroon","Beige","Brown","Yellow","Purple"], sizes:[], isNew:true, desc:"Washed cotton dad cap with a soft, broken-in look." },
     { id:"p12", name:"Classic Cap", category:"Caps & Hats", price:299.99, img:"", images:["https://pqznwgluuiuncdgdkpbp.supabase.co/storage/v1/object/public/images/images/classic-cap-1.webp"], colors:["Black","White","Green","Sky Blue","Navy","Red","Grey","Yellow"], sizes:[], desc:"Structured six-panel classic cap." },
     { id:"p13", name:"Straight Leg Sweatpants", category:"Clothing", price:624.99, img:"", images:["https://pqznwgluuiuncdgdkpbp.supabase.co/storage/v1/object/public/images/images/straight-leg-sweatpants-1.webp","https://pqznwgluuiuncdgdkpbp.supabase.co/storage/v1/object/public/images/images/straight-leg-sweatpants-2.webp","https://pqznwgluuiuncdgdkpbp.supabase.co/storage/v1/object/public/images/images/straight-leg-sweatpants-3.webp","https://pqznwgluuiuncdgdkpbp.supabase.co/storage/v1/object/public/images/images/straight-leg-sweatpants-4.webp","https://pqznwgluuiuncdgdkpbp.supabase.co/storage/v1/object/public/images/images/straight-leg-sweatpants-5.webp","https://pqznwgluuiuncdgdkpbp.supabase.co/storage/v1/object/public/images/images/straight-leg-sweatpants-6.webp"], colors:["Black","Green","Grey"], sizes:["S","M","L","XL","2XL"], sizeGuide:"sweatpantsWH", desc:"Straight leg, elastic waist and slightly oversized." },
     { id:"p14", name:"Regular Sweatshorts", category:"Clothing", price:537.49, img:"", images:["https://pqznwgluuiuncdgdkpbp.supabase.co/storage/v1/object/public/images/images/sweatshorts-1.webp","https://pqznwgluuiuncdgdkpbp.supabase.co/storage/v1/object/public/images/images/sweatshorts-2.webp","https://pqznwgluuiuncdgdkpbp.supabase.co/storage/v1/object/public/images/images/sweatshorts-3.webp"], colors:["Black","Green","Grey"], sizes:["S","M","L","XL","2XL"], sizeGuide:"sweatWH", desc:"Regular, straight fit, suitable for comfy everyday wear." },
-    { id:"p15", name:"Washed Milton Sweatpants", category:"Clothing", price:724.99, img:"", images:["https://pqznwgluuiuncdgdkpbp.supabase.co/storage/v1/object/public/images/images/washed-milton-sweatpants-1.webp","https://pqznwgluuiuncdgdkpbp.supabase.co/storage/v1/object/public/images/images/washed-milton-sweatpants-2.webp"], colors:["Dark Grey"], sizes:["S","M","L","XL"], desc:"Heavy washed fleece sweatpants, relaxed fit." },
+    { id:"p15", name:"Washed Milton Sweatpants", category:"Clothing", price:724.99, img:"", images:["https://pqznwgluuiuncdgdkpbp.supabase.co/storage/v1/object/public/images/images/washed-milton-sweatpants-1.webp","https://pqznwgluuiuncdgdkpbp.supabase.co/storage/v1/object/public/images/images/washed-milton-sweatpants-2.webp"], colors:["Dark Grey"], sizes:["S","M","L","XL"], bestSeller:true, stock:"low", desc:"Heavy washed fleece sweatpants, relaxed fit." },
     { id:"p16", name:"Banded Regular Sweatpants", category:"Clothing", price:624.99, img:"", images:["https://pqznwgluuiuncdgdkpbp.supabase.co/storage/v1/object/public/images/images/banded-sweatpants-1.webp","https://pqznwgluuiuncdgdkpbp.supabase.co/storage/v1/object/public/images/images/banded-sweatpants-2.webp"], colors:["Black","White","Grey"], sizes:["S","M","L","XL","2XL"], sizeGuide:"bandedSweatpants", desc:"Banded leg, slim fit, suitable for a comfy everyday fit." },
     { id:"p17", name:"Magic Mug", category:"Mugs & Coasters", price:349.99, img:"", images:["https://pqznwgluuiuncdgdkpbp.supabase.co/storage/v1/object/public/images/images/magic-mug-1.webp"], colors:["White (color-changing)"], sizes:[], desc:"Color-changing ceramic mug — reveals your design when filled with something hot." },
-    { id:"p18", name:"Boulevard Oversized T-Shirt", category:"Clothing", price:574.99, img:"", images:["https://pqznwgluuiuncdgdkpbp.supabase.co/storage/v1/object/public/images/images/boulevard-tee-1.webp","https://pqznwgluuiuncdgdkpbp.supabase.co/storage/v1/object/public/images/images/boulevard-tee-2.webp","https://pqznwgluuiuncdgdkpbp.supabase.co/storage/v1/object/public/images/images/boulevard-tee-3.webp","https://pqznwgluuiuncdgdkpbp.supabase.co/storage/v1/object/public/images/images/boulevard-tee-4.webp","https://pqznwgluuiuncdgdkpbp.supabase.co/storage/v1/object/public/images/images/boulevard-tee-5.webp","https://pqznwgluuiuncdgdkpbp.supabase.co/storage/v1/object/public/images/images/boulevard-tee-6.webp","https://pqznwgluuiuncdgdkpbp.supabase.co/storage/v1/object/public/images/images/boulevard-tee-7.webp","https://pqznwgluuiuncdgdkpbp.supabase.co/storage/v1/object/public/images/images/boulevard-tee-8.webp","https://pqznwgluuiuncdgdkpbp.supabase.co/storage/v1/object/public/images/images/boulevard-tee-9.webp"], colors:["Black","White","Green","Maroon"], sizes:["S","M","L","XL","2XL"], sizeGuide:"boulevardTee", desc:"Oversized, loose-shoulder fit in heavy material for a premium look." },
+    { id:"p18", name:"Boulevard Oversized T-Shirt", category:"Clothing", price:574.99, img:"", images:["https://pqznwgluuiuncdgdkpbp.supabase.co/storage/v1/object/public/images/images/boulevard-tee-1.webp","https://pqznwgluuiuncdgdkpbp.supabase.co/storage/v1/object/public/images/images/boulevard-tee-2.webp","https://pqznwgluuiuncdgdkpbp.supabase.co/storage/v1/object/public/images/images/boulevard-tee-3.webp","https://pqznwgluuiuncdgdkpbp.supabase.co/storage/v1/object/public/images/images/boulevard-tee-4.webp","https://pqznwgluuiuncdgdkpbp.supabase.co/storage/v1/object/public/images/images/boulevard-tee-5.webp","https://pqznwgluuiuncdgdkpbp.supabase.co/storage/v1/object/public/images/images/boulevard-tee-6.webp","https://pqznwgluuiuncdgdkpbp.supabase.co/storage/v1/object/public/images/images/boulevard-tee-7.webp","https://pqznwgluuiuncdgdkpbp.supabase.co/storage/v1/object/public/images/images/boulevard-tee-8.webp","https://pqznwgluuiuncdgdkpbp.supabase.co/storage/v1/object/public/images/images/boulevard-tee-9.webp"], colors:["Black","White","Green","Maroon"], sizes:["S","M","L","XL","2XL"], sizeGuide:"boulevardTee", bestSeller:true, desc:"Oversized, loose-shoulder fit in heavy material for a premium look." },
     { id:"p19", name:"Parasola Oversized T-Shirt", category:"Clothing", price:499.99, img:"", images:["https://pqznwgluuiuncdgdkpbp.supabase.co/storage/v1/object/public/images/images/parasola-tee-1.webp","https://pqznwgluuiuncdgdkpbp.supabase.co/storage/v1/object/public/images/images/parasola-tee-2.webp","https://pqznwgluuiuncdgdkpbp.supabase.co/storage/v1/object/public/images/images/parasola-tee-3.webp","https://pqznwgluuiuncdgdkpbp.supabase.co/storage/v1/object/public/images/images/parasola-tee-4.webp","https://pqznwgluuiuncdgdkpbp.supabase.co/storage/v1/object/public/images/images/parasola-tee-5.webp","https://pqznwgluuiuncdgdkpbp.supabase.co/storage/v1/object/public/images/images/parasola-tee-6.webp","https://pqznwgluuiuncdgdkpbp.supabase.co/storage/v1/object/public/images/images/parasola-tee-7.webp"], colors:["Black","White","Blue","Green"], sizes:["S","M","L","XL","2XL"], sizeGuide:"parasola", desc:"Oversized, loose-shoulder fit, light material suitable for sunny days." },
     { id:"p20", name:"Washed Oversized Long Sleeves", category:"Clothing", price:649.99, img:"", images:["https://pqznwgluuiuncdgdkpbp.supabase.co/storage/v1/object/public/images/images/washed-long-sleeves-1.webp","https://pqznwgluuiuncdgdkpbp.supabase.co/storage/v1/object/public/images/images/washed-long-sleeves-2.webp"], colors:["Dark Grey"], sizes:["M","L","XL"], sizeGuide:"washedLongSleeves", desc:"Oversized, loose-shoulder fit with wide sleeves." },
     { id:"p21", name:"AirPods Pro Case", category:"Tech Accessories", price:249.99, img:"", images:["https://pqznwgluuiuncdgdkpbp.supabase.co/storage/v1/object/public/images/images/airpods-pro-case-1.webp"], colors:[], sizes:["AirPods Pro","AirPods Pro 2"], desc:"Clear protective case with carabiner clip — customize with your own design." },
@@ -988,10 +1158,70 @@
 
   var CATEGORIES = Array.from(new Set(PRODUCTS.map(function(p){ return p.category; })));
 
+  /* ---------- live sheet override loading (see SHEET_CSV_URL above) ---------- */
+  function parseCSV(text){
+    var rows = [], row = [], field = "", inQuotes = false;
+    for(var i=0;i<text.length;i++){
+      var c = text[i], next = text[i+1];
+      if(inQuotes){
+        if(c === '"' && next === '"'){ field += '"'; i++; }
+        else if(c === '"'){ inQuotes = false; }
+        else { field += c; }
+      } else {
+        if(c === '"'){ inQuotes = true; }
+        else if(c === ','){ row.push(field); field = ""; }
+        else if(c === '\n' || c === '\r'){
+          if(c === '\r' && next === '\n') i++;
+          row.push(field); rows.push(row); row = []; field = "";
+        } else { field += c; }
+      }
+    }
+    if(field.length || row.length){ row.push(field); rows.push(row); }
+    return rows.filter(function(r){ return r.length > 1 || (r[0] && r[0].trim()); });
+  }
+  function applySheetOverrides(csvText){
+    var rows = parseCSV(csvText);
+    if(rows.length < 2) return;
+    var header = rows[0].map(function(h){ return String(h||"").trim().toLowerCase(); });
+    var idIdx = header.indexOf("id");
+    if(idIdx === -1) return; // no id column — can't safely match rows to products
+    var priceIdx = header.indexOf("price"), stockIdx = header.indexOf("stock");
+    var bestsellerIdx = header.indexOf("bestseller"), newIdx = header.indexOf("new"), descIdx = header.indexOf("desc");
+    for(var r=1; r<rows.length; r++){
+      var row = rows[r];
+      var id = String(row[idIdx] || "").trim();
+      if(!id) continue;
+      var p = findProduct(id);
+      if(!p) continue; // unknown id in the sheet — skip it, don't touch PRODUCTS
+      if(priceIdx !== -1 && String(row[priceIdx]||"").trim() !== ""){
+        var num = parseFloat(row[priceIdx]);
+        if(!isNaN(num)) p.price = num;
+      }
+      if(stockIdx !== -1){
+        var stockVal = String(row[stockIdx]||"").trim().toLowerCase();
+        p.stock = (stockVal === "low" || stockVal === "out") ? stockVal : undefined;
+      }
+      if(bestsellerIdx !== -1){ p.bestSeller = String(row[bestsellerIdx]||"").trim().toLowerCase() === "yes"; }
+      if(newIdx !== -1){ p.isNew = String(row[newIdx]||"").trim().toLowerCase() === "yes"; }
+      if(descIdx !== -1 && String(row[descIdx]||"").trim() !== ""){ p.desc = String(row[descIdx]).trim(); }
+    }
+  }
+  function loadSheetOverrides(){
+    if(!SHEET_CSV_URL) return;
+    fetch(SHEET_CSV_URL, { cache: "no-store" })
+      .then(function(res){ if(!res.ok) throw new Error("sheet fetch failed: " + res.status); return res.text(); })
+      .then(function(text){
+        applySheetOverrides(text);
+        // silently refresh whatever's currently rendered with the live data
+        renderFeatured(); renderFilters(); renderProducts(); renderWishlist(); renderCart();
+      })
+      .catch(function(err){ console.warn("ODOS: couldn't load live sheet overrides, using the built-in product data instead.", err); });
+  }
+
   var DESIGN_SURCHARGE = 70;
   var DESIGNS = [
     { id:"d1", name:"ODOS Brush", img:"https://pqznwgluuiuncdgdkpbp.supabase.co/storage/v1/object/public/images/images/design-1.webp" },
-    { id:"d2", name:"OPOS Drip", img:"https://pqznwgluuiuncdgdkpbp.supabase.co/storage/v1/object/public/images/images/design-2.webp" },
+    { id:"d2", name:"ODOS Drip", img:"https://pqznwgluuiuncdgdkpbp.supabase.co/storage/v1/object/public/images/images/design-2.webp" },
     { id:"d3", name:"ODOS Bold", img:"https://pqznwgluuiuncdgdkpbp.supabase.co/storage/v1/object/public/images/images/design-3.webp" }
   ];
   function findDesign(id){ return DESIGNS.filter(function(d){ return d.id === id; })[0]; }
@@ -1001,7 +1231,9 @@
      STATE — cart items keyed by id+color+size
   ============================================================= */
   var cart = JSON.parse(localStorage.getItem("odos_cart") || "[]");
+  var wishlist = JSON.parse(localStorage.getItem("odos_wishlist") || "[]"); // array of product ids, this device only
   var currentFilter = "All";
+  var currentSort = "featured";
   var modalProduct = null, modalQty = 1, modalColor = null, modalSize = null, modalDesign = "";
 
   function saveCart(){ localStorage.setItem("odos_cart", JSON.stringify(cart)); renderCart(); renderCartCount(); }
@@ -1131,15 +1363,32 @@
     }
     return '<img src="'+src+'" alt="'+p.name+'" loading="lazy" decoding="async">';
   }
+  var WISH_ICON = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 21s-7.5-4.6-10-9.3C.5 8 2 4 6 4c2 0 3.5 1 4 2.5C10.5 5 12 4 14 4c4 0 5.5 4 4 7.7C19.5 16.4 12 21 12 21z"/></svg>';
+  function isWished(id){ return wishlist.indexOf(id) !== -1; }
+  function wishBtnHTML(p){
+    var active = isWished(p.id);
+    return '<button type="button" class="wish-btn'+(active?' active':'')+'" data-wish="'+p.id+'" aria-pressed="'+active+'" aria-label="'+(active?'Remove from wishlist':'Add to wishlist')+'">'+WISH_ICON+'</button>';
+  }
+  function badgesHTML(p){
+    /* one band per product (a diagonal ribbon can't stack cleanly) — most
+       important status wins: sold out > low stock > best seller > new */
+    var label = null, cls = "card-badge";
+    if(p.stock === "out"){ label = "Sold Out"; cls += " outline"; }
+    else if(p.stock === "low"){ label = "Low Stock"; cls += " outline"; }
+    else if(p.bestSeller){ label = "Best Seller"; }
+    else if(p.isNew){ label = "New"; }
+    return label ? '<div class="card-badges"><span class="'+cls+'">'+label+'</span></div>' : '';
+  }
   function cardHTML(p){
+    var soldOut = p.stock === "out";
     return (
       '<div class="card">' +
-        '<div class="card-img" data-open="'+p.id+'">'+(p.bestSeller ? '<span class="card-badge">Best Seller</span>' : '')+imgBlock(p)+'</div>' +
+        '<div class="card-img" data-open="'+p.id+'">'+badgesHTML(p)+wishBtnHTML(p)+imgBlock(p)+'</div>' +
         '<div class="card-body">' +
           '<span class="card-cat">'+p.category.toUpperCase()+'</span>' +
           '<span class="card-name" data-open="'+p.id+'">'+p.name+'</span>' +
           '<span class="card-price">'+fmt(p.price)+'</span>' +
-          '<div class="card-actions"><button class="btn small full" data-open="'+p.id+'">Select Options</button></div>' +
+          '<div class="card-actions"><button class="btn small full" data-open="'+p.id+'"'+(soldOut?' disabled':'')+'>'+(soldOut?'Sold Out':'Select Options')+'</button></div>' +
         '</div>' +
       '</div>'
     );
@@ -1149,11 +1398,20 @@
     var picks = FEATURED_IDS.map(function(id){ return findProduct(id); }).filter(Boolean);
     document.getElementById("featuredGrid").innerHTML = picks.map(cardHTML).join("");
   }
+  function sortProducts(list){
+    list = list.slice();
+    if(currentSort === "name-asc"){ list.sort(function(a,b){ return a.name.localeCompare(b.name); }); }
+    else if(currentSort === "name-desc"){ list.sort(function(a,b){ return b.name.localeCompare(a.name); }); }
+    else if(currentSort === "price-asc"){ list.sort(function(a,b){ return a.price - b.price; }); }
+    else if(currentSort === "price-desc"){ list.sort(function(a,b){ return b.price - a.price; }); }
+    return list; // "featured" = original curated order, no re-sort
+  }
   function renderProducts(){
     var grid = document.getElementById("productsGrid");
     var list = currentFilter === "All" ? PRODUCTS : PRODUCTS.filter(function(p){ return p.category === currentFilter; });
     var q = (document.getElementById("searchInput").value || "").trim().toLowerCase();
     if(q){ list = list.filter(function(p){ return p.name.toLowerCase().indexOf(q) !== -1 || p.category.toLowerCase().indexOf(q) !== -1; }); }
+    list = sortProducts(list);
     grid.innerHTML = list.length ? list.map(cardHTML).join("") : '<p class="copy" style="grid-column:1/-1; color:var(--grey);">No products match.</p>';
   }
   function renderFilters(){
@@ -1163,6 +1421,48 @@
   }
   function renderMenuCategories(){
     document.getElementById("menuCategories").innerHTML = CATEGORIES.map(function(c){ return '<button data-catgo="'+c+'">'+c+'</button>'; }).join("");
+  }
+
+  /* ============================================================
+     WISHLIST — device-local (localStorage), same pattern as cart.
+     No accounts on this site, so a wishlist can't follow a
+     customer across devices; it lives in their browser like the
+     cart already does.
+  ============================================================= */
+  function renderWishlist(){
+    var grid = document.getElementById("wishlistGrid");
+    var emptyMsg = document.getElementById("wishlistEmptyMsg");
+    if(!grid) return;
+    var picks = wishlist.map(function(id){ return findProduct(id); }).filter(Boolean);
+    grid.innerHTML = picks.map(cardHTML).join("");
+    if(emptyMsg) emptyMsg.style.display = picks.length ? "none" : "block";
+  }
+  function renderWishlistCount(){
+    var el = document.getElementById("wishCount");
+    if(!el) return;
+    el.textContent = wishlist.length;
+    el.style.display = wishlist.length ? "flex" : "none";
+  }
+  function saveWishlist(){
+    localStorage.setItem("odos_wishlist", JSON.stringify(wishlist));
+    renderWishlistCount();
+  }
+  function toggleWish(id){
+    var idx = wishlist.indexOf(id);
+    var added = idx === -1;
+    if(added) wishlist.push(id); else wishlist.splice(idx, 1);
+    saveWishlist();
+    // refresh whichever grids currently show this product's card
+    renderFeatured(); renderProducts(); renderWishlist();
+    if(modalProduct && modalProduct.id === id){
+      var mwb = document.getElementById("modalWishBtn");
+      if(mwb){
+        mwb.classList.toggle("active", added);
+        mwb.setAttribute("aria-pressed", added);
+        mwb.setAttribute("aria-label", added ? "Remove from wishlist" : "Add to wishlist");
+      }
+    }
+    showToast(added ? "Added to wishlist" : "Removed from wishlist");
   }
 
   /* ============================================================
@@ -1245,7 +1545,7 @@
   /* ============================================================
      NAVIGATION
   ============================================================= */
-  var PAGES = ["home","products","cart","contact","faq","story"];
+  var PAGES = ["home","products","wishlist","cart","contact","faq","story"];
   function goTo(page){
     if(PAGES.indexOf(page) === -1) page = "home";
     PAGES.forEach(function(p){ document.getElementById("page-"+p).classList.toggle("active", p === page); });
@@ -1253,6 +1553,7 @@
     window.scrollTo(0,0);
     if(location.hash !== "#"+page) history.replaceState(null, "", "#"+page);
     if(page === "products") renderProducts();
+    if(page === "wishlist") renderWishlist();
   }
   document.addEventListener("click", function(e){
     var nav = e.target.closest("[data-nav]");
@@ -1287,8 +1588,15 @@
     currentFilter = btn.getAttribute("data-filter"); renderFilters(); renderProducts();
   });
 
-  /* ---------- delegated clicks: add/open/qty/remove/faq ---------- */
+  /* ---------- sort ---------- */
+  document.getElementById("sortSelect").addEventListener("change", function(){
+    currentSort = this.value; renderProducts();
+  });
+
+  /* ---------- delegated clicks: add/open/qty/remove/faq/wish ---------- */
   document.addEventListener("click", function(e){
+    var wish = e.target.closest("[data-wish]");
+    if(wish){ toggleWish(wish.getAttribute("data-wish")); return; }
     var open = e.target.closest("[data-open]");
     if(open){ openModal(open.getAttribute("data-open")); return; }
     var inc = e.target.closest("[data-inc]");
@@ -1306,6 +1614,17 @@
   ============================================================= */
   var modalOverlay = document.getElementById("modalOverlay");
 
+  /* ---------- toast helper ---------- */
+  var toastEl = document.getElementById("toast");
+  var toastTimer = null;
+  function showToast(text){
+    if(!toastEl) return;
+    toastEl.textContent = text;
+    toastEl.classList.add("show");
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(function(){ toastEl.classList.remove("show"); }, 2200);
+  }
+
   function openModal(id){
     modalProduct = findProduct(id);
     if(!modalProduct) return;
@@ -1319,7 +1638,26 @@
     document.getElementById("modalDesc").textContent = modalProduct.desc;
     updateModalPrice();
     document.getElementById("modalImg").innerHTML = primaryImg(modalProduct) ? '<img src="'+primaryImg(modalProduct)+'" alt="'+modalProduct.name+'">' : '<span class="img-placeholder">'+modalProduct.name.toUpperCase()+' — ADD PHOTO</span>';
+
+    var modalWishBtn = document.getElementById("modalWishBtn");
+    var modalWished = isWished(modalProduct.id);
+    modalWishBtn.innerHTML = WISH_ICON;
+    modalWishBtn.setAttribute("data-wish", modalProduct.id);
+    modalWishBtn.setAttribute("aria-pressed", modalWished);
+    modalWishBtn.setAttribute("aria-label", modalWished ? "Remove from wishlist" : "Add to wishlist");
+    modalWishBtn.classList.toggle("active", modalWished);
+
     document.getElementById("qtyVal").textContent = modalQty;
+
+    var addBtn = document.getElementById("modalAddBtn");
+    var soldOut = modalProduct.stock === "out";
+    addBtn.disabled = soldOut;
+    addBtn.textContent = soldOut ? "Sold Out" : "Add to Cart";
+
+    var related = PRODUCTS.filter(function(p){ return p.category === modalProduct.category && p.id !== modalProduct.id; }).slice(0, 4);
+    var relatedWrap = document.getElementById("modalRelated");
+    document.getElementById("modalRelatedRow").innerHTML = related.map(cardHTML).join("");
+    relatedWrap.style.display = related.length ? "block" : "none";
 
     var thumbsWrap = document.getElementById("modalThumbs");
     var gallery = (modalProduct.images && modalProduct.images.length) ? modalProduct.images : (modalProduct.img ? [modalProduct.img] : []);
@@ -1467,6 +1805,7 @@
       document.getElementById("optWarn").classList.add("show"); return;
     }
     addToCart(modalProduct.id, modalColor, modalSize, modalQty, modalDesign);
+    showToast("Added to cart");
     closeModal();
   });
   document.addEventListener("keydown", function(e){ if(e.key === "Escape"){ closeModal(); closeMenu(); if(qrLightbox) qrLightbox.classList.remove("show"); } });
@@ -1544,10 +1883,13 @@
   renderFilters();
   renderMenuCategories();
   renderProducts();
+  renderWishlist();
+  renderWishlistCount();
   renderCart();
   renderCartCount();
   renderFAQ();
   goTo(location.hash ? location.hash.replace("#","") : "home");
+  loadSheetOverrides(); // no-op until SHEET_CSV_URL above is filled in
 
 })();
 </script>
