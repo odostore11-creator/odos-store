@@ -1038,10 +1038,10 @@
     ? window.supabase.createClient("https://pqznwgluuiuncdgdkpbp.supabase.co", "sb_publishable_Gql9eTuQJwsLHvoJiib1rA_B7qjGRtk")
     : null;
   function verifySupabaseCode(code){
-    if(!supabaseClient) return Promise.resolve(0);
+    if(!supabaseClient) return Promise.resolve({ found:false, pct:0 });
     return supabaseClient.rpc("check_discount_code", { p_code: code })
-      .then(function(res){ return (res && !res.error && res.data) ? res.data : 0; })
-      .catch(function(){ return 0; });
+      .then(function(res){ return (res && !res.error && res.data) ? res.data : { found:false, pct:0 }; })
+      .catch(function(){ return { found:false, pct:0 }; });
   }
   function normCode(c){ return String(c || "").toUpperCase().replace(/[^A-Z0-9]/g, ""); }
   function showCode(c){ return c.replace(/^ODOS/, "ODOS-"); }
@@ -1073,8 +1073,8 @@
   function verifyCode(code){
     return verifyPool(code).then(function(pct){
       if(pct) return pct;
-      return verifySupabaseCode(code).then(function(pct2){
-        if(pct2) return pct2;
+      return verifySupabaseCode(code).then(function(result){
+        if(result.found) return result.pct;
         if(!/^ODOS[ABCDEFGHJKMNPQRSTUVWXYZ23456789]{7}$/.test(code)) return 0;
         return welcomeCheck(code.slice(4, 8)).then(function(chk){ return chk === code.slice(8) ? 10 : 0; });
       });
