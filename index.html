@@ -1679,7 +1679,9 @@
 
     var related = PRODUCTS.filter(function(p){ return p.category === modalProduct.category && p.id !== modalProduct.id; }).slice(0, 4);
     var relatedWrap = document.getElementById("modalRelated");
-    document.getElementById("modalRelatedRow").innerHTML = related.map(cardHTML).join("");
+    var relatedRow = document.getElementById("modalRelatedRow");
+    relatedRow.innerHTML = related.map(cardHTML).join("");
+    observeReveals(relatedRow);
     relatedWrap.style.display = related.length ? "block" : "none";
 
     var thumbsWrap = document.getElementById("modalThumbs");
