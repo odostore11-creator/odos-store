@@ -218,6 +218,13 @@
 
   /* ---------- products grid ---------- */
   .grid{ display:grid; grid-template-columns: repeat(auto-fill, minmax(240px,1fr)); gap: 22px; padding-bottom: 60px; }
+
+  /* ---------- scroll reveal ---------- */
+  .reveal{ opacity:0; transform: translateY(26px); transition: opacity .6s ease, transform .6s ease; }
+  .reveal.in-view{ opacity:1; transform:none; }
+  @media (prefers-reduced-motion: reduce){
+    .reveal{ transition:none; opacity:1; transform:none; }
+  }
   .card{ border:1px solid var(--grey-line); border-radius: var(--radius); background: var(--black-2); display:flex; flex-direction:column; overflow:hidden; transition: transform .25s ease, box-shadow .25s ease; }
   .card:hover{ transform: translateY(-4px) scale(1.015); box-shadow: 0 12px 24px rgba(0,0,0,0.35); }
   .card-img{ aspect-ratio: 4/5; background:#1a1a18; display:flex; align-items:center; justify-content:center; color:var(--grey); font-size:12px; letter-spacing:0.08em; text-align:center; overflow:hidden; cursor:pointer; }
@@ -530,13 +537,13 @@
       </div>
     </div>
     <div class="wrap">
-      <div class="section-heading">
+      <div class="section-heading reveal">
         <h2>FEATURED</h2>
         <p class="copy">A short list, picked by hand. The full range is one tap away.</p>
       </div>
       <div class="grid" id="featuredGrid"></div>
     </div>
-    <div class="wrap home-story">
+    <div class="wrap home-story reveal">
       <h3>WHY "ODOS"</h3>
       <p class="copy">Odos is Greek for "path" — the one we're all on, walking, running, sometimes just crawling through it. Nobody's really ahead of anybody. We're all just trying to figure ourselves out along the way. <strong>Execute.</strong></p>
       <p class="copy">Kairos is Greek for "opportunity." It's not something you plan for — it just shows up. A moment, an opening, a shot you didn't see coming. You either take it and let it bend your path somewhere new, or it slips by and you keep walking the same way you were. <strong>Seize.</strong></p>
@@ -1376,10 +1383,11 @@
     else if(p.isNew){ label = "New"; }
     return label ? '<div class="card-badges"><span class="'+cls+'">'+label+'</span></div>' : '';
   }
-  function cardHTML(p){
+  function cardHTML(p, idx){
     var soldOut = p.stock === "out";
+    var delay = idx ? (idx % 8) * 55 : 0;
     return (
-      '<div class="card">' +
+      '<div class="card reveal" style="transition-delay:'+delay+'ms">' +
         '<div class="card-img" data-open="'+p.id+'">'+badgesHTML(p)+wishBtnHTML(p)+imgBlock(p)+'</div>' +
         '<div class="card-body">' +
           '<span class="card-cat">'+p.category.toUpperCase()+'</span>' +
@@ -1394,6 +1402,7 @@
   function renderFeatured(){
     var picks = FEATURED_IDS.map(function(id){ return findProduct(id); }).filter(Boolean);
     document.getElementById("featuredGrid").innerHTML = picks.map(cardHTML).join("");
+    observeReveals(document.getElementById("featuredGrid"));
   }
   function sortProducts(list){
     list = list.slice();
@@ -1410,6 +1419,7 @@
     if(q){ list = list.filter(function(p){ return p.name.toLowerCase().indexOf(q) !== -1 || p.category.toLowerCase().indexOf(q) !== -1; }); }
     list = sortProducts(list);
     grid.innerHTML = list.length ? list.map(cardHTML).join("") : '<p class="copy" style="grid-column:1/-1; color:var(--grey);">No products match.</p>';
+    observeReveals(grid);
   }
   function renderFilters(){
     var row = document.getElementById("filterRow");
@@ -1418,6 +1428,21 @@
   }
   function renderMenuCategories(){
     document.getElementById("menuCategories").innerHTML = CATEGORIES.map(function(c){ return '<button data-catgo="'+c+'">'+c+'</button>'; }).join("");
+  }
+
+  /* ============================================================
+     SCROLL REVEAL
+  ============================================================= */
+  var revealObserver = ("IntersectionObserver" in window) ? new IntersectionObserver(function(entries){
+    entries.forEach(function(entry){
+      entry.target.classList.toggle("in-view", entry.isIntersecting);
+    });
+  }, { threshold: 0.12, rootMargin: "0px 0px -40px 0px" }) : null;
+  function observeReveals(root){
+    var scope = root || document;
+    var els = scope.querySelectorAll ? scope.querySelectorAll(".reveal") : [];
+    if(!revealObserver){ els.forEach(function(el){ el.classList.add("in-view"); }); return; }
+    els.forEach(function(el){ revealObserver.observe(el); });
   }
 
   /* ============================================================
@@ -1432,6 +1457,7 @@
     if(!grid) return;
     var picks = wishlist.map(function(id){ return findProduct(id); }).filter(Boolean);
     grid.innerHTML = picks.map(cardHTML).join("");
+    observeReveals(grid);
     if(emptyMsg) emptyMsg.style.display = picks.length ? "none" : "block";
   }
   function renderWishlistCount(){
@@ -1885,6 +1911,7 @@
   renderCart();
   renderCartCount();
   renderFAQ();
+  observeReveals(document);
   goTo(location.hash ? location.hash.replace("#","") : "home");
   loadSheetOverrides(); // no-op until SHEET_CSV_URL above is filled in
 
