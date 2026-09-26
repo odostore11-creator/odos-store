@@ -213,8 +213,14 @@
   .section-heading h2{ font-size: clamp(28px, 4vw, 42px); letter-spacing:0.01em; }
   .section-heading .copy{ max-width:340px; text-align:right; font-size:13px; }
   .home-story{ padding: 70px 0; border-bottom:1px solid var(--grey-line); }
-  .home-story .copy{ max-width:640px; font-size:17px; }
+  .home-story .copy{ max-width:600px; font-size:17px; margin-bottom:22px; }
   .home-story h3{ font-size: clamp(24px,3vw,34px); margin-bottom:18px; }
+  .quality-section{ padding: 70px 0; border-bottom:1px solid var(--grey-line); }
+  .quality-section h3{ font-size: clamp(24px,3vw,34px); margin-bottom:14px; }
+  .quality-section > .copy{ max-width:600px; margin-bottom:36px; }
+  .quality-grid{ display:grid; grid-template-columns:repeat(auto-fit, minmax(200px,1fr)); gap:36px; }
+  .quality-item h4{ font-family:'Anton', sans-serif; font-size:16px; letter-spacing:0.04em; text-transform:uppercase; margin-bottom:10px; }
+  .quality-item .copy{ font-size:15px; }
 
   /* ---------- products grid ---------- */
   .grid{ display:grid; grid-template-columns: repeat(auto-fill, minmax(240px,1fr)); gap: 22px; padding-bottom: 60px; }
@@ -489,7 +495,7 @@
     <div class="search-wrap" id="searchWrap"><input type="text" id="searchInput" placeholder="Search products…"></div>
     <button class="icon-btn" id="searchBtn" aria-label="Search"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></button>
     <button class="icon-btn" id="wishBtn" aria-label="Wishlist" data-nav="wishlist">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 21s-7.5-4.6-10-9.3C.5 8 2 4 6 4c2 0 3.5 1 4 2.5C10.5 5 12 4 14 4c4 0 5.5 4 4 7.7C19.5 16.4 12 21 12 21z"/></svg>
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
       <span class="cart-count" id="wishCount" style="display:none;">0</span>
     </button>
     <button class="icon-btn" id="cartBtn" aria-label="Cart" data-nav="cart">
@@ -525,7 +531,7 @@
       <div class="hero-inner">
         <div class="hero-text">
           <h1>EVERY<br>CHOICE<br>IS A PATH.</h1>
-          <p class="copy">ODOS is a small, local goods brand — clothing, caps, mugs, bags and accessories built around one idea: the line you walk matters more than the destination.</p>
+          <p class="copy">A local goods brand — clothing, caps, mugs, bags and more.<br>Built on one idea: <strong>the walk matters more than the destination.</strong></p>
           <div class="hero-cta">
             <a class="btn" href="#products" data-nav="products">Shop All Products</a>
             <a class="btn ghost" href="#faq" data-nav="faq">Read the FAQ</a>
@@ -545,10 +551,28 @@
     </div>
     <div class="wrap home-story reveal">
       <h3>WHY "ODOS"</h3>
-      <p class="copy">Odos is Greek for "path" — the one we're all on, walking, running, sometimes just crawling through it. Nobody's really ahead of anybody. We're all just trying to figure ourselves out along the way. <strong>Execute.</strong></p>
-      <p class="copy">Kairos is Greek for "opportunity." It's not something you plan for — it just shows up. A moment, an opening, a shot you didn't see coming. You either take it and let it bend your path somewhere new, or it slips by and you keep walking the same way you were. <strong>Seize.</strong></p>
-      <p class="copy">Whatever you're trying to surpass or achieve — a final, a certain GPA, your dream job, a shot you've been waiting on — wear it. Every time you put it on, you remember why you started. <strong>Remember.</strong></p>
+      <p class="copy">Odos is Greek for "path" — the one we're all on, walking, running, sometimes just crawling through it. Nobody's really ahead of anybody.<br><strong>Execute.</strong></p>
+      <p class="copy">Kairos is Greek for "opportunity." It's not something you plan for — it just shows up. You either take it and let it bend your path somewhere new, or it slips by.<br><strong>Seize.</strong></p>
+      <p class="copy">Whatever you're trying to surpass — a final, a GPA, your dream job — wear it. Every time you put it on, you remember why you started.<br><strong>Remember.</strong></p>
       <a class="btn ghost" href="#story" data-nav="story" style="margin-top:16px; display:inline-block;">Read Our Story</a>
+    </div>
+    <div class="wrap quality-section reveal">
+      <h3>MADE TO LAST</h3>
+      <p class="copy">No stock photos, no promises we can't back up — just what actually goes into every piece before it ships.</p>
+      <div class="quality-grid">
+        <div class="quality-item">
+          <h4>Fabric</h4>
+          <p class="copy">100% cotton, 180 g/m² — light enough to move, dense enough to hold its shape wash after wash.</p>
+        </div>
+        <div class="quality-item">
+          <h4>Stitching</h4>
+          <p class="copy">Side-seamed construction with double-needle stitching — seams built to outlast the fabric around them.</p>
+        </div>
+        <div class="quality-item">
+          <h4>Print &amp; Finish</h4>
+          <p class="copy">Embroidery for a premium, textured finish on apparel and headwear; DTF for vibrant designs across fabric types; sublimation for permanent, infused color on polyester and coated pieces — each one matched to the product it suits best.</p>
+        </div>
+      </div>
     </div>
   </section>
 
@@ -1367,7 +1391,7 @@
     }
     return '<img src="'+src+'" alt="'+p.name+'" loading="lazy" decoding="async">';
   }
-  var WISH_ICON = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 21s-7.5-4.6-10-9.3C.5 8 2 4 6 4c2 0 3.5 1 4 2.5C10.5 5 12 4 14 4c4 0 5.5 4 4 7.7C19.5 16.4 12 21 12 21z"/></svg>';
+  var WISH_ICON = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>';
   function isWished(id){ return wishlist.indexOf(id) !== -1; }
   function wishBtnHTML(p){
     var active = isWished(p.id);
