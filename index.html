@@ -768,6 +768,11 @@
         <div class="opt-row" id="modalDesignRow"></div>
       </div>
 
+      <div id="modalPrintMethodWrap" style="display:none; margin-top:14px;">
+        <p class="opt-label">PRINTING METHOD: <span id="modalPrintMethodSelected"></span></p>
+        <div class="opt-row" id="modalPrintMethodRow"></div>
+      </div>
+
       <p class="opt-warn" id="optWarn">Please select all options before adding to cart.</p>
 
       <div class="qty-row">
@@ -1247,13 +1252,23 @@
   }
 
   var DESIGN_SURCHARGE = 70;
+  var EMBROIDERY_SURCHARGE = 175;
+  var PRINT_METHODS = [
+    { id:"dtf", name:"Regular Printing (DTF)", surcharge: DESIGN_SURCHARGE },
+    { id:"embroidery", name:"Embroidery", surcharge: EMBROIDERY_SURCHARGE }
+  ];
+  function findPrintMethod(id){ return PRINT_METHODS.filter(function(m){ return m.id === id; })[0]; }
   var DESIGNS = [
     { id:"d1", name:"ODOS Brush", img:"https://pqznwgluuiuncdgdkpbp.supabase.co/storage/v1/object/public/images/images/design-1.webp" },
     { id:"d2", name:"ODOS Drip", img:"https://pqznwgluuiuncdgdkpbp.supabase.co/storage/v1/object/public/images/images/design-2.webp" },
     { id:"d3", name:"ODOS Bold", img:"https://pqznwgluuiuncdgdkpbp.supabase.co/storage/v1/object/public/images/images/design-3.webp" }
   ];
   function findDesign(id){ return DESIGNS.filter(function(d){ return d.id === id; })[0]; }
-  function itemPrice(p, design){ return p.price + (design && !p.freeDesign ? DESIGN_SURCHARGE : 0); }
+  function itemPrice(p, design, printMethod){
+    if(!design || p.freeDesign) return p.price;
+    var m = findPrintMethod(printMethod) || findPrintMethod("dtf");
+    return p.price + m.surcharge;
+  }
 
   /* ============================================================
      STATE — cart items keyed by id+color+size
@@ -1262,7 +1277,7 @@
   var wishlist = JSON.parse(localStorage.getItem("odos_wishlist") || "[]"); // array of product ids, this device only
   var currentFilter = "All";
   var currentSort = "featured";
-  var modalProduct = null, modalQty = 1, modalColor = null, modalSize = null, modalDesign = "";
+  var modalProduct = null, modalQty = 1, modalColor = null, modalSize = null, modalDesign = "", modalPrintMethod = "dtf";
 
   function saveCart(){ localStorage.setItem("odos_cart", JSON.stringify(cart)); renderCart(); renderCartCount(); }
   /* ---- Discount codes: add or change codes here (percent off) ---- */
@@ -1350,19 +1365,19 @@
     if(savedCode){ verifyCode(savedCode).then(function(pct){ if(pct){ appliedCode = savedCode; appliedPct = pct; renderCart(); } }).catch(function(){}); }
   }catch(e){}
   function saveCode(){ try{ if(appliedCode) localStorage.setItem("odos_code", appliedCode); else localStorage.removeItem("odos_code"); }catch(e){} }
-  function cartSubtotal(){ return cart.reduce(function(sum, c){ var p = findProduct(c.id); return sum + (p ? itemPrice(p, c.design) * c.qty : 0); }, 0); }
+  function cartSubtotal(){ return cart.reduce(function(sum, c){ var p = findProduct(c.id); return sum + (p ? itemPrice(p, c.design, c.printMethod) * c.qty : 0); }, 0); }
   function discountFor(subtotal){ return appliedCode ? Math.round(subtotal * appliedPct) / 100 : 0; }
   function discountMsg(text, kind){ var m = document.getElementById("discountMsg"); m.textContent = text; m.className = "discount-msg" + (text ? " show " + kind : ""); }
   function fmt(n){ n = Math.round(n*100)/100; return "EGP " + n.toLocaleString(undefined,{minimumFractionDigits: (n%1!==0?2:0), maximumFractionDigits:2}); }
   function findProduct(id){ return PRODUCTS.filter(function(p){ return p.id === id; })[0]; }
-  function variantKey(id,color,size,design){ return id + "|" + (color||"") + "|" + (size||"") + "|" + (design||""); }
+  function variantKey(id,color,size,design,printMethod){ return id + "|" + (color||"") + "|" + (size||"") + "|" + (design||"") + "|" + (design ? (printMethod||"dtf") : ""); }
 
-  function addToCart(id, color, size, qty, design){
+  function addToCart(id, color, size, qty, design, printMethod){
     qty = qty || 1;
-    var key = variantKey(id, color, size, design);
+    var key = variantKey(id, color, size, design, printMethod);
     var existing = cart.filter(function(c){ return c.key === key; })[0];
     if(existing){ existing.qty += qty; }
-    else { cart.push({ key:key, id:id, color:color||"", size:size||"", design:design||"", qty:qty }); }
+    else { cart.push({ key:key, id:id, color:color||"", size:size||"", design:design||"", printMethod: design ? (printMethod||"dtf") : "", qty:qty }); }
     saveCart();
   }
   function setQtyByKey(key, qty){
@@ -1525,11 +1540,11 @@
       list.innerHTML = cart.map(function(c){
         var p = findProduct(c.id);
         if(!p) return "";
-        var unitPrice = itemPrice(p, c.design);
+        var unitPrice = itemPrice(p, c.design, c.printMethod);
         var variantBits = [];
         if(c.color) variantBits.push(c.color);
         if(c.size) variantBits.push(c.size);
-        if(c.design){ var d = findDesign(c.design); variantBits.push(d ? d.name+" design" : "Design"); } else { variantBits.push("Blank"); }
+        if(c.design){ var d = findDesign(c.design); var pm = findPrintMethod(c.printMethod); variantBits.push((d ? d.name+" design" : "Design") + (pm ? " — "+pm.name : "")); } else { variantBits.push("Blank"); }
         var variantText = variantBits.length ? variantBits.join(" / ") : "";
         return (
           '<div class="cart-item">' +
@@ -1679,6 +1694,7 @@
     modalColor = modalProduct.colors && modalProduct.colors.length ? modalProduct.colors[0] : null;
     modalSize = modalProduct.sizeAsSelect ? "" : (modalProduct.sizes && modalProduct.sizes.length ? modalProduct.sizes[0] : null);
     modalDesign = "";
+    modalPrintMethod = "dtf";
 
     document.getElementById("modalCat").textContent = modalProduct.category.toUpperCase();
     document.getElementById("modalName").textContent = modalProduct.name;
@@ -1807,8 +1823,30 @@
     var designRow = document.getElementById("modalDesignRow");
     var designSelected = document.getElementById("modalDesignSelected");
     var freePrintBadge = document.getElementById("freePrintBadge");
+    var printMethodWrap = document.getElementById("modalPrintMethodWrap");
+    var printMethodRow = document.getElementById("modalPrintMethodRow");
+    var printMethodSelected = document.getElementById("modalPrintMethodSelected");
     freePrintBadge.style.display = modalProduct.freeDesign ? "inline-block" : "none";
     designSelected.textContent = "Blank";
+    printMethodWrap.style.display = "none";
+    function renderPrintMethodRow(){
+      printMethodRow.innerHTML = PRINT_METHODS.map(function(m){
+        return '<button type="button" data-print="'+m.id+'">'+m.name+' (+'+fmt(m.surcharge)+')</button>';
+      }).join("");
+      printMethodRow.querySelectorAll("button").forEach(function(b){
+        if(b.getAttribute("data-print") === modalPrintMethod) b.classList.add("selected");
+        b.addEventListener("click", function(){
+          modalPrintMethod = b.getAttribute("data-print");
+          var m = findPrintMethod(modalPrintMethod);
+          printMethodSelected.textContent = m ? m.name : "";
+          printMethodRow.querySelectorAll("button").forEach(function(x){ x.classList.remove("selected"); });
+          b.classList.add("selected");
+          updateModalPrice();
+        });
+      });
+      var m0 = findPrintMethod(modalPrintMethod);
+      printMethodSelected.textContent = m0 ? m0.name : "";
+    }
     var blankBtn = '<button type="button" class="design-thumb" data-design=""><span style="width:44px;height:44px;display:flex;align-items:center;justify-content:center;background:#fff;color:#000;border-radius:2px;">—</span><span>Blank</span></button>';
     var designBtns = DESIGNS.map(function(d){
       return '<button type="button" class="design-thumb" data-design="'+d.id+'"><img src="'+d.img+'" alt="'+d.name+'"><span>'+d.name+'</span></button>';
@@ -1820,7 +1858,16 @@
       b.addEventListener("click", function(){
         modalDesign = b.getAttribute("data-design");
         var d = findDesign(modalDesign);
-        designSelected.textContent = d ? (modalProduct.freeDesign ? d.name+" (Free)" : d.name+" (+"+fmt(DESIGN_SURCHARGE)+")") : "Blank";
+        if(modalDesign && !modalProduct.freeDesign){
+          modalPrintMethod = modalPrintMethod || "dtf";
+          printMethodWrap.style.display = "block";
+          renderPrintMethodRow();
+          var m = findPrintMethod(modalPrintMethod);
+          designSelected.textContent = d ? d.name : "Blank";
+        } else {
+          printMethodWrap.style.display = "none";
+          designSelected.textContent = d ? (modalProduct.freeDesign ? d.name+" (Free)" : d.name) : "Blank";
+        }
         designRow.querySelectorAll("button").forEach(function(x){ x.classList.remove("selected"); });
         b.classList.add("selected");
         updateModalPrice();
@@ -1832,7 +1879,7 @@
   }
   function updateModalPrice(){
     if(!modalProduct) return;
-    document.getElementById("modalPrice").textContent = fmt(itemPrice(modalProduct, modalDesign));
+    document.getElementById("modalPrice").textContent = fmt(itemPrice(modalProduct, modalDesign, modalPrintMethod));
   }
   function closeModal(){ modalOverlay.classList.remove("show"); modalProduct = null; }
   document.getElementById("modalClose").addEventListener("click", closeModal);
@@ -1853,7 +1900,7 @@
     if((needsColor && !modalColor) || (needsSize && !modalSize)){
       document.getElementById("optWarn").classList.add("show"); return;
     }
-    addToCart(modalProduct.id, modalColor, modalSize, modalQty, modalDesign);
+    addToCart(modalProduct.id, modalColor, modalSize, modalQty, modalDesign, modalPrintMethod);
     showToast("Added to cart");
     closeModal();
   });
@@ -1907,8 +1954,8 @@
     var lines = cart.map(function(c){
       var p = findProduct(c.id); if(!p) return "";
       var bits = []; if(c.color) bits.push(c.color); if(c.size) bits.push(c.size);
-      if(c.design){ var d = findDesign(c.design); bits.push(d ? d.name+" design" : "Design"); } else { bits.push("Blank"); }
-      var unit = itemPrice(p, c.design);
+      if(c.design){ var d = findDesign(c.design); var pm = findPrintMethod(c.printMethod); bits.push((d ? d.name+" design" : "Design") + (pm ? " — "+pm.name : "")); } else { bits.push("Blank"); }
+      var unit = itemPrice(p, c.design, c.printMethod);
       return p.name + (bits.length ? " ("+bits.join(" / ")+")" : "") + " x" + c.qty + " — " + fmt(unit*c.qty);
     });
     document.getElementById("orderDetailsField").value = lines.join(" | ");
