@@ -1340,7 +1340,23 @@
   var currentSort = "featured";
   var modalProduct = null, modalQty = 1, modalColor = null, modalSize = null, modalDesign = "", modalPrintMethod = "dtf";
 
-  function saveCart(){ localStorage.setItem("odos_cart", JSON.stringify(cart)); renderCart(); renderCartCount(); }
+  function saveCart(){ localStorage.setItem("odos_cart", JSON.stringify(cart)); renderCart(); renderCartCount(); syncCartToSupabase(); }
+  var cartSyncTimer = null;
+  function syncCartToSupabase(){
+    if(!sb || !currentUser) return;
+    var uid = currentUser.id;
+    var snapshot = cart.slice();
+    clearTimeout(cartSyncTimer);
+    cartSyncTimer = setTimeout(function(){
+      sb.from("cart_items").delete().eq("user_id", uid).then(function(){
+        if(!snapshot.length) return;
+        var rows = snapshot.map(function(c){
+          return { user_id: uid, product_id: c.id, color: c.color || null, size: c.size || null, design: c.design || null, print_method: c.printMethod || null, qty: c.qty };
+        });
+        sb.from("cart_items").insert(rows);
+      });
+    }, 500);
+  }
   /* ---- Discount codes: add or change codes here (percent off) ---- */
   /* ---- Discount codes ----
      Only scrambled (PBKDF2-SHA256) fingerprints of the codes are stored here, so the real codes
@@ -1569,6 +1585,21 @@
   function saveWishlist(){
     localStorage.setItem("odos_wishlist", JSON.stringify(wishlist));
     renderWishlistCount();
+    syncWishlistToSupabase();
+  }
+  var wishSyncTimer = null;
+  function syncWishlistToSupabase(){
+    if(!sb || !currentUser) return;
+    var uid = currentUser.id;
+    var snapshot = wishlist.slice();
+    clearTimeout(wishSyncTimer);
+    wishSyncTimer = setTimeout(function(){
+      sb.from("wishlist_items").delete().eq("user_id", uid).then(function(){
+        if(!snapshot.length) return;
+        var rows = snapshot.map(function(id){ return { user_id: uid, product_id: id }; });
+        sb.from("wishlist_items").insert(rows);
+      });
+    }, 500);
   }
   function toggleWish(id){
     var idx = wishlist.indexOf(id);
@@ -1733,11 +1764,52 @@
       currentUser = res.data.session ? res.data.session.user : null;
       renderAuthState();
     });
+    var mergedForUid = null; // avoid re-merging on every token refresh, only once per sign-in
     sb.auth.onAuthStateChange(function(event, session){
       currentUser = session ? session.user : null;
       renderAuthState();
-      if(event === "SIGNED_IN"){ closeAuth(); }
+      if(event === "SIGNED_IN"){
+        closeAuth();
+        if(currentUser && mergedForUid !== currentUser.id){
+          mergedForUid = currentUser.id;
+          mergeAccountData();
+        }
+      }
+      if(event === "SIGNED_OUT"){ mergedForUid = null; }
     });
+
+    function mergeAccountData(){
+      var uid = currentUser.id;
+      Promise.all([
+        sb.from("cart_items").select("*").eq("user_id", uid),
+        sb.from("wishlist_items").select("*").eq("user_id", uid)
+      ]).then(function(results){
+        var remoteCart = (results[0].data || []).map(function(r){
+          return {
+            key: variantKey(r.product_id, r.color, r.size, r.design, r.print_method),
+            id: r.product_id, color: r.color || "", size: r.size || "",
+            design: r.design || "", printMethod: r.print_method || "", qty: r.qty
+          };
+        });
+        var remoteWishIds = (results[1].data || []).map(function(r){ return r.product_id; });
+
+        // merge remote + local guest cart: remote wins on qty for shared keys, local-only items get appended
+        var byKey = {};
+        remoteCart.forEach(function(c){ byKey[c.key] = c; });
+        cart.forEach(function(c){ if(!byKey[c.key]) byKey[c.key] = c; });
+        cart = Object.keys(byKey).map(function(k){ return byKey[k]; });
+
+        // merge wishlist: union of remote ids + local ids
+        var wishSet = {};
+        remoteWishIds.forEach(function(id){ wishSet[id] = true; });
+        wishlist.forEach(function(id){ wishSet[id] = true; });
+        wishlist = Object.keys(wishSet);
+
+        saveCart();
+        saveWishlist();
+        renderFeatured(); renderProducts(); renderWishlist();
+      });
+    }
 
     document.getElementById("authMagicBtn").addEventListener("click", function(){
       var email = document.getElementById("authEmailMagic").value.trim();
