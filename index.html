@@ -494,6 +494,9 @@
   <div class="header-right">
     <div class="search-wrap" id="searchWrap"><input type="text" id="searchInput" placeholder="Search products…"></div>
     <button class="icon-btn" id="searchBtn" aria-label="Search"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></button>
+    <button class="icon-btn" id="accountBtn" aria-label="Account">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+    </button>
     <button class="icon-btn" id="wishBtn" aria-label="Wishlist" data-nav="wishlist">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
       <span class="cart-count" id="wishCount" style="display:none;">0</span>
@@ -506,6 +509,50 @@
 </header>
 
 <div class="overlay" id="overlay"></div>
+
+<div class="modal-overlay" id="authOverlay">
+  <div class="modal" style="max-width:420px; grid-template-columns:1fr; padding:32px;">
+    <button class="modal-close" id="authClose" aria-label="Close">&times;</button>
+    <div id="authSignedOutView">
+      <h2 style="margin:0 0 4px;">Sign In</h2>
+      <p class="copy" style="margin:0 0 20px; color:var(--grey);" id="authSubtitle">Access your cart, wishlist and orders from any device.</p>
+
+      <div id="authMagicLinkForm">
+        <div class="field">
+          <input type="email" id="authEmailMagic" placeholder="Email address" autocomplete="email" style="width:100%; background:var(--black); border:1px solid var(--grey-line); border-radius:var(--radius-sm); color:var(--white); padding:12px; font-size:14px;">
+        </div>
+        <button class="btn" id="authMagicBtn" style="width:100%; text-align:center;">Send Magic Link</button>
+        <p class="copy" style="margin:12px 0 0; color:var(--grey); font-size:13px;">We'll email you a link — no password needed.</p>
+      </div>
+
+      <div style="display:flex; align-items:center; gap:10px; margin:20px 0; color:var(--grey); font-size:12px;">
+        <div style="flex:1; height:1px; background:var(--grey-line);"></div>
+        OR USE A PASSWORD
+        <div style="flex:1; height:1px; background:var(--grey-line);"></div>
+      </div>
+
+      <div id="authPasswordForm">
+        <div class="field">
+          <input type="email" id="authEmailPw" placeholder="Email address" autocomplete="email" style="width:100%; background:var(--black); border:1px solid var(--grey-line); border-radius:var(--radius-sm); color:var(--white); padding:12px; font-size:14px;">
+        </div>
+        <div class="field">
+          <input type="password" id="authPassword" placeholder="Password" autocomplete="current-password" style="width:100%; background:var(--black); border:1px solid var(--grey-line); border-radius:var(--radius-sm); color:var(--white); padding:12px; font-size:14px;">
+        </div>
+        <button class="btn" id="authPwSignInBtn" style="width:100%; text-align:center;">Sign In</button>
+        <button class="btn ghost" id="authPwSignUpBtn" style="width:100%; text-align:center; margin-top:10px;">Create Account</button>
+      </div>
+
+      <p class="copy" id="authError" style="color:#e88; font-size:13px; margin:14px 0 0; display:none;"></p>
+      <p class="copy" id="authNotice" style="color:var(--white); font-size:13px; margin:14px 0 0; display:none;"></p>
+    </div>
+
+    <div id="authSignedInView" style="display:none;">
+      <h2 style="margin:0 0 4px;">Your Account</h2>
+      <p class="copy" style="margin:0 0 20px; color:var(--grey);" id="authUserEmail"></p>
+      <button class="btn ghost" id="authSignOutBtn" style="width:100%; text-align:center;">Sign Out</button>
+    </div>
+  </div>
+</div>
 <aside class="side-menu" id="sideMenu">
   <span class="logo">ODOS</span>
   <nav>
@@ -1275,6 +1322,16 @@
   }
 
   /* ============================================================
+     SUPABASE CLIENT — auth + per-account data (cart/wishlist sync)
+  ============================================================= */
+  var SUPABASE_URL = "https://pqznwgluuiuncdgdkpbp.supabase.co";
+  var SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBxem53Z2x1dWl1bmNkZ2RrcGJwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTAxNjc3MjUsImV4cCI6MjEwNTc0MzcyNX0.PPX3n6-CcGSRIvKSDSJIY8kQbPNMDVH8BYkS8VnVLa8";
+  var sb = (window.supabase && window.supabase.createClient)
+    ? window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY)
+    : null;
+  var currentUser = null; // set once we know the session state, see initAuth() below
+
+  /* ============================================================
      STATE — cart items keyed by id+color+size
   ============================================================= */
   var cart = JSON.parse(localStorage.getItem("odos_cart") || "[]");
@@ -1639,6 +1696,91 @@
     var btn = e.target.closest("[data-catgo]"); if(!btn) return;
     currentFilter = btn.getAttribute("data-catgo"); renderFilters(); goTo("products");
   });
+
+  /* ---------- account / auth ---------- */
+  var authOverlay = document.getElementById("authOverlay");
+  var accountBtn = document.getElementById("accountBtn");
+  var authSignedOutView = document.getElementById("authSignedOutView");
+  var authSignedInView = document.getElementById("authSignedInView");
+  var authError = document.getElementById("authError");
+  var authNotice = document.getElementById("authNotice");
+
+  function openAuth(){ authOverlay.classList.add("show"); authError.style.display = "none"; authNotice.style.display = "none"; }
+  function closeAuth(){ authOverlay.classList.remove("show"); }
+  document.getElementById("authClose").addEventListener("click", closeAuth);
+  authOverlay.addEventListener("click", function(e){ if(e.target === authOverlay) closeAuth(); });
+
+  function showAuthError(msg){ authNotice.style.display = "none"; authError.textContent = msg; authError.style.display = "block"; }
+  function showAuthNotice(msg){ authError.style.display = "none"; authNotice.textContent = msg; authNotice.style.display = "block"; }
+
+  function renderAuthState(){
+    if(currentUser){
+      authSignedOutView.style.display = "none";
+      authSignedInView.style.display = "block";
+      document.getElementById("authUserEmail").textContent = currentUser.email;
+      accountBtn.classList.add("logged-in");
+    } else {
+      authSignedOutView.style.display = "block";
+      authSignedInView.style.display = "none";
+      accountBtn.classList.remove("logged-in");
+    }
+  }
+
+  accountBtn.addEventListener("click", openAuth);
+
+  if(sb){
+    sb.auth.getSession().then(function(res){
+      currentUser = res.data.session ? res.data.session.user : null;
+      renderAuthState();
+    });
+    sb.auth.onAuthStateChange(function(event, session){
+      currentUser = session ? session.user : null;
+      renderAuthState();
+      if(event === "SIGNED_IN"){ closeAuth(); }
+    });
+
+    document.getElementById("authMagicBtn").addEventListener("click", function(){
+      var email = document.getElementById("authEmailMagic").value.trim();
+      if(!email){ showAuthError("Enter your email first."); return; }
+      var btn = this; btn.disabled = true; btn.textContent = "Sending…";
+      sb.auth.signInWithOtp({ email: email, options: { emailRedirectTo: window.location.origin } }).then(function(res){
+        btn.disabled = false; btn.textContent = "Send Magic Link";
+        if(res.error){ showAuthError(res.error.message); return; }
+        showAuthNotice("Check your email — we sent you a sign-in link.");
+      });
+    });
+
+    document.getElementById("authPwSignInBtn").addEventListener("click", function(){
+      var email = document.getElementById("authEmailPw").value.trim();
+      var password = document.getElementById("authPassword").value;
+      if(!email || !password){ showAuthError("Enter your email and password."); return; }
+      var btn = this; btn.disabled = true; btn.textContent = "Signing In…";
+      sb.auth.signInWithPassword({ email: email, password: password }).then(function(res){
+        btn.disabled = false; btn.textContent = "Sign In";
+        if(res.error){ showAuthError(res.error.message); return; }
+      });
+    });
+
+    document.getElementById("authPwSignUpBtn").addEventListener("click", function(){
+      var email = document.getElementById("authEmailPw").value.trim();
+      var password = document.getElementById("authPassword").value;
+      if(!email || !password){ showAuthError("Enter your email and password."); return; }
+      if(password.length < 6){ showAuthError("Password must be at least 6 characters."); return; }
+      var btn = this; btn.disabled = true; btn.textContent = "Creating…";
+      sb.auth.signUp({ email: email, password: password, options: { emailRedirectTo: window.location.origin } }).then(function(res){
+        btn.disabled = false; btn.textContent = "Create Account";
+        if(res.error){ showAuthError(res.error.message); return; }
+        if(res.data.session){ return; } // instant sign-in, onAuthStateChange handles the rest
+        showAuthNotice("Check your email to confirm your account, then sign in.");
+      });
+    });
+
+    document.getElementById("authSignOutBtn").addEventListener("click", function(){
+      sb.auth.signOut().then(function(){ closeAuth(); });
+    });
+  } else {
+    accountBtn.addEventListener("click", function(){ /* sb not available — no-op beyond default openAuth above */ });
+  }
 
   /* ---------- search ---------- */
   var searchBtn = document.getElementById("searchBtn");
