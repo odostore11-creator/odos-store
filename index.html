@@ -1355,7 +1355,7 @@
         var rows = snapshot.map(function(c){
           return { user_id: uid, product_id: c.id, color: c.color || null, size: c.size || null, design: c.design || null, print_method: c.printMethod || null, qty: c.qty };
         });
-        sb.from("cart_items").insert(rows);
+        return sb.from("cart_items").insert(rows).then(function(r){ if(r && r.error) console.warn("ODOS cart save failed:", r.error.message); });
       });
     }, 500);
   }
@@ -1599,7 +1599,7 @@
       sb.from("wishlist_items").delete().eq("user_id", uid).then(function(){
         if(!snapshot.length) return;
         var rows = snapshot.map(function(id){ return { user_id: uid, product_id: id }; });
-        sb.from("wishlist_items").insert(rows);
+        return sb.from("wishlist_items").insert(rows).then(function(r){ if(r && r.error) console.warn("ODOS wishlist save failed:", r.error.message); });
       });
     }, 500);
   }
@@ -1777,7 +1777,13 @@
           mergeAccountData();
         }
       }
-      if(event === "SIGNED_OUT"){ mergedForUid = null; }
+      if(event === "SIGNED_OUT"){
+        mergedForUid = null;
+        // clear this browser's copy so the next account doesn't inherit the previous account's cart/wishlist
+        cart = []; wishlist = [];
+        localStorage.setItem("odos_cart", "[]"); localStorage.setItem("odos_wishlist", "[]");
+        renderCart(); renderCartCount(); renderWishlistCount(); renderFeatured(); renderProducts(); renderWishlist();
+      }
     });
 
     function mergeAccountData(){
