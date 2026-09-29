@@ -682,8 +682,10 @@
             <input type="hidden" name="order_total" id="orderTotalField">
             <input type="hidden" name="discount_code" id="orderDiscountCodeField">
             <input type="hidden" name="discount_amount" id="orderDiscountAmountField">
+            <input type="hidden" name="order_id" id="orderIdField">
 
             <div class="field"><label for="ord_name">Full name</label><input type="text" id="ord_name" name="name" required></div>
+            <div class="field"><label for="ord_email">Email</label><input type="email" id="ord_email" name="email" autocomplete="email" placeholder="For your order confirmation" required></div>
             <div class="field"><label for="ord_phone">Phone number</label><input type="tel" id="ord_phone" name="phone" required></div>
             <div class="field"><label for="ord_whatsapp">WhatsApp number</label><input type="tel" id="ord_whatsapp" name="whatsapp" placeholder="If different from phone number" required></div>
             <div class="field"><label for="ord_address">Delivery address</label><textarea id="ord_address" name="address" required></textarea></div>
@@ -2162,6 +2164,31 @@
     if(e.target && e.target.id === "discountRemove"){ appliedCode = null; appliedPct = 0; saveCode(); discountMsg("Code removed.", "ok"); renderCart(); }
   });
 
+  /* ============================================================
+     ORDER CONFIRMATION EMAIL — Supabase Edge Function -> Resend
+     Fire-and-forget: if it fails, the order itself is already sent.
+  ============================================================= */
+  function sendOrderEmail(payload){
+    try{
+      fetch(SUPABASE_URL + "/functions/v1/send-order-email", {
+        method: "POST",
+        headers: { "Content-Type": "application/json", "apikey": SUPABASE_ANON_KEY, "Authorization": "Bearer " + SUPABASE_ANON_KEY },
+        body: JSON.stringify(payload),
+        keepalive: true
+      }).catch(function(err){ console.warn("ODOS confirmation email failed:", err); });
+    }catch(err){ console.warn("ODOS confirmation email failed:", err); }
+  }
+  function prefillOrderEmail(){
+    var el = document.getElementById("ord_email");
+    if(!sb || !el) return;
+    sb.auth.getSession().then(function(r){
+      var u = r && r.data && r.data.session && r.data.session.user;
+      if(u && u.email && !el.value) el.value = u.email;
+    });
+  }
+  prefillOrderEmail();
+  if(sb) sb.auth.onAuthStateChange(function(){ prefillOrderEmail(); });
+
   var orderForm = document.getElementById("orderForm");
   orderForm.addEventListener("submit", function(e){
     e.preventDefault();
@@ -2176,11 +2203,31 @@
       var unit = itemPrice(p, c.design, c.printMethod);
       return p.name + (bits.length ? " ("+bits.join(" / ")+")" : "") + " x" + c.qty + " — " + fmt(unit*c.qty);
     });
+    var orderId = "OD" + Date.now().toString(36).toUpperCase().slice(-6);
+    document.getElementById("orderIdField").value = orderId;
+    var emailItems = cart.map(function(c){
+      var p = findProduct(c.id); if(!p) return null;
+      var bits = []; if(c.color) bits.push(c.color); if(c.size) bits.push(c.size);
+      if(c.design){ var d = findDesign(c.design); var pm = findPrintMethod(c.printMethod, p); bits.push((d ? d.name+" design" : "Design") + (pm ? " — "+pm.name : "")); } else { bits.push("Blank"); }
+      return { name: p.name, qty: c.qty, price: fmt(itemPrice(p, c.design, c.printMethod)*c.qty), variant: bits.join(" / ") };
+    }).filter(Boolean);
+    var emailPayload = {
+      orderId: orderId,
+      email: (document.getElementById("ord_email").value || "").trim(),
+      name: document.getElementById("ord_name").value.trim(),
+      phone: document.getElementById("ord_phone").value.trim(),
+      address: document.getElementById("ord_address").value.trim(),
+      city: document.getElementById("ord_city").value.trim(),
+      payment: (orderForm.querySelector('input[name="payment"]:checked') || {}).value || "",
+      discount: appliedCode ? (showCode(appliedCode) + " (−" + fmt(disc) + ")") : "",
+      total: fmt(total),
+      items: emailItems
+    };
     document.getElementById("orderDetailsField").value = lines.join(" | ");
     document.getElementById("orderTotalField").value = fmt(total) + (appliedCode ? " (after " + showCode(appliedCode) + " discount)" : "");
     document.getElementById("orderDiscountCodeField").value = appliedCode ? showCode(appliedCode) : "none";
     document.getElementById("orderDiscountAmountField").value = appliedCode ? fmt(disc) : "EGP 0";
-    submitNetlifyForm(orderForm, document.getElementById("orderMsg"), function(){ cart = []; appliedCode = null; appliedPct = 0; saveCode(); saveCart(); orderForm.reset(); document.getElementById("discountInput").value = ""; discountMsg("", ""); });
+    submitNetlifyForm(orderForm, document.getElementById("orderMsg"), function(){ sendOrderEmail(emailPayload); cart = []; appliedCode = null; appliedPct = 0; saveCode(); saveCart(); orderForm.reset(); prefillOrderEmail(); document.getElementById("discountInput").value = ""; discountMsg("", ""); });
   });
 
   var contactForm = document.getElementById("contactForm");
