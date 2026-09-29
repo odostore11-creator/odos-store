@@ -2135,7 +2135,7 @@
   /* ============================================================
      WEB3FORMS SUBMISSION (AJAX, no page reload)
   ============================================================= */
-  function submitNetlifyForm(form, msgEl, onSuccess){
+  function submitNetlifyForm(form, msgEl, onSuccess, successText){
     fetch(form.action, {
       method: "POST",
       headers: { "Accept": "application/json" },
@@ -2143,7 +2143,7 @@
     })
       .then(function(res){ return res.json().then(function(data){ return { ok: res.ok, data: data }; }); })
       .then(function(result){
-        if(result.ok && result.data && result.data.success){ msgEl.textContent = "Thanks — your message has been sent. We'll be in touch shortly."; msgEl.className = "form-msg show ok"; if(onSuccess) onSuccess(); }
+        if(result.ok && result.data && result.data.success){ msgEl.textContent = successText || "Thanks — your message has been sent. We'll be in touch shortly."; msgEl.className = "form-msg show ok"; if(onSuccess) onSuccess(); }
         else { throw new Error("Bad response"); }
       })
       .catch(function(){ msgEl.textContent = "Something went wrong sending this. Please try again, or contact us directly."; msgEl.className = "form-msg show err"; });
@@ -2233,7 +2233,7 @@
     document.getElementById("orderTotalField").value = fmt(total) + (appliedCode ? " (after " + showCode(appliedCode) + " discount)" : "");
     document.getElementById("orderDiscountCodeField").value = appliedCode ? showCode(appliedCode) : "none";
     document.getElementById("orderDiscountAmountField").value = appliedCode ? fmt(disc) : "EGP 0";
-    submitNetlifyForm(orderForm, document.getElementById("orderMsg"), function(){ sendOrderEmail(emailPayload); cart = []; appliedCode = null; appliedPct = 0; saveCode(); saveCart(); orderForm.reset(); prefillOrderEmail(); document.getElementById("discountInput").value = ""; discountMsg("", ""); });
+    submitNetlifyForm(orderForm, document.getElementById("orderMsg"), function(){ sendOrderEmail(emailPayload); cart = []; appliedCode = null; appliedPct = 0; saveCode(); saveCart(); orderForm.reset(); prefillOrderEmail(); document.getElementById("discountInput").value = ""; discountMsg("", ""); }, "Thank you — your order has been placed! A confirmation email is on its way to " + emailPayload.email + ". If you don't see it within a few minutes, please check your spam or junk folder. We'll also contact you shortly to confirm the details.");
   });
 
   var contactForm = document.getElementById("contactForm");
