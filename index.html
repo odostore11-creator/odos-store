@@ -455,6 +455,48 @@
   .nl-copy{ padding:9px 16px; font-size:13px; }
   .nl-code-hint{ margin:10px 0 0; font-size:12px; color:var(--grey); }
   @media (max-width:520px){ .nl-pop{ right:16px; left:16px; bottom:16px; width:auto; } }
+
+  /* ---- Custom cursor: dot + ring (desktop mouse only) ---- */
+  @media (hover: hover) and (pointer: fine){
+    html.has-cursor, html.has-cursor *, html.has-cursor *::before, html.has-cursor *::after{ cursor: none !important; }
+    .cur-dot, .cur-ring{
+      position: fixed; top: 0; left: 0; pointer-events: none; z-index: 9999;
+      border-radius: 50%; opacity: 0; will-change: transform;
+    }
+    html.cursor-live .cur-dot, html.cursor-live .cur-ring{ opacity: 1; }
+    .cur-dot{ width: 6px; height: 6px; background: #fff; mix-blend-mode: difference; transition: opacity .2s; }
+    .cur-ring{
+      width: 34px; height: 34px; border: 1px solid #fff; mix-blend-mode: difference;
+      display: grid; place-items: center;
+      font: 500 10px/1 'Inter', sans-serif; letter-spacing: .12em; text-transform: uppercase; color: #000;
+      transition: width .25s ease, height .25s ease, opacity .2s, background-color .2s;
+    }
+    .cur-ring.hover{ width: 60px; height: 60px; }
+    .cur-ring.label{
+      background: #f5f5f0; border-color: #f5f5f0; border-radius: 999px; mix-blend-mode: normal;
+      white-space: nowrap; padding: 0; overflow: hidden;
+      transition: width .25s ease, height .25s ease, opacity .2s, background-color .2s, border-radius .25s;
+    }
+    .cur-ring.down{ width: 26px; height: 26px; }
+    .cur-ring.hover.down{ width: 50px; height: 50px; }
+    .cur-ring.label.down{ opacity: .85; }
+    .cur-ring.tight{ width: 20px; height: 20px; }
+    .cur-ring.wrap{ border-radius: 12px; transition: opacity .2s, border-radius .25s, background-color .2s; }
+    .cur-ring.fill{ background: #fff; border-color: #fff; border-radius: 8px; }
+    .cur-ring.fill.down{ opacity: .7; }
+    .cur-ring.brackets{
+      border-color: transparent; border-radius: 3px; mix-blend-mode: difference;
+      background:
+        linear-gradient(#fff,#fff) 0 0 / 12px 2px no-repeat,    linear-gradient(#fff,#fff) 0 0 / 2px 12px no-repeat,
+        linear-gradient(#fff,#fff) 100% 0 / 12px 2px no-repeat, linear-gradient(#fff,#fff) 100% 0 / 2px 12px no-repeat,
+        linear-gradient(#fff,#fff) 0 100% / 12px 2px no-repeat, linear-gradient(#fff,#fff) 0 100% / 2px 12px no-repeat,
+        linear-gradient(#fff,#fff) 100% 100% / 12px 2px no-repeat, linear-gradient(#fff,#fff) 100% 100% / 2px 12px no-repeat;
+      background-origin: border-box;
+    }
+    .cur-ring.tight.down{ width: 14px; height: 14px; }
+    .cur-dot.hide{ opacity: 0 !important; }
+  }
+  @media not all and (hover: hover) and (pointer: fine){ .cur-dot, .cur-ring{ display: none; } }
 </style>
 <!-- Cloudflare Web Analytics -->
 <script type='module' src='https://static.cloudflareinsights.com/beacon.min.js' data-cf-beacon='{"token": "5c914474db464af9860e68bc267b4720"}'></script>
@@ -462,6 +504,9 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body>
+<div class="cur-dot" aria-hidden="true"></div>
+<div class="cur-ring" aria-hidden="true"></div>
+
 
 <div class="path-bg" aria-hidden="true"><canvas id="pathCanvas"></canvas></div>
 <div class="grain-overlay" aria-hidden="true"></div>
@@ -2386,6 +2431,183 @@
       btn.disabled = false; btn.textContent = "Get 10% Off";
     });
   });
+})();
+</script>
+
+<script>
+/* Custom cursor: dot + ring. Ring grows on clickables, becomes a "View" label on product images. */
+(function(){
+  if (!window.matchMedia || !matchMedia("(hover: hover) and (pointer: fine)").matches) return;
+  var root = document.documentElement;
+  var dot = document.querySelector(".cur-dot");
+  var ring = document.querySelector(".cur-ring");
+  if (!dot || !ring) return;
+  root.classList.add("has-cursor");
+
+  var reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
+  var ease = reduce ? 1 : 0.15;
+  var x = 0, y = 0, rx = 0, ry = 0, started = false;
+  var wrapEl = null, rw = 34, rh = 34;
+
+  addEventListener("mousemove", function(e){
+    x = e.clientX; y = e.clientY;
+    if (!started){ rx = x; ry = y; started = true; root.classList.add("cursor-live"); }
+    dot.style.transform = "translate(" + x + "px," + y + "px) translate(-50%,-50%)";
+  }, { passive: true });
+
+  // Magnetic pull: option elements drift a few px toward the cursor while hovered, then ease back.
+  var MAGNET_SEL = ".opt-row button, .design-thumb, [data-size], [data-design]";
+  var mx = 0, my = 0, magnetOn = false, settling = [];
+  function clamp(v, lo, hi){ return v < lo ? lo : v > hi ? hi : v; }
+  function releaseMagnet(){
+    if (wrapEl && magnetOn && (Math.abs(mx) > 0.1 || Math.abs(my) > 0.1)) settling.push({ el: wrapEl, x: mx, y: my });
+    mx = 0; my = 0; magnetOn = false;
+  }
+  function releaseWrap(){
+    releaseMagnet();
+    wrapEl = null;
+    ring.classList.remove("wrap", "fill", "brackets");
+    ring.style.width = ""; ring.style.height = "";
+  }
+
+  (function loop(){
+    for (var i = settling.length - 1; i >= 0; i--){
+      var q = settling[i];
+      q.x *= 0.78; q.y *= 0.78;
+      if (Math.abs(q.x) < 0.1 && Math.abs(q.y) < 0.1){ q.el.style.translate = ""; settling.splice(i, 1); }
+      else q.el.style.translate = q.x + "px " + q.y + "px";
+    }
+    if (wrapEl && document.contains(wrapEl)){
+      // Ring wraps the hovered element and follows it (even while scrolling)
+      var r = wrapEl.getBoundingClientRect(), k = reduce ? 1 : 0.25;
+      var cx = r.left + r.width / 2, cy = r.top + r.height / 2;
+      if (magnetOn){
+        var bx = cx - mx, by = cy - my; // element centre without the current pull
+        mx += (clamp((x - bx) * 0.22, -6, 6) - mx) * 0.2;
+        my += (clamp((y - by) * 0.22, -6, 6) - my) * 0.2;
+        wrapEl.style.translate = mx + "px " + my + "px";
+        cx = bx + mx; cy = by + my;
+      }
+      rx += (cx - rx) * k;
+      ry += (cy - ry) * k;
+      rw += (r.width + wrapPad - rw) * k;
+      rh += (r.height + wrapPad - rh) * k;
+      ring.style.width = rw + "px";
+      ring.style.height = rh + "px";
+    } else {
+      if (wrapEl) releaseWrap();
+      rx += (x - rx) * ease;
+      ry += (y - ry) * ease;
+    }
+    ring.style.transform = "translate(" + rx + "px," + ry + "px) translate(-50%,-50%)";
+    requestAnimationFrame(loop);
+  })();
+
+  document.addEventListener("mouseleave", function(){ root.classList.remove("cursor-live"); });
+  document.addEventListener("mouseenter", function(){ if (started) root.classList.add("cursor-live"); });
+  addEventListener("mousedown", function(){ ring.classList.add("down"); });
+  addEventListener("mouseup", function(){ ring.classList.remove("down"); });
+
+  var HOVER_SEL = "a, button, select, label, summary, [data-open], [data-wish], .logo, .swatch, .radio-option, .qr-trigger, .faq-q";
+  // Small controls that should only grow the ring (a pill would cover them)
+  // Selectors: dot stays, ring tightens (sizes, design/print options, qty +/-, payment methods, swatches...)
+  // Ring morphs into a frame/capsule around these (payment methods, sizes, designs, print methods)
+  var WRAP_SEL = ".radio-option, .opt-row button, .design-thumb, [data-size], [data-design]";
+  // Text options get a solid white capsule that inverts the label via blend mode; image/payment options get an outline frame
+  var OUTLINE_SEL = ".radio-option, .design-thumb, [data-design]";
+  var wrapPad = 10;
+  var TIGHT_SEL = ".opt-row button, .design-thumb, [data-size], [data-design], .qty-row button, .radio-option, .swatch, .modal-thumbs button, .filter-row button, .size-select";
+  var SMALL_SEL = ".opt-row button, .qty-row button, .modal-thumbs button, .filter-row button, .swatch, .size-select, .faq-q, .radio-option, select, label";
+  var NAV_NAMES = { home:"Home", products:"Shop", contact:"Contact", faq:"FAQ", story:"Story", wishlist:"Wishlist", cart:"Cart" };
+  var labelText = "", lastTarget = null;
+
+  function clean(str){
+    str = (str || "").replace(/[\u2192\u2190]/g, "").replace(/\s+/g, " ").trim();
+    return str.length > 18 ? str.slice(0, 17).trim() + "\u2026" : str;
+  }
+
+  // Returns the pill text for an element, or "" if it should only get the hover ring.
+  function labelFor(t){
+    var el;
+    if ((el = t.closest("[data-cursor]"))) return clean(el.getAttribute("data-cursor"));
+    if (t.closest(TIGHT_SEL) || t.closest(SMALL_SEL)) return "";
+    if ((el = t.closest(".wish-btn"))) return el.classList.contains("active") ? "Remove" : "Save";
+    if (t.closest(".modal-close, .nl-close, .qr-lightbox-close")) return "Close";
+    if (t.closest(".menu-btn")) return "Menu";
+    if (t.closest(".logo")) return "Home";
+    if ((el = t.closest(".icon-btn"))) return clean(el.getAttribute("aria-label")) || "";
+    if ((el = t.closest(".btn"))) return clean(el.textContent);
+    if ((el = t.closest("[data-nav]"))) return NAV_NAMES[el.getAttribute("data-nav")] || clean(el.textContent);
+    if (t.closest(".card-img[data-open], .card-name[data-open]")) return "View";
+    if ((el = t.closest("[data-catgo]"))) return clean(el.textContent);
+    if (t.closest(".cart-item .remove, .discount-remove")) return "Remove";
+    if ((el = t.closest("a[href]"))) {
+      var h = el.getAttribute("href") || "";
+      if (h.indexOf("mailto:") === 0) return "Email";
+      if (h.indexOf("wa.me") > -1) return "WhatsApp";
+      if (h.indexOf("instagram.com") > -1) return "Instagram";
+      return "Open";
+    }
+    return "";
+  }
+
+  function setLabel(text){
+    if (text === labelText) return;
+    labelText = text;
+    ring.textContent = text;
+    if (text){
+      ring.style.width = Math.max(72, text.length * 8 + 40) + "px";
+      ring.style.height = "44px";
+    } else {
+      ring.style.width = ""; ring.style.height = "";
+    }
+  }
+
+  function update(t){
+    if (!t || !t.closest) return;
+    var text = labelFor(t);
+    var wrapT = !text ? t.closest(WRAP_SEL) : null;
+    var tight = !text && !wrapT && !!t.closest(TIGHT_SEL);
+    if (wrapEl && wrapEl !== wrapT) releaseWrap();
+    var isClickable = !!t.closest(HOVER_SEL);
+    if (text){
+      setLabel(text);
+      ring.classList.add("label"); ring.classList.remove("hover", "tight", "wrap", "fill", "brackets");
+      dot.classList.add("hide");
+    } else if (wrapT){
+      setLabel("");
+      if (wrapEl !== wrapT){
+        wrapEl = wrapT; rw = ring.offsetWidth; rh = ring.offsetHeight;
+        magnetOn = !reduce && wrapT.matches(MAGNET_SEL);
+        mx = 0; my = 0;
+        // If this element was still easing back from an earlier hover, pick up where it left off
+        for (var i = settling.length - 1; i >= 0; i--){
+          if (settling[i].el === wrapT){ mx = settling[i].x; my = settling[i].y; settling.splice(i, 1); }
+        }
+      }
+      var isDesign = !!wrapT.matches(".design-thumb, [data-design]");
+      var outline = !!wrapT.matches(OUTLINE_SEL);
+      wrapPad = isDesign ? 16 : outline ? 10 : 4;
+      ring.classList.remove("label", "hover", "tight"); ring.classList.add("wrap");
+      ring.classList.toggle("brackets", isDesign);
+      ring.classList.toggle("fill", !outline);
+      dot.classList.remove("hide");
+    } else if (tight){
+      setLabel("");
+      ring.classList.remove("label", "hover", "wrap", "fill", "brackets"); ring.classList.add("tight");
+      dot.classList.remove("hide");
+    } else {
+      setLabel("");
+      ring.classList.remove("label", "tight", "wrap", "fill", "brackets");
+      ring.classList.toggle("hover", isClickable);
+      dot.classList.toggle("hide", isClickable);
+    }
+  }
+
+  // Delegation, so anything rendered later from JS (cards, cart rows, related row) works automatically.
+  document.addEventListener("mouseover", function(e){ lastTarget = e.target; update(e.target); });
+  // Button text can change after a click ("Add to Cart" -> "Added"), so refresh the pill.
+  document.addEventListener("click", function(){ setTimeout(function(){ if (lastTarget && document.contains(lastTarget)) update(lastTarget); }, 80); });
 })();
 </script>
 </body>
