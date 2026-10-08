@@ -80,6 +80,64 @@
   .path-bg canvas{ position:absolute; inset:0; width:100%; height:100%; opacity:0.85; }
   @media (prefers-reduced-motion: reduce){ .path-bg{ display:none; } }
 
+  /* ---------- KAIROS: side-menu link, homepage teaser, collection page ---------- */
+  @keyframes kGlow{ 0%,100%{ box-shadow:0 0 14px rgba(201,165,94,.20); } 50%{ box-shadow:0 0 28px rgba(201,165,94,.45); } }
+  .side-menu nav a.kairos-link{
+    position:relative; isolation:isolate; overflow:hidden; display:flex; align-items:center; justify-content:space-between;
+    margin:2px 0; padding:11px 14px; border-radius:8px; color:#140f04;
+    font-family:'Anton',sans-serif; font-size:17px; letter-spacing:.09em;
+    background:linear-gradient(90deg,#dcbc73 0%,#b8975a 36%,rgba(184,151,90,.28) 72%,rgba(184,151,90,0) 100%);
+    box-shadow:0 0 16px rgba(201,165,94,.22);
+  }
+  .side-menu nav a.kairos-link::after{ content:""; position:absolute; inset:0; z-index:-1; pointer-events:none; mix-blend-mode:multiply; opacity:.6; background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='140' height='140'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 .55 0'/></filter><rect width='100%25' height='100%25' filter='url(%23n)'/></svg>"); }
+  .side-menu nav a.kairos-link small{ font-family:'Inter',sans-serif; font-size:10px; font-weight:600; letter-spacing:.24em; color:#d9b86f; }
+  .side-menu nav a.kairos-link:hover{ color:#140f04; filter:brightness(1.14); }
+  @media (prefers-reduced-motion:no-preference){ .side-menu nav a.kairos-link{ animation:kGlow 3.6s ease-in-out infinite; } }
+
+  .kairos-teaser{
+    position:relative; isolation:isolate; overflow:hidden; display:flex; flex-wrap:wrap; align-items:center; justify-content:space-between; gap:14px 28px;
+    margin-top:28px; padding:20px 30px; border-radius:16px; color:var(--white);
+    background:radial-gradient(90% 140% at 100% 0%,rgba(201,165,94,.34),transparent 60%),linear-gradient(135deg,#1b1507 0%,#0b0b0a 70%);
+    border:1px solid rgba(201,165,94,.45);
+    box-shadow:0 0 0 1px rgba(201,165,94,.08),0 0 42px rgba(201,165,94,.18),inset 0 0 60px rgba(201,165,94,.05);
+    transition:box-shadow .3s ease, transform .3s ease; cursor:pointer;
+  }
+  .kairos-teaser::after{ content:""; position:absolute; inset:0; z-index:-1; pointer-events:none; mix-blend-mode:multiply; opacity:.5; background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='140' height='140'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 .55 0'/></filter><rect width='100%25' height='100%25' filter='url(%23n)'/></svg>"); }
+  .kairos-teaser:hover{ transform:translateY(-2px); box-shadow:0 0 0 1px rgba(201,165,94,.2),0 0 64px rgba(201,165,94,.32),inset 0 0 70px rgba(201,165,94,.08); }
+  .kt-eyebrow, .kairos-eyebrow{ display:block; font-size:12px; letter-spacing:.24em; color:#d9b86f; }
+  .kt-title, .kairos-title{
+    font-family:'Anton',sans-serif; font-weight:400; text-transform:uppercase; margin:12px 0 0;
+    background:linear-gradient(180deg,#f5f5f0 10%,#d9b86f 100%); -webkit-background-clip:text; background-clip:text; color:transparent;
+    filter:drop-shadow(0 0 18px rgba(201,165,94,.35));
+  }
+  .kt-title{ font-size:clamp(34px,8.4vw,88px); line-height:.95; margin-top:4px; }
+  .kt-meta{ max-width:340px; }
+  .kt-meta strong{ display:block; font-size:15px; letter-spacing:.04em; }
+  .kt-meta span{ display:block; margin-top:6px; color:var(--grey); font-size:13px; letter-spacing:.14em; }
+  .kt-cta{
+    display:inline-block; margin-top:10px; padding:9px 20px; border-radius:40px; color:#140f04; font-weight:700; font-size:13px; letter-spacing:.16em;
+    background:linear-gradient(90deg,#e4c780,#b8975a); box-shadow:0 0 22px rgba(201,165,94,.45);
+  }
+  @media (prefers-reduced-motion:no-preference){ .kt-cta{ animation:kGlow 3.6s ease-in-out infinite; } }
+
+  #page-kairos{ background:radial-gradient(80% 46% at 50% 0%,rgba(201,165,94,.30),transparent 70%),linear-gradient(180deg,#1d1608 0%,#0e0c06 30%,var(--black) 65%); }
+  .kairos-hero{ padding:56px 0 30px; text-align:center; }
+  .kairos-title{ font-size:clamp(40px,9vw,92px); line-height:1; }
+  .kairos-date{ margin-top:12px; font-size:13px; letter-spacing:.2em; color:var(--grey); }
+  .kairos-hero .copy{ max-width:520px; margin:16px auto 0; }
+  .kairos-grid{ grid-template-columns:minmax(0,440px); justify-content:center; margin-top:8px; }
+  .kairos-grid .card{ box-shadow:0 0 0 1px rgba(201,165,94,.22),0 14px 44px rgba(201,165,94,.07); }
+  .kairos-grid .card-price{ color:#d9b86f; }
+  .kairos-foot{ text-align:center; max-width:560px; margin:56px auto 0; padding-bottom:70px; }
+  .card-img .bundle-collage{ width:100%; height:100%; display:grid; grid-template-columns:1fr 1fr; grid-template-rows:1fr 1fr; gap:2px; background:#0d0d0c; }
+  .bundle-collage .bc-cap{ grid-column:1; grid-row:1; } .bundle-collage .bc-tee{ grid-column:1; grid-row:2; } .bundle-collage .bc-pants{ grid-column:2; grid-row:1 / 3; }
+  .bun-piece{ border:1px solid var(--grey-line); border-radius:12px; padding:14px; margin-top:12px; background:rgba(201,165,94,.04); }
+  .bun-piece.bun-off{ opacity:.55; }
+  .bun-head{ display:flex; justify-content:space-between; align-items:center; gap:10px; margin-bottom:10px; }
+  .bun-title{ font-family:'Anton',sans-serif; letter-spacing:.07em; font-size:15px; color:#d9b86f; }
+  .bun-sub{ display:block; font-size:11px; color:var(--grey); margin-top:2px; }
+  .bun-toggle{ border:1px solid var(--grey-line); background:none; color:var(--white); border-radius:var(--radius-sm); padding:6px 10px; font-size:11px; letter-spacing:.06em; cursor:pointer; white-space:nowrap; }
+
   /* ---------- grain overlay: subtle texture over the flat black ---------- */
   .grain-overlay{
     position: fixed; inset:0; z-index:1; pointer-events:none;
@@ -603,6 +661,7 @@
   <nav>
     <a href="#home" data-nav="home">Home</a>
     <a href="#products" data-nav="products">All Products</a>
+    <a href="#kairos" data-nav="kairos" class="kairos-link"><span>KAIROS</span><small>GRIT</small></a>
     <a href="#contact" data-nav="contact">Contact Us</a>
     <a href="#faq" data-nav="faq">FAQ / Q&amp;A</a>
     <a href="#story" data-nav="story">The Path &amp; The Moment</a>
@@ -634,6 +693,19 @@
              and add class="has-image" back onto .hero-inner above. -->
       </div>
     </div>
+    <div class="wrap reveal">
+      <a class="kairos-teaser" href="#kairos" data-nav="kairos" aria-label="Enter the Kairos collection">
+        <div>
+          <span class="kt-eyebrow">KAIROS</span>
+          <h2 class="kt-title">NOT COMING SOON</h2>
+        </div>
+        <div class="kt-meta">
+          <strong>THE &ldquo;GRIT&rdquo; COLLECTION</strong>
+          <span>ALREADY RELEASED SINCE 7.10.2026</span>
+          <span class="kt-cta">ENTER KAIROS &rarr;</span>
+        </div>
+      </a>
+    </div>
     <div class="wrap">
       <div class="section-heading reveal">
         <h2>FEATURED</h2>
@@ -664,6 +736,22 @@
           <h4>Print &amp; Finish</h4>
           <p class="copy">Embroidery for a premium, textured finish on apparel and headwear; DTF for vibrant designs across fabric types; sublimation for permanent, infused color on polyester and coated pieces — each one matched to the product it suits best.</p>
         </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="page" id="page-kairos">
+    <div class="wrap">
+      <div class="kairos-hero">
+        <span class="kairos-eyebrow">KAIROS &middot; THE MOMENT</span>
+        <h1 class="kairos-title">THE &ldquo;GRIT&rdquo; COLLECTION</h1>
+        <p class="kairos-date">ALREADY RELEASED SINCE 7.10.2026</p>
+        <p class="copy">One collection: the tee, the sweatpants and the cap. Pick sizes and printing for each piece right on the card.</p>
+      </div>
+      <div class="grid kairos-grid" id="kairosGrid"></div>
+      <div class="kairos-foot reveal">
+        <p class="copy">Kairos is Greek for &quot;opportunity.&quot; It's not something you plan for &mdash; it just shows up. You either take it and let it bend your path somewhere new, or it slips by.<br><strong>Seize.</strong></p>
+        <a class="btn ghost" href="#products" data-nav="products" style="margin-top:16px; display:inline-block;">Shop All Products</a>
       </div>
     </div>
   </section>
@@ -867,6 +955,8 @@
         <div class="opt-row" id="modalPrintMethodRow"></div>
       </div>
 
+      <div id="modalBundleWrap" style="display:none;"></div>
+
       <p class="opt-warn" id="optWarn">Please select all options before adding to cart.</p>
 
       <div class="qty-row">
@@ -899,6 +989,7 @@
       <a href="#contact" data-nav="contact">Contact Us</a>
       <a href="#faq" data-nav="faq">FAQ / Q&amp;A</a>
       <a href="#story" data-nav="story">The Path &amp; The Moment</a>
+      <a href="#kairos" data-nav="kairos">Kairos</a>
     </div>
     <div class="footer-col">
       <h4>CONTACT</h4>
@@ -1309,6 +1400,16 @@
      PRODUCT DATA — photos live on Supabase Storage (see "images"
      on each product below); update a URL there to swap a photo.
   ============================================================= */
+  /* ---- KAIROS "GRIT" collection: one bundle product (id kairos-grit) made of three pieces ---- */
+  var KAIROS_BUNDLE_ID = "kairos-grit";
+  var KAIROS_COLOR = "Dark Grey", openFromKairos = false;
+  var KAIROS_CAP_DEDUCT = 270;   // taken off the set price if the customer removes the cap — change to your number
+  var BUNDLE_PARTS = [
+    { key:"tee",   pid:"p32", label:"T-Shirt" },
+    { key:"pants", pid:"p15", label:"Sweatpants" },
+    { key:"cap",   pid:"p11", label:"Cap", optional:true }
+  ];
+  var bun = null;
   var PRODUCTS = [
     { id:"p01", name:"Washed Oversized Tank Top", category:"Clothing", price:399.99, img:"", images:["https://pqznwgluuiuncdgdkpbp.supabase.co/storage/v1/object/public/images/images/washed-tank-1.webp","https://pqznwgluuiuncdgdkpbp.supabase.co/storage/v1/object/public/images/images/washed-tank-2.webp","https://pqznwgluuiuncdgdkpbp.supabase.co/storage/v1/object/public/images/images/washed-tank-3.webp","https://pqznwgluuiuncdgdkpbp.supabase.co/storage/v1/object/public/images/images/washed-tank-dark-grey-bold.webp","https://pqznwgluuiuncdgdkpbp.supabase.co/storage/v1/object/public/images/images/washed-tank-dark-grey-drip.webp","https://pqznwgluuiuncdgdkpbp.supabase.co/storage/v1/object/public/images/images/washed-tank-dark-grey-brush.webp"], colors:["Dark Grey"], sizes:["M","L","XL"], sizeGuide:"washedTank", designPhotos:{ "Dark Grey":{ d3:"https://pqznwgluuiuncdgdkpbp.supabase.co/storage/v1/object/public/images/images/washed-tank-dark-grey-bold.webp", d2:"https://pqznwgluuiuncdgdkpbp.supabase.co/storage/v1/object/public/images/images/washed-tank-dark-grey-drip.webp", d1:"https://pqznwgluuiuncdgdkpbp.supabase.co/storage/v1/object/public/images/images/washed-tank-dark-grey-brush.webp" } }, desc:"Oversized, loose-shoulder fit in heavy washed cotton." },
     { id:"p02", name:"Regular Long Sleeves", category:"Clothing", price:409.99, img:"", images:["https://pqznwgluuiuncdgdkpbp.supabase.co/storage/v1/object/public/images/images/regular-long-sleeves-1.webp","https://pqznwgluuiuncdgdkpbp.supabase.co/storage/v1/object/public/images/images/regular-long-sleeves-2.webp"], colors:["Black","White"], sizes:["S","M","L","XL","2XL"], sizeGuide:"longSleeves", desc:"Regular straight fit, suitable for everyday wear." },
@@ -1360,8 +1461,9 @@
       { label:"Samsung (A series)", options:["Samsung A74","A73","A72","A71","A70","A56","A55","A54","A53","A52/A52e","A51","A50","A36","A35","A34","A33","A32","A31","A30","A26","A25","A24","A23","A22","A21","A20","A16","A15","A14","A13","A12","A11","A10/A10s","A09","A08","A07","A06/A06s","A05c","A05","A04","A03"] },
       { label:"Samsung (M series)", options:["Samsung M51","Samsung M31"] },
       { label:"Vivo", options:["Vivo Y55 / Y55s","Vivo Y37 / Y15 / Y11 / 3","Vivo Y22 / Y22s","Vivo Y21T (4G)","Vivo Y20","Vivo Y02s"] }
-    ], freeDesign:true, desc:"Matte, shock-resistant case with raised edges to protect the screen and camera." }
-  ];
+    ], freeDesign:true, desc:"Matte, shock-resistant case with raised edges to protect the screen and camera." },
+  { id:"kairos-grit", name:"The GRIT Collection", category:"Kairos", price:1249, img:"", images:["https://pqznwgluuiuncdgdkpbp.supabase.co/storage/v1/object/public/images/images/washed-os-tshirt-1.webp","https://pqznwgluuiuncdgdkpbp.supabase.co/storage/v1/object/public/images/images/washed-milton-sweatpants-1.webp","https://pqznwgluuiuncdgdkpbp.supabase.co/storage/v1/object/public/images/images/washed-cap-1.webp"], colors:["Dark Grey"], sizes:[], bundle:true, isNew:true, desc:"The full GRIT set in Dark Grey: washed oversized tee, washed Milton sweatpants and washed cap. Choose size and printing for each piece." }
+];
 
   var CATEGORIES = Array.from(new Set(PRODUCTS.map(function(p){ return p.category; })));
 
@@ -1442,7 +1544,34 @@
     { id:"d3", name:"ODOS Bold", img:"https://pqznwgluuiuncdgdkpbp.supabase.co/storage/v1/object/public/images/images/design-3.webp" }
   ];
   function findDesign(id){ return DESIGNS.filter(function(d){ return d.id === id; })[0]; }
+  function bundlePrice(p, design, pm){
+    var d = (design||"").split("|"), m = (pm||"").split("|"), total = p.price;
+    BUNDLE_PARTS.forEach(function(part, i){
+      var dv = d[i] || "-";
+      if(dv === "none"){ total -= KAIROS_CAP_DEDUCT; }
+      else if(dv !== "-"){ total += findPrintMethod(m[i] || "dtf", findProduct(part.pid)).surcharge; }
+    });
+    return total;
+  }
+  function bundleBits(c){
+    var sz = (c.size||"").split("|"), d = (c.design||"").split("|"), m = (c.printMethod||"").split("|");
+    return BUNDLE_PARTS.map(function(part, i){
+      if(d[i] === "none") return part.label + ": removed";
+      var bits = [];
+      if(sz[i] && sz[i] !== "-") bits.push(sz[i]);
+      if(d[i] && d[i] !== "-"){ var dd = findDesign(d[i]), pm = findPrintMethod(m[i], findProduct(part.pid)); bits.push((dd ? dd.name : "Design") + (pm ? " — " + pm.name : "")); }
+      else { bits.push("Blank"); }
+      return part.label + ": " + bits.join(", ");
+    });
+  }
+  function cartBits(c, p){
+    if(p.bundle) return bundleBits(c);
+    var bits = []; if(c.color) bits.push(c.color); if(c.size) bits.push(c.size);
+    if(c.design){ var d = findDesign(c.design); var pm = findPrintMethod(c.printMethod, p); bits.push((d ? d.name+" design" : "Design") + (pm ? " — "+pm.name : "")); } else { bits.push("Blank"); }
+    return bits;
+  }
   function itemPrice(p, design, printMethod){
+    if(p.bundle) return bundlePrice(p, design, printMethod);
     if(!design || p.freeDesign) return p.price;
     var m = findPrintMethod(printMethod, p);
     return p.price + m.surcharge;
@@ -1472,7 +1601,7 @@
   function syncCartToSupabase(){
     if(!sb || !currentUser) return;
     var uid = currentUser.id;
-    var snapshot = cart.slice();
+    var snapshot = cart.filter(function(c){ return c.id !== KAIROS_BUNDLE_ID; });   // bundle lines stay local
     clearTimeout(cartSyncTimer);
     cartSyncTimer = setTimeout(function(){
       sb.from("cart_items").delete().eq("user_id", uid).then(function(){
@@ -1600,6 +1729,9 @@
   }
   function imgBlock(p){
     var src = primaryImg(p);
+    if(p.bundle && p.images && p.images.length >= 3){
+      return '<div class="bundle-collage"><img class="bc-cap" src="'+p.images[2]+'" alt="" loading="lazy" decoding="async"><img class="bc-tee" src="'+p.images[0]+'" alt="" loading="lazy" decoding="async"><img class="bc-pants" src="'+p.images[1]+'" alt="'+p.name+'" loading="lazy" decoding="async"></div>';
+    }
     if(!src){ return '<span class="img-placeholder">'+p.name.toUpperCase()+' — ADD PHOTO</span>'; }
     var second = (p.images && p.images.length > 1) ? p.images[1] : null;
     if(second){
@@ -1646,6 +1778,13 @@
     var picks = FEATURED_IDS.map(function(id){ return findProduct(id); }).filter(Boolean);
     document.getElementById("featuredGrid").innerHTML = picks.map(cardHTML).join("");
     observeReveals(document.getElementById("featuredGrid"));
+    renderKairos();
+  }
+  function renderKairos(){
+    var grid = document.getElementById("kairosGrid"); if(!grid) return;
+    var b = findProduct(KAIROS_BUNDLE_ID);
+    grid.innerHTML = b ? cardHTML(b) : "";
+    observeReveals(grid);
   }
   function sortProducts(list){
     list = list.slice();
@@ -1760,10 +1899,7 @@
         var p = findProduct(c.id);
         if(!p) return "";
         var unitPrice = itemPrice(p, c.design, c.printMethod);
-        var variantBits = [];
-        if(c.color) variantBits.push(c.color);
-        if(c.size) variantBits.push(c.size);
-        if(c.design){ var d = findDesign(c.design); var pm = findPrintMethod(c.printMethod, p); variantBits.push((d ? d.name+" design" : "Design") + (pm ? " — "+pm.name : "")); } else { variantBits.push("Blank"); }
+        var variantBits = cartBits(c, p);
         var variantText = variantBits.length ? variantBits.join(" / ") : "";
         return (
           '<div class="cart-item">' +
@@ -1826,7 +1962,7 @@
   /* ============================================================
      NAVIGATION
   ============================================================= */
-  var PAGES = ["home","products","wishlist","cart","contact","faq","story"];
+  var PAGES = ["home","products","wishlist","cart","contact","faq","story","kairos"];
   function goTo(page){
     if(PAGES.indexOf(page) === -1) page = "home";
     PAGES.forEach(function(p){ document.getElementById("page-"+p).classList.toggle("active", p === page); });
@@ -1834,6 +1970,7 @@
     window.scrollTo(0,0);
     if(location.hash !== "#"+page) history.replaceState(null, "", "#"+page);
     if(page === "products") renderProducts();
+    if(page === "kairos") renderKairos();
     if(page === "wishlist") renderWishlist();
   }
   document.addEventListener("click", function(e){
@@ -2011,6 +2148,7 @@
     var wish = e.target.closest("[data-wish]");
     if(wish){ toggleWish(wish.getAttribute("data-wish")); return; }
     var open = e.target.closest("[data-open]");
+    openFromKairos = !!(open && open.closest("#kairosGrid"));
     if(open){ openModal(open.getAttribute("data-open")); return; }
     var inc = e.target.closest("[data-inc]");
     if(inc){ var k1 = inc.getAttribute("data-inc"); var it1 = cart.filter(function(c){ return c.key===k1; })[0]; if(it1) setQtyByKey(k1, it1.qty+1); return; }
@@ -2042,7 +2180,7 @@
     modalProduct = findProduct(id);
     if(!modalProduct) return;
     modalQty = 1;
-    modalColor = modalProduct.colors && modalProduct.colors.length ? modalProduct.colors[0] : null;
+    modalColor = modalProduct.colors && modalProduct.colors.length ? ((openFromKairos && modalProduct.colors.indexOf(KAIROS_COLOR) !== -1) ? KAIROS_COLOR : modalProduct.colors[0]) : null;
     modalSize = modalProduct.sizeAsSelect ? "" : (modalProduct.sizes && modalProduct.sizes.length ? modalProduct.sizes[0] : null);
     modalDesign = "";
     modalPrintMethod = getPrintMethods(modalProduct)[0].id;
@@ -2226,8 +2364,60 @@
       });
     });
 
+    var bw = document.getElementById("modalBundleWrap");
+    if(modalProduct.bundle){
+      bun = freshBundle();
+      ["modalColorWrap","modalSizeWrap","modalDesignWrap","modalPrintMethodWrap"].forEach(function(id){ document.getElementById(id).style.display = "none"; });
+      bw.style.display = "block";
+      renderBundleUI(); syncBundleState(); updateModalPrice();
+    } else {
+      bw.style.display = "none";
+      document.getElementById("modalDesignWrap").style.display = "";
+      document.getElementById("optWarn").textContent = "Please select all options before adding to cart.";
+    }
+
     modalOverlay.classList.add("show");
   }
+  function freshBundle(){
+    var o = {};
+    BUNDLE_PARTS.forEach(function(part){ o[part.key] = { on:true, size:"", design:"", pm: getPrintMethods(findProduct(part.pid))[0].id }; });
+    return o;
+  }
+  function syncBundleState(){
+    modalSize = [bun.tee.size || "-", bun.pants.size || "-", "-"].join("|");
+    modalDesign = [bun.tee.design || "-", bun.pants.design || "-", bun.cap.on ? (bun.cap.design || "-") : "none"].join("|");
+    modalPrintMethod = [bun.tee.design ? bun.tee.pm : "-", bun.pants.design ? bun.pants.pm : "-", (bun.cap.on && bun.cap.design) ? bun.cap.pm : "-"].join("|");
+  }
+  function renderBundleUI(){
+    var wrap = document.getElementById("modalBundleWrap");
+    wrap.innerHTML = BUNDLE_PARTS.map(function(part){
+      var cp = findProduct(part.pid), st = bun[part.key], off = part.optional && !st.on;
+      var h = '<div class="bun-piece'+(off ? ' bun-off' : '')+'"><div class="bun-head"><div><span class="bun-title">'+part.label.toUpperCase()+'</span><span class="bun-sub">'+cp.name+' · '+KAIROS_COLOR+(off ? ' · −'+fmt(KAIROS_CAP_DEDUCT) : '')+'</span></div>';
+      if(part.optional){ h += '<button type="button" class="bun-toggle" data-act="toggle" data-part="'+part.key+'">'+(st.on ? 'Remove cap' : '+ Add cap')+'</button>'; }
+      h += '</div>';
+      if(!off){
+        if(cp.sizes && cp.sizes.length){
+          h += '<p class="opt-label">SIZE</p><div class="opt-row">' + cp.sizes.map(function(z){ return '<button type="button" data-act="size" data-part="'+part.key+'" data-val="'+z+'" class="'+(st.size === z ? 'selected' : '')+'">'+z+'</button>'; }).join("") + '</div>';
+        }
+        h += '<p class="opt-label" style="margin-top:12px;">DESIGN</p><div class="opt-row"><button type="button" data-act="design" data-part="'+part.key+'" data-val="" class="'+(!st.design ? 'selected' : '')+'">Blank</button>' +
+          DESIGNS.map(function(d){ return '<button type="button" data-act="design" data-part="'+part.key+'" data-val="'+d.id+'" class="'+(st.design === d.id ? 'selected' : '')+'">'+d.name+'</button>'; }).join("") + '</div>';
+        if(st.design){
+          h += '<p class="opt-label" style="margin-top:12px;">PRINTING</p><div class="opt-row">' + getPrintMethods(cp).map(function(m){ return '<button type="button" data-act="pm" data-part="'+part.key+'" data-val="'+m.id+'" class="'+(st.pm === m.id ? 'selected' : '')+'">'+m.name+' (+'+fmt(m.surcharge)+')</button>'; }).join("") + '</div>';
+        }
+      }
+      return h + '</div>';
+    }).join("");
+  }
+  document.getElementById("modalBundleWrap").addEventListener("click", function(e){
+    var b = e.target.closest("button[data-act]"); if(!b || !modalProduct || !modalProduct.bundle) return;
+    var st = bun[b.getAttribute("data-part")], act = b.getAttribute("data-act"), v = b.getAttribute("data-val");
+    if(act === "toggle") st.on = !st.on;
+    else if(act === "size") st.size = v;
+    else if(act === "design") st.design = v;
+    else if(act === "pm") st.pm = v;
+    document.getElementById("optWarn").classList.remove("show");
+    renderBundleUI(); syncBundleState(); updateModalPrice();
+  });
   function updateModalPrice(){
     if(!modalProduct) return;
     document.getElementById("modalPrice").textContent = fmt(itemPrice(modalProduct, modalDesign, modalPrintMethod));
@@ -2246,6 +2436,9 @@
   document.getElementById("qtyMinus").addEventListener("click", function(){ modalQty = Math.max(1, modalQty-1); document.getElementById("qtyVal").textContent = modalQty; });
   document.getElementById("modalAddBtn").addEventListener("click", function(){
     if(!modalProduct) return;
+    if(modalProduct.bundle && (!bun.tee.size || !bun.pants.size)){
+      var w = document.getElementById("optWarn"); w.textContent = "Please choose a size for the T-Shirt and the Sweatpants."; w.classList.add("show"); return;
+    }
     var needsColor = modalProduct.colors && modalProduct.colors.length;
     var needsSize = (modalProduct.sizes && modalProduct.sizes.length) || (modalProduct.sizeAsSelect && modalProduct.sizeGroups && modalProduct.sizeGroups.length);
     if((needsColor && !modalColor) || (needsSize && !modalSize)){
@@ -2329,8 +2522,7 @@
     var total = subtotal - disc;
     var lines = cart.map(function(c){
       var p = findProduct(c.id); if(!p) return "";
-      var bits = []; if(c.color) bits.push(c.color); if(c.size) bits.push(c.size);
-      if(c.design){ var d = findDesign(c.design); var pm = findPrintMethod(c.printMethod, p); bits.push((d ? d.name+" design" : "Design") + (pm ? " — "+pm.name : "")); } else { bits.push("Blank"); }
+      var bits = cartBits(c, p);
       var unit = itemPrice(p, c.design, c.printMethod);
       return p.name + (bits.length ? " ("+bits.join(" / ")+")" : "") + " x" + c.qty + " — " + fmt(unit*c.qty);
     });
@@ -2338,8 +2530,7 @@
     document.getElementById("orderIdField").value = orderId;
     var emailItems = cart.map(function(c){
       var p = findProduct(c.id); if(!p) return null;
-      var bits = []; if(c.color) bits.push(c.color); if(c.size) bits.push(c.size);
-      if(c.design){ var d = findDesign(c.design); var pm = findPrintMethod(c.printMethod, p); bits.push((d ? d.name+" design" : "Design") + (pm ? " — "+pm.name : "")); } else { bits.push("Blank"); }
+      var bits = cartBits(c, p);
       return { name: p.name, qty: c.qty, price: fmt(itemPrice(p, c.design, c.printMethod)*c.qty), variant: bits.join(" / ") };
     }).filter(Boolean);
     var emailPayload = {
