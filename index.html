@@ -1005,13 +1005,21 @@
   function buildJourney(){
     var n = 6;
     var raw = [];
-    for(var i=0;i<=n;i++){
-      raw.push({
-        x: (W/n) * i + (Math.random()-0.5) * (W/n) * 0.55,
-        y: H * (0.18 + Math.random()*0.64)
-      });
+    var mx = Math.max(24, W*0.025), my = Math.max(24, H*0.04);   // keep the whole route inside the screen
+    var span = W - 2*mx;
+    function clampPt(p, rightPad){
+      p.x = Math.min(W - (rightPad||mx), Math.max(mx, p.x));
+      p.y = Math.min(H - my, Math.max(my, p.y));
+      return p;
     }
-    var main = smoothPoints(raw, 24);
+    for(var i=0;i<=n;i++){
+      raw.push(clampPt({
+        x: mx + (span/n) * i + (Math.random()-0.5) * (span/n) * 0.55,
+        y: H * (0.18 + Math.random()*0.64)
+      }, i===n ? Math.max(mx, 48) : mx));       // extra room at the end so the flare ring isn't clipped
+    }
+    // the spline can swing slightly past its control points — clamp the sampled curve too
+    var main = smoothPoints(raw, 24).map(function(p){ return clampPt({x:p.x, y:p.y}, Math.max(mx, 48)); });
     var mainLens = [0]; for(var k=1;k<main.length;k++){ var dx=main[k].x-main[k-1].x, dy=main[k].y-main[k-1].y; mainLens.push(Math.sqrt(dx*dx+dy*dy)); }
     var mainTotal = pathLength(main);
 
@@ -1025,7 +1033,7 @@
       { x: forkOrigin.x + Math.cos(angle)*forkLen*0.5, y: forkOrigin.y + Math.sin(angle)*forkLen*0.5 },
       { x: forkOrigin.x + Math.cos(angle)*forkLen, y: forkOrigin.y + Math.sin(angle)*forkLen }
     ];
-    var fork = smoothPoints(forkRaw, 20);
+    var fork = smoothPoints(forkRaw, 20).map(function(p){ return clampPt({x:p.x, y:p.y}); });
     var forkLens = [0]; for(var m=1;m<fork.length;m++){ var fdx=fork[m].x-fork[m-1].x, fdy=fork[m].y-fork[m-1].y; forkLens.push(Math.sqrt(fdx*fdx+fdy*fdy)); }
     var forkTotal = pathLength(fork);
 
@@ -1057,7 +1065,7 @@
         y: gx.y - tt*(tt>0 ? above : below)
       });
     }
-    var gold = smoothPoints(goldRaw, 24);
+    var gold = smoothPoints(goldRaw, 24).map(function(p){ return clampPt({x:p.x, y:p.y}); });
     var goldLens = [0]; for(var gk=1;gk<gold.length;gk++){ var gdx=gold[gk].x-gold[gk-1].x, gdy=gold[gk].y-gold[gk-1].y; goldLens.push(Math.sqrt(gdx*gdx+gdy*gdy)); }
     var goldTotal = pathLength(gold);
 
