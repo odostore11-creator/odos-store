@@ -1029,8 +1029,41 @@
     var forkLens = [0]; for(var m=1;m<fork.length;m++){ var fdx=fork[m].x-fork[m-1].x, fdy=fork[m].y-fork[m-1].y; forkLens.push(Math.sqrt(fdx*fdx+fdy*fdy)); }
     var forkTotal = pathLength(fork);
 
+    /* KAIROS line — an almost-vertical golden curve that cuts across the
+       white path just after the middle of the screen and overshoots it on
+       both sides: the moment that crosses the path. */
+    var goldAt = 0.6;
+    for(var gi=1; gi<main.length; gi++){
+      if(main[gi].x >= W*0.56){
+        var acc = 0; for(var gj=1; gj<=gi; gj++) acc += mainLens[gj];
+        goldAt = acc/mainTotal; break;
+      }
+    }
+    goldAt = Math.max(goldAt, forkAt + 0.12);   // keep clear of the fork
+    goldAt = Math.min(goldAt, 0.8);
+    var gx = pointAt(main, mainLens, mainTotal, goldAt);
+    var below = H*(0.17 + Math.random()*0.07);
+    var above = H*(0.21 + Math.random()*0.07);
+    below = Math.min(below, H*0.94 - gx.y);
+    above = Math.min(above, gx.y - H*0.06);
+    var bend = Math.min(W,H)*(0.03 + Math.random()*0.02) * (Math.random()>0.5?1:-1);
+    var lean = H*0.035;                          // slight lean, rising to the right
+    var goldRaw = [];
+    var ts = [-1,-0.5,0,0.5,1];
+    for(var ti=0; ti<ts.length; ti++){
+      var tt = ts[ti];
+      goldRaw.push({
+        x: gx.x + bend*Math.sin(tt*Math.PI*0.8) + tt*lean,
+        y: gx.y - tt*(tt>0 ? above : below)
+      });
+    }
+    var gold = smoothPoints(goldRaw, 24);
+    var goldLens = [0]; for(var gk=1;gk<gold.length;gk++){ var gdx=gold[gk].x-gold[gk-1].x, gdy=gold[gk].y-gold[gk-1].y; goldLens.push(Math.sqrt(gdx*gdx+gdy*gdy)); }
+    var goldTotal = pathLength(gold);
+
     return { main:main, mainLens:mainLens, mainTotal:mainTotal, forkAt:forkAt,
-              fork:fork, forkLens:forkLens, forkTotal:forkTotal };
+              fork:fork, forkLens:forkLens, forkTotal:forkTotal,
+              gold:gold, goldLens:goldLens, goldTotal:goldTotal, goldAt:goldAt };
   }
 
   var journey = buildJourney();
@@ -1039,6 +1072,32 @@
   var DRAW_MS = 3600, FLARE_MS = 550, HOLD_MS = 900, FADE_MS = 950;
   var forkT = 0, forkState = "idle"; // idle -> drawing -> fading -> done
   var FORK_DRAW_MS = 520, FORK_FADE_MS = 700;
+  var goldT = 0, goldState = "idle";   // idle -> drawing -> done
+  var GOLD_DRAW_MS = 1100;
+
+  // the golden Kairos line: warm gold, a soft glow, a bright point at its tip
+  function drawGold(cut, fadeMul){
+    if(cut <= 0 || fadeMul <= 0) return;
+    var g = journey.gold, a = g[0], b = g[g.length-1];
+    var grad = ctx.createLinearGradient(a.x,a.y,b.x,b.y);
+    grad.addColorStop(0,"rgba(150,120,66,"+(0.55*fadeMul).toFixed(3)+")");
+    grad.addColorStop(1,"rgba(226,188,108,"+(0.95*fadeMul).toFixed(3)+")");
+    ctx.save();
+    ctx.lineJoin="round"; ctx.lineCap="round";
+    ctx.shadowColor = "rgba(214,176,98,"+(0.8*fadeMul).toFixed(3)+")"; ctx.shadowBlur = 12;
+    ctx.lineWidth = 2.1;
+    ctx.strokeStyle = grad;
+    strokeCut(g, journey.goldLens, journey.goldTotal, cut);
+    ctx.restore();
+    var tp = pointAt(g, journey.goldLens, journey.goldTotal, cut);
+    var r = 8;
+    var rg = ctx.createRadialGradient(tp.x,tp.y,0,tp.x,tp.y,r);
+    rg.addColorStop(0,"rgba(255,246,220,"+(0.95*fadeMul).toFixed(3)+")");
+    rg.addColorStop(0.45,"rgba(226,188,108,"+(0.55*fadeMul).toFixed(3)+")");
+    rg.addColorStop(1,"rgba(226,188,108,0)");
+    ctx.fillStyle = rg;
+    ctx.beginPath(); ctx.arc(tp.x,tp.y,r,0,Math.PI*2); ctx.fill();
+  }
 
   /* Pause the animation loop while the tab isn't visible — no point
      burning battery/CPU drawing a canvas nobody's looking at. */
@@ -1060,6 +1119,12 @@
 
     // elapsed tracking per state
     frame.elapsed = (frame.elapsed||0) + dt;
+
+    if(goldState==="drawing"){
+      goldT += dt;
+      if(goldT >= GOLD_DRAW_MS){ goldT = GOLD_DRAW_MS; goldState = "done"; }
+    }
+    var goldCut = goldState==="idle" ? 0 : easeInOutCubic(Math.min(1, goldT/GOLD_DRAW_MS));
 
     if(state==="drawing"){
       var raw = Math.min(1, frame.elapsed/DRAW_MS);
@@ -1105,6 +1170,10 @@
         ctx.beginPath(); ctx.arc(tp.x,tp.y,r,0,Math.PI*2); ctx.fill();
       }
 
+      // the golden line cuts across once the white path is past the middle
+      if(goldState==="idle" && progress >= journey.goldAt){ goldState="drawing"; goldT=0; }
+      drawGold(goldCut, 1);
+
       if(raw>=1){ state="flare"; frame.elapsed=0; }
     }
     else if(state==="flare" || state==="holding" || state==="fading"){
@@ -1118,6 +1187,8 @@
       ctx.strokeStyle = "rgba(245,245,240,"+(0.72*fadeMul).toFixed(3)+")";
       strokeCut(journey.main, journey.mainLens, journey.mainTotal, 1);
       ctx.restore();
+
+      drawGold(goldCut, fadeMul);
 
       // the flare — the moment seized (Kairos): a bright burst at the path's end
       var end = journey.main[journey.main.length-1];
@@ -1140,6 +1211,7 @@
       else if(state==="holding" && frame.elapsed>=HOLD_MS){ state="fading"; frame.elapsed=0; }
       else if(state==="fading" && frame.elapsed>=FADE_MS){
         state="drawing"; frame.elapsed=0; forkState="idle"; forkT=0;
+        goldState="idle"; goldT=0;
         journey = buildJourney();
       }
     }
