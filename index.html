@@ -131,6 +131,7 @@
   .kairos-foot{ text-align:center; max-width:560px; margin:56px auto 0; padding-bottom:70px; }
   .card-img .bundle-collage{ width:100%; height:100%; display:grid; grid-template-columns:1fr 1fr; grid-template-rows:1fr 1fr; gap:2px; background:#0d0d0c; }
   .bundle-collage .bc-cap{ grid-column:1; grid-row:1; } .bundle-collage .bc-tee{ grid-column:1; grid-row:2; } .bundle-collage .bc-pants{ grid-column:2; grid-row:1 / 3; }
+  .card-img .bundle-img img, .modal-img.bundle-img img{ object-position:50% 37%; }
   .bun-piece{ border:1px solid var(--grey-line); border-radius:12px; padding:14px; margin-top:12px; background:rgba(201,165,94,.04); }
   .bun-piece.bun-off{ opacity:.55; }
   .bun-head{ display:flex; justify-content:space-between; align-items:center; gap:10px; margin-bottom:10px; }
@@ -1462,7 +1463,7 @@
       { label:"Samsung (M series)", options:["Samsung M51","Samsung M31"] },
       { label:"Vivo", options:["Vivo Y55 / Y55s","Vivo Y37 / Y15 / Y11 / 3","Vivo Y22 / Y22s","Vivo Y21T (4G)","Vivo Y20","Vivo Y02s"] }
     ], freeDesign:true, desc:"Matte, shock-resistant case with raised edges to protect the screen and camera." },
-  { id:"kairos-grit", name:"The GRIT Collection", category:"Kairos", price:1249, img:"", images:["https://pqznwgluuiuncdgdkpbp.supabase.co/storage/v1/object/public/images/images/washed-os-tshirt-1.webp","https://pqznwgluuiuncdgdkpbp.supabase.co/storage/v1/object/public/images/images/washed-milton-sweatpants-1.webp","https://pqznwgluuiuncdgdkpbp.supabase.co/storage/v1/object/public/images/images/washed-cap-1.webp"], colors:["Dark Grey"], sizes:[], bundle:true, isNew:true, desc:"The full GRIT set in Dark Grey: washed oversized tee, washed Milton sweatpants and washed cap. Choose size and printing for each piece." }
+  { id:"kairos-grit", name:"The GRIT Collection", category:"Kairos", price:1249, img:"", images:["https://pqznwgluuiuncdgdkpbp.supabase.co/storage/v1/object/public/images/images/4.webp","https://pqznwgluuiuncdgdkpbp.supabase.co/storage/v1/object/public/images/images/15.webp","https://pqznwgluuiuncdgdkpbp.supabase.co/storage/v1/object/public/images/images/14.webp","https://pqznwgluuiuncdgdkpbp.supabase.co/storage/v1/object/public/images/images/13.webp"], colors:["Dark Grey"], sizes:[], bundle:true, isNew:true, desc:"The full GRIT set in Dark Grey: washed oversized tee, washed Milton sweatpants and washed cap. Choose size and printing for each piece." }
 ];
 
   var CATEGORIES = Array.from(new Set(PRODUCTS.map(function(p){ return p.category; })));
@@ -1729,13 +1730,10 @@
   }
   function imgBlock(p){
     var src = primaryImg(p);
-    if(p.bundle && p.images && p.images.length >= 3){
-      return '<div class="bundle-collage"><img class="bc-cap" src="'+p.images[2]+'" alt="" loading="lazy" decoding="async"><img class="bc-tee" src="'+p.images[0]+'" alt="" loading="lazy" decoding="async"><img class="bc-pants" src="'+p.images[1]+'" alt="'+p.name+'" loading="lazy" decoding="async"></div>';
-    }
     if(!src){ return '<span class="img-placeholder">'+p.name.toUpperCase()+' — ADD PHOTO</span>'; }
     var second = (p.images && p.images.length > 1) ? p.images[1] : null;
     if(second){
-      return '<div class="img-swap-wrap">' +
+      return '<div class="img-swap-wrap'+(p.bundle ? ' bundle-img' : '')+'">' +
         '<img class="img-primary" src="'+src+'" alt="'+p.name+'" loading="lazy" decoding="async">' +
         '<img class="img-secondary" src="'+second+'" alt="'+p.name+'" loading="lazy" decoding="async">' +
       '</div>';
@@ -2365,6 +2363,7 @@
     });
 
     var bw = document.getElementById("modalBundleWrap");
+    document.getElementById("modalImg").classList.toggle("bundle-img", !!modalProduct.bundle);
     if(modalProduct.bundle){
       bun = freshBundle();
       ["modalColorWrap","modalSizeWrap","modalDesignWrap","modalPrintMethodWrap"].forEach(function(id){ document.getElementById(id).style.display = "none"; });
