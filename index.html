@@ -185,6 +185,35 @@
     .nl-pop{ bottom:84px !important; }
   }
 
+  /* ---------- ORDER TRACKING ---------- */
+  .track-wrap{ max-width:640px; padding-bottom:70px; }
+  .track-form{ display:flex; gap:10px; margin:22px 0 10px; }
+  .track-form input{ flex:1; min-width:0; background:var(--black); border:1px solid var(--grey-line); border-radius:var(--radius-sm); color:var(--white); padding:13px 14px; font-size:16px; letter-spacing:.14em; text-transform:uppercase; }
+  .track-form input:focus{ outline:none; border-color:var(--white); }
+  .track-recent{ font-size:12px; color:var(--grey); display:flex; flex-wrap:wrap; gap:8px; align-items:center; }
+  .track-chip{ background:none; border:1px solid var(--grey-line); color:var(--white); border-radius:20px; padding:4px 12px; font-size:12px; letter-spacing:.08em; cursor:pointer; }
+  .track-card{ margin-top:22px; border:1px solid var(--grey-line); border-radius:14px; padding:22px; background:var(--black-2); }
+  .track-head{ display:flex; justify-content:space-between; align-items:center; gap:10px; flex-wrap:wrap; }
+  .track-no{ font-family:'Anton',sans-serif; font-size:22px; letter-spacing:.1em; }
+  .track-pill{ background:linear-gradient(90deg,#e4c780,#b8975a); color:#140f04; border-radius:20px; padding:4px 12px; font-size:12px; font-weight:700; letter-spacing:.08em; text-transform:uppercase; }
+  .track-pill.bad{ background:#a44; color:#fff; }
+  .track-msg{ margin-top:18px; font-size:14px; color:var(--grey); }
+  .track-msg.err{ color:#f88; }
+  .track-note{ margin-top:18px; padding:12px 14px; border-left:2px solid #d9b86f; background:rgba(217,184,111,.07); font-size:14px; }
+  .track-num, .track-upd{ margin-top:12px; font-size:13px; color:var(--grey); }
+  .track-num b{ color:var(--white); letter-spacing:.06em; }
+  .tl{ list-style:none; margin:20px 0 4px; padding:0; }
+  .tl li{ position:relative; display:flex; gap:14px; padding-bottom:20px; color:var(--grey); }
+  .tl li:last-child{ padding-bottom:0; }
+  .tl li i{ flex:0 0 14px; height:14px; margin-top:3px; border-radius:50%; border:2px solid var(--grey-line); background:var(--black); position:relative; z-index:1; }
+  .tl li:not(:last-child)::before{ content:""; position:absolute; left:6px; top:18px; bottom:-3px; width:2px; background:var(--grey-line); }
+  .tl li.done, .tl li.now{ color:var(--white); }
+  .tl li.done i{ background:var(--white); border-color:var(--white); }
+  .tl li.done:not(:last-child)::before{ background:var(--white); }
+  .tl li.now i{ background:#d9b86f; border-color:#d9b86f; box-shadow:0 0 0 4px rgba(217,184,111,.2),0 0 14px rgba(217,184,111,.6); }
+  .tl b{ display:block; font-weight:600; letter-spacing:.03em; }
+  .tl small{ display:block; color:var(--grey); font-size:12px; margin-top:2px; }
+
   /* ---------- grain overlay: subtle texture over the flat black ---------- */
   .grain-overlay{
     position: fixed; inset:0; z-index:1; pointer-events:none;
@@ -735,6 +764,7 @@
     <a href="#contact" data-nav="contact">Contact Us</a>
     <a href="#faq" data-nav="faq">FAQ / Q&amp;A</a>
     <a href="#story" data-nav="story">The Path &amp; The Moment</a>
+    <a href="#track" data-nav="track">Track Order</a>
   </nav>
   <p class="cat-label">CATEGORIES</p>
   <div class="categories" id="menuCategories"></div>
@@ -962,6 +992,19 @@
     </div>
   </section>
 
+  <section class="page" id="page-track">
+    <div class="wrap track-wrap">
+      <h1 class="page-title">TRACK YOUR ORDER</h1>
+      <p class="copy">Enter the order number from your confirmation. It starts with OD, like OD7K3M9Q.</p>
+      <form class="track-form" id="trackForm" novalidate>
+        <input type="text" id="trackInput" placeholder="Order number" autocomplete="off" autocapitalize="characters" spellcheck="false" maxlength="12" aria-label="Order number">
+        <button type="submit" class="btn" id="trackBtn">Track</button>
+      </form>
+      <div class="track-recent" id="trackRecent"></div>
+      <div id="trackResult" aria-live="polite"></div>
+    </div>
+  </section>
+
   <section class="page" id="page-story">
     <div class="story-line" aria-hidden="true"><i></i></div>
     <div class="wrap story-wrap">
@@ -1056,6 +1099,7 @@
       <a href="#contact" data-nav="contact">Contact Us</a>
       <a href="#faq" data-nav="faq">FAQ / Q&amp;A</a>
       <a href="#story" data-nav="story">The Path &amp; The Moment</a>
+    <a href="#track" data-nav="track">Track Order</a>
       <a href="#kairos" data-nav="kairos">Kairos</a>
     </div>
     <div class="footer-col">
@@ -2026,7 +2070,7 @@
   /* ============================================================
      NAVIGATION
   ============================================================= */
-  var PAGES = ["home","products","wishlist","cart","contact","faq","story","kairos"];
+  var PAGES = ["home","products","wishlist","cart","contact","faq","story","kairos","track"];
   function goTo(page){
     if(PAGES.indexOf(page) === -1) page = "home";
     PAGES.forEach(function(p){ document.getElementById("page-"+p).classList.toggle("active", p === page); });
@@ -2040,6 +2084,7 @@
     if(page === "products") renderProducts();
     if(page === "kairos") renderKairos();
     if(page === "wishlist") renderWishlist();
+    if(page === "track") renderTrackPage();
   }
   document.addEventListener("click", function(e){
     var nav = e.target.closest("[data-nav]");
@@ -2197,6 +2242,56 @@
     ], {duration:650, easing:"cubic-bezier(.5,0,.75,0)"});
     an.onfinish = function(){ c.remove(); bump(target); };
   }
+
+  /* ============================================================
+     ORDER TRACKING — customer enters an order number, sees the status you set in Supabase
+  ============================================================= */
+  var TRACK_STEPS = [["received","Order received"],["confirmed","Confirmed"],["preparing","Preparing"],["shipped","Shipped"],["out_for_delivery","Out for delivery"],["delivered","Delivered"]];
+  var TRACK_LABEL = { received:"Received", confirmed:"Confirmed", preparing:"Preparing", shipped:"Shipped", out_for_delivery:"Out for delivery", delivered:"Delivered", cancelled:"Cancelled" };
+  function trackEsc(v){ return String(v == null ? "" : v).replace(/[&<>"']/g, function(c){ return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]; }); }
+  function trackDate(d){ try{ return new Date(d).toLocaleString("en-GB", { day:"numeric", month:"short", hour:"2-digit", minute:"2-digit", timeZone:"Africa/Cairo" }); }catch(e){ return ""; } }
+  function trackRecent(){ try{ return JSON.parse(localStorage.getItem("odos_orders") || "[]"); }catch(e){ return []; } }
+  function rememberOrder(id){
+    try{ var a = trackRecent().filter(function(x){ return x !== id; }); a.unshift(id); localStorage.setItem("odos_orders", JSON.stringify(a.slice(0,5))); }catch(e){}
+  }
+  function renderTrackPage(){
+    var box = document.getElementById("trackRecent"), inp = document.getElementById("trackInput"), a = trackRecent();
+    box.innerHTML = a.length ? '<span>Your recent orders:</span>' + a.map(function(id){ return '<button type="button" class="track-chip" data-track="'+trackEsc(id)+'">'+trackEsc(id)+'</button>'; }).join("") : "";
+    if(a.length && !inp.value) inp.value = a[0];
+  }
+  function trackHTML(o){
+    var cancelled = o.status === "cancelled", hist = {};
+    (o.history || []).forEach(function(h){ hist[h.status] = h.at; });
+    var idx = TRACK_STEPS.map(function(x){ return x[0]; }).indexOf(o.status);
+    var steps = cancelled ? '<p class="track-msg err">This order was cancelled. Message us on WhatsApp if you have any questions.</p>' :
+      '<ol class="tl">' + TRACK_STEPS.map(function(x, i){
+        var cls = i < idx ? "done" : (i === idx ? "now" : "");
+        return '<li class="'+cls+'"><i></i><div><b>'+x[1]+'</b>'+(hist[x[0]] ? '<small>'+trackDate(hist[x[0]])+'</small>' : '')+'</div></li>';
+      }).join("") + '</ol>';
+    return '<div class="track-card"><div class="track-head"><span class="track-no">'+trackEsc(o.order_number)+'</span><span class="track-pill'+(cancelled ? ' bad' : '')+'">'+(TRACK_LABEL[o.status] || trackEsc(o.status))+'</span></div>' +
+      steps +
+      (o.status_note ? '<p class="track-note">'+trackEsc(o.status_note)+'</p>' : '') +
+      (o.tracking_number ? '<p class="track-num">Courier tracking number: <b>'+trackEsc(o.tracking_number)+'</b></p>' : '') +
+      '<p class="track-upd">Last updated '+trackDate(o.updated_at)+'</p></div>';
+  }
+  function doTrack(raw){
+    var id = String(raw || "").trim().toUpperCase().replace(/^#/, ""), out = document.getElementById("trackResult"), btn = document.getElementById("trackBtn");
+    if(!/^OD[A-Z0-9]{6}$/.test(id)){ out.innerHTML = '<p class="track-msg err">That doesn\'t look like an order number. It starts with OD followed by 6 letters or numbers.</p>'; return; }
+    if(!supabaseClient){ out.innerHTML = '<p class="track-msg err">Tracking is unavailable right now. Please message us on WhatsApp.</p>'; return; }
+    btn.disabled = true; btn.textContent = "Checking…";
+    supabaseClient.rpc("track_order", { p_order_number: id }).then(function(r){
+      if(r.error) throw r.error;
+      var o = r.data && r.data[0];
+      out.innerHTML = o ? trackHTML(o) : '<p class="track-msg err">We couldn\'t find that order number. Check it and try again, or message us on WhatsApp.</p>';
+    }).catch(function(){
+      out.innerHTML = '<p class="track-msg err">Couldn\'t check right now. Please try again in a moment.</p>';
+    }).then(function(){ btn.disabled = false; btn.textContent = "Track"; });
+  }
+  document.getElementById("trackForm").addEventListener("submit", function(e){ e.preventDefault(); doTrack(document.getElementById("trackInput").value); });
+  document.addEventListener("click", function(e){
+    var c = e.target.closest("[data-track]"); if(!c) return;
+    document.getElementById("trackInput").value = c.getAttribute("data-track"); doTrack(c.getAttribute("data-track"));
+  });
 
   /* ---------- side menu ---------- */
   var menuBtn = document.getElementById("menuBtn");
@@ -2725,6 +2820,22 @@
       }).catch(function(err){ console.warn("ODOS confirmation email failed:", err); });
     }catch(err){ console.warn("ODOS confirmation email failed:", err); }
   }
+  function newOrderId(){
+    var A = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789", b = new Uint8Array(6), o = "OD";
+    (window.crypto || window.msCrypto).getRandomValues(b);
+    for(var i=0;i<6;i++) o += A.charAt(b[i] % 32);
+    return o;
+  }
+  function createOrderRecord(payload){
+    try{
+      fetch(SUPABASE_URL + "/functions/v1/create-order", {
+        method: "POST",
+        headers: { "Content-Type": "application/json", "apikey": SUPABASE_ANON_KEY, "Authorization": "Bearer " + SUPABASE_ANON_KEY },
+        body: JSON.stringify(payload),
+        keepalive: true
+      }).catch(function(err){ console.warn("ODOS order record failed:", err); });
+    }catch(err){ console.warn("ODOS order record failed:", err); }
+  }
   function prefillOrderEmail(){
     var el = document.getElementById("ord_email");
     if(!sb || !el) return;
@@ -2749,7 +2860,7 @@
       var unit = itemPrice(p, c.design, c.printMethod);
       return p.name + (bits.length ? " ("+bits.join(" / ")+")" : "") + " x" + c.qty + " — " + fmt(unit*c.qty);
     });
-    var orderId = "OD" + Date.now().toString(36).toUpperCase().slice(-6);
+    var orderId = newOrderId();
     document.getElementById("orderIdField").value = orderId;
     var emailItems = cart.map(function(c){
       var p = findProduct(c.id); if(!p) return null;
@@ -2772,7 +2883,7 @@
     document.getElementById("orderTotalField").value = fmt(total) + (appliedCode ? " (after " + showCode(appliedCode) + " discount)" : "");
     document.getElementById("orderDiscountCodeField").value = appliedCode ? showCode(appliedCode) : "none";
     document.getElementById("orderDiscountAmountField").value = appliedCode ? fmt(disc) : "EGP 0";
-    submitNetlifyForm(orderForm, document.getElementById("orderMsg"), function(){ sendOrderEmail(emailPayload); cart = []; appliedCode = null; appliedPct = 0; saveCode(); saveCart(); orderForm.reset(); prefillOrderEmail(); document.getElementById("discountInput").value = ""; discountMsg("", ""); }, "Thank you — your order has been placed! A confirmation email is on its way to " + emailPayload.email + ". If you don't see it within a few minutes, please check your spam or junk folder. We'll also contact you shortly to confirm the details.");
+    submitNetlifyForm(orderForm, document.getElementById("orderMsg"), function(){ createOrderRecord(emailPayload); sendOrderEmail(emailPayload); rememberOrder(emailPayload.orderId); cart = []; appliedCode = null; appliedPct = 0; saveCode(); saveCart(); orderForm.reset(); prefillOrderEmail(); document.getElementById("discountInput").value = ""; discountMsg("", ""); }, "Thank you — your order has been placed! Your order number is " + orderId + " — track it anytime from the menu (Track Order). A confirmation email is on its way to " + emailPayload.email + ". If you don't see it within a few minutes, please check your spam or junk folder. We'll also contact you shortly to confirm the details.");
   });
 
   var contactForm = document.getElementById("contactForm");
