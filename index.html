@@ -186,6 +186,13 @@
   }
 
   /* ---------- ORDER TRACKING ---------- */
+  .order-track-cta{ display:none; margin-top:14px; padding:18px; border:1px solid var(--grey-line); border-radius:14px; background:var(--black-2); text-align:center; }
+  .order-track-cta.show{ display:block; }
+  .order-track-cta .otc-label{ font-size:12px; letter-spacing:.12em; text-transform:uppercase; color:var(--grey); }
+  .order-track-cta .otc-no{ font-family:'Anton',sans-serif; font-size:26px; letter-spacing:.12em; margin:6px 0 4px; }
+  .order-track-cta .otc-sub{ font-size:13px; color:var(--grey); margin-bottom:14px; }
+  .order-track-cta .btn{ background:var(--white); color:var(--black); font-weight:700; }
+  .order-track-cta .btn:hover{ opacity:.88; }
   .track-wrap{ max-width:640px; padding-bottom:70px; }
   .track-form{ display:flex; gap:10px; margin:22px 0 10px; }
   .track-form input{ flex:1; min-width:0; background:var(--black); border:1px solid var(--grey-line); border-radius:var(--radius-sm); color:var(--white); padding:13px 14px; font-size:16px; letter-spacing:.14em; text-transform:uppercase; }
@@ -953,6 +960,7 @@
 
             <button type="submit" class="btn full" id="orderSubmitBtn">Place Order</button>
             <div class="form-msg" id="orderMsg"></div>
+            <div class="order-track-cta" id="orderTrackCta" aria-live="polite"></div>
           </form>
         </div>
       </div>
@@ -2274,7 +2282,7 @@
       (o.tracking_number ? '<p class="track-num">Courier tracking number: <b>'+trackEsc(o.tracking_number)+'</b></p>' : '') +
       '<p class="track-upd">Last updated '+trackDate(o.updated_at)+'</p></div>';
   }
-  function doTrack(raw){
+  function doTrack(raw, retries){
     var id = String(raw || "").trim().toUpperCase().replace(/^#/, ""), out = document.getElementById("trackResult"), btn = document.getElementById("trackBtn");
     if(!/^OD[A-Z0-9]{6}$/.test(id)){ out.innerHTML = '<p class="track-msg err">That doesn\'t look like an order number. It starts with OD followed by 6 letters or numbers.</p>'; return; }
     if(!supabaseClient){ out.innerHTML = '<p class="track-msg err">Tracking is unavailable right now. Please message us on WhatsApp.</p>'; return; }
@@ -2282,6 +2290,7 @@
     supabaseClient.rpc("track_order", { p_order_number: id }).then(function(r){
       if(r.error) throw r.error;
       var o = r.data && r.data[0];
+      if(!o && retries > 0){ out.innerHTML = '<p class="track-msg">Looking for your order…</p>'; setTimeout(function(){ doTrack(id, retries - 1); }, 1500); return; }
       out.innerHTML = o ? trackHTML(o) : '<p class="track-msg err">We couldn\'t find that order number. Check it and try again, or message us on WhatsApp.</p>';
     }).catch(function(){
       out.innerHTML = '<p class="track-msg err">Couldn\'t check right now. Please try again in a moment.</p>';
@@ -2291,6 +2300,24 @@
   document.addEventListener("click", function(e){
     var c = e.target.closest("[data-track]"); if(!c) return;
     document.getElementById("trackInput").value = c.getAttribute("data-track"); doTrack(c.getAttribute("data-track"));
+  });
+
+  /* ---------- post-order "Track your order" button ---------- */
+  function showTrackCta(id){
+    var box = document.getElementById("orderTrackCta"); if(!box) return;
+    box.innerHTML = '<div class="otc-label">Your order number</div><div class="otc-no">' + trackEsc(id) + '</div>' +
+      '<div class="otc-sub">Use it anytime to see where your order is.</div>' +
+      '<button type="button" class="btn" data-track-go="' + trackEsc(id) + '">Track my order</button>';
+    box.classList.add("show");
+    try{ box.scrollIntoView({ behavior:"smooth", block:"nearest" }); }catch(e){}
+  }
+  function hideTrackCta(){ var box = document.getElementById("orderTrackCta"); if(box){ box.classList.remove("show"); box.innerHTML = ""; } }
+  document.addEventListener("click", function(e){
+    var b = e.target.closest("[data-track-go]"); if(!b) return;
+    var id = b.getAttribute("data-track-go");
+    goTo("track");
+    document.getElementById("trackInput").value = id;
+    doTrack(id, 3);
   });
 
   /* ---------- side menu ---------- */
@@ -2851,6 +2878,7 @@
   orderForm.addEventListener("submit", function(e){
     e.preventDefault();
     if(cart.length === 0) return;
+    hideTrackCta();
     var subtotal = cartSubtotal();
     var disc = discountFor(subtotal);
     var total = subtotal - disc;
@@ -2883,7 +2911,7 @@
     document.getElementById("orderTotalField").value = fmt(total) + (appliedCode ? " (after " + showCode(appliedCode) + " discount)" : "");
     document.getElementById("orderDiscountCodeField").value = appliedCode ? showCode(appliedCode) : "none";
     document.getElementById("orderDiscountAmountField").value = appliedCode ? fmt(disc) : "EGP 0";
-    submitNetlifyForm(orderForm, document.getElementById("orderMsg"), function(){ createOrderRecord(emailPayload); sendOrderEmail(emailPayload); rememberOrder(emailPayload.orderId); cart = []; appliedCode = null; appliedPct = 0; saveCode(); saveCart(); orderForm.reset(); prefillOrderEmail(); document.getElementById("discountInput").value = ""; discountMsg("", ""); }, "Thank you — your order has been placed! Your order number is " + orderId + " — track it anytime from the menu (Track Order). A confirmation email is on its way to " + emailPayload.email + ". If you don't see it within a few minutes, please check your spam or junk folder. We'll also contact you shortly to confirm the details.");
+    submitNetlifyForm(orderForm, document.getElementById("orderMsg"), function(){ createOrderRecord(emailPayload); sendOrderEmail(emailPayload); rememberOrder(emailPayload.orderId); showTrackCta(emailPayload.orderId); cart = []; appliedCode = null; appliedPct = 0; saveCode(); saveCart(); orderForm.reset(); prefillOrderEmail(); document.getElementById("discountInput").value = ""; discountMsg("", ""); }, "Thank you — your order has been placed! Your order number is " + orderId + " — track it anytime from the menu (Track Order). A confirmation email is on its way to " + emailPayload.email + ". If you don't see it within a few minutes, please check your spam or junk folder. We'll also contact you shortly to confirm the details.");
   });
 
   var contactForm = document.getElementById("contactForm");
