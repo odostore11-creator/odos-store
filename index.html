@@ -1889,7 +1889,7 @@
       '</div>'
     );
   }
-  var FEATURED_IDS = ["p35","p02","p15","p04"];
+  var FEATURED_IDS = ["p35","p05","p15","p04"];
   function renderFeatured(){
     var picks = FEATURED_IDS.map(function(id){ return findProduct(id); }).filter(Boolean);
     document.getElementById("featuredGrid").innerHTML = picks.map(cardHTML).join("");
