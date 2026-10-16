@@ -5,33 +5,33 @@
 <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
 <link rel="shortcut icon" href="/favicon.ico" />
 <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
-<meta name="apple-mobile-web-app-title" content="MyWebSite" />
+<meta name="apple-mobile-web-app-title" content="ODOS" />
 <link rel="manifest" href="/site.webmanifest" />
 
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>ODOS</title>
-<meta name="description" content="ODOS — every choice is a path.">
+<meta name="description" content="ODOS. Every choice is a path.">
 
 <!-- Open Graph / social link preview tags -->
 <meta property="og:type" content="website">
 <meta property="og:title" content="ODOS">
-<meta property="og:description" content="ODOS — every choice is a path.">
+<meta property="og:description" content="ODOS. Every choice is a path.">
 <meta property="og:image" content="https://odos.online/images/design-3.png">
 <meta property="og:url" content="https://odos.online">
 
 <!-- Twitter/X card (some apps also check these) -->
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="ODOS">
-<meta name="twitter:description" content="ODOS — every choice is a path.">
+<meta name="twitter:description" content="ODOS. Every choice is a path.">
 <meta name="twitter:image" content="https://odos.online/images/design-3.png">
 
 <!-- ============================================================
-  ODOS — single-file site
+  ODOS - single-file site
   HOW TO EDIT THIS FILE:
   1. Products are in the PRODUCTS array inside <script> near the
      bottom. Each has colors + sizes where relevant.
-  2. Product photos are hosted on Cloudflare (odos.omardirty999.workers.dev) —
+  2. Product photos are hosted on Cloudflare (odos.omardirty999.workers.dev) -
      each product's "images" list already points at those URLs. To swap
      a photo, upload the replacement to that same Cloudflare project and
      update the URL here.
@@ -40,7 +40,7 @@
      Discount codes are verified live against a Supabase database
      (see supabaseClient below) instead of being hardcoded here.
   4. Optional: price, stock, and the Best Seller/New badges can be
-     edited from a published Google Sheet instead of this file —
+     edited from a published Google Sheet instead of this file -
      see the SHEET_CSV_URL note above the PRODUCTS array for setup.
 ============================================================= -->
 
@@ -620,47 +620,6 @@
   .nl-code-hint{ margin:10px 0 0; font-size:12px; color:var(--grey); }
   @media (max-width:520px){ .nl-pop{ right:16px; left:16px; bottom:16px; width:auto; } }
 
-  /* ---- Custom cursor: dot + ring (desktop mouse only) ---- */
-  @media (hover: hover) and (pointer: fine){
-    html.has-cursor, html.has-cursor *, html.has-cursor *::before, html.has-cursor *::after{ cursor: none !important; }
-    .cur-dot, .cur-ring{
-      position: fixed; top: 0; left: 0; pointer-events: none; z-index: 9999;
-      border-radius: 50%; opacity: 0; will-change: transform;
-    }
-    html.cursor-live .cur-dot, html.cursor-live .cur-ring{ opacity: 1; }
-    .cur-dot{ width: 6px; height: 6px; background: #fff; mix-blend-mode: difference; transition: opacity .2s; }
-    .cur-ring{
-      width: 34px; height: 34px; border: 1px solid #fff; mix-blend-mode: difference;
-      display: grid; place-items: center;
-      font: 500 10px/1 'Inter', sans-serif; letter-spacing: .12em; text-transform: uppercase; color: #000;
-      transition: width .25s ease, height .25s ease, opacity .2s, background-color .2s;
-    }
-    .cur-ring.hover{ width: 60px; height: 60px; }
-    .cur-ring.label{
-      background: #f5f5f0; border-color: #f5f5f0; border-radius: 999px; mix-blend-mode: normal;
-      white-space: nowrap; padding: 0; overflow: hidden;
-      transition: width .25s ease, height .25s ease, opacity .2s, background-color .2s, border-radius .25s;
-    }
-    .cur-ring.down{ width: 26px; height: 26px; }
-    .cur-ring.hover.down{ width: 50px; height: 50px; }
-    .cur-ring.label.down{ opacity: .85; }
-    .cur-ring.tight{ width: 20px; height: 20px; }
-    .cur-ring.wrap{ border-radius: 12px; transition: opacity .2s, border-radius .25s, background-color .2s; }
-    .cur-ring.fill{ background: #fff; border-color: #fff; border-radius: 8px; }
-    .cur-ring.fill.down{ opacity: .7; }
-    .cur-ring.brackets{
-      border-color: transparent; border-radius: 3px; mix-blend-mode: difference;
-      background:
-        linear-gradient(#fff,#fff) 0 0 / 12px 2px no-repeat,    linear-gradient(#fff,#fff) 0 0 / 2px 12px no-repeat,
-        linear-gradient(#fff,#fff) 100% 0 / 12px 2px no-repeat, linear-gradient(#fff,#fff) 100% 0 / 2px 12px no-repeat,
-        linear-gradient(#fff,#fff) 0 100% / 12px 2px no-repeat, linear-gradient(#fff,#fff) 0 100% / 2px 12px no-repeat,
-        linear-gradient(#fff,#fff) 100% 100% / 12px 2px no-repeat, linear-gradient(#fff,#fff) 100% 100% / 2px 12px no-repeat;
-      background-origin: border-box;
-    }
-    .cur-ring.tight.down{ width: 14px; height: 14px; }
-    .cur-dot.hide{ opacity: 0 !important; }
-  }
-  @media not all and (hover: hover) and (pointer: fine){ .cur-dot, .cur-ring{ display: none; } }
 
   /* ---------- scroll-scrubbed tee: front, side, back travel past on a track ---------- */
   .spin-tee{ position:relative; height:300vh; border-top:1px solid var(--grey-line); border-bottom:1px solid var(--grey-line); }
@@ -692,6 +651,28 @@
     .spin-cap{ opacity:1; transform:none; position:static; margin:20px 24px 0; max-width:none; text-align:left !important; }
     .spin-cta{ position:static; opacity:1; transform:none; pointer-events:auto; margin-top:24px; }
   }
+
+  /* ---------- hover outline on option buttons (replaces the old custom cursor frame) ---------- */
+  @media (hover: hover){
+    .radio-option:hover, .opt-row button:hover, .design-thumb:hover, [data-size]:hover, [data-design]:hover{ outline:1px solid var(--white); outline-offset:3px; }
+  }
+
+  /* ---------- consent lines, storage notice, policies page ---------- */
+  .consent{ display:flex; gap:10px; align-items:flex-start; margin:4px 0 16px; font-size:13px; line-height:1.5; color:#cfcfc8; cursor:pointer; }
+  .consent input{ flex:none; margin-top:3px; accent-color:#fff; }
+  .consent a, .form-note a, .nl-consent a, .storage-notice a{ text-decoration:underline; }
+  .form-note{ margin:0 0 14px; font-size:12px; color:var(--grey); line-height:1.5; }
+  .nl-consent{ margin:10px 0 0; font-size:11px; line-height:1.5; color:var(--grey); }
+  .storage-notice{ display:none; position:fixed; left:20px; bottom:20px; width:min(440px, calc(100vw - 32px)); background:var(--black-2); border:1px solid var(--grey-line); border-radius:var(--radius-lg); padding:16px 18px; z-index:70; box-shadow:0 18px 50px rgba(0,0,0,0.55); font-size:13px; line-height:1.55; color:#cfcfc8; }
+  .storage-notice.show{ display:block; }
+  .storage-notice p{ margin:0; }
+  .storage-notice .btn{ padding:8px 18px; font-size:12px; margin-top:12px; }
+  @media(max-width:768px){ .storage-notice{ left:16px; right:16px; width:auto; bottom:calc(84px + env(safe-area-inset-bottom,0px)); } }
+  .policy{ max-width:760px; }
+  .policy h2{ font-size:22px; margin:44px 0 14px; padding-top:22px; border-top:1px solid var(--grey-line); scroll-margin-top:calc(var(--header-h) + var(--banner-h) + 16px); }
+  .policy .copy{ margin:0 0 14px; }
+  .policy-toc{ display:flex; flex-wrap:wrap; gap:8px; margin:22px 0 4px; }
+  .policy-toc a{ border:1px solid var(--grey-line); border-radius:20px; padding:6px 14px; font-size:12px; letter-spacing:.06em; color:var(--white); }
 </style>
 <!-- Cloudflare Web Analytics -->
 <script type='module' src='https://static.cloudflareinsights.com/beacon.min.js' data-cf-beacon='{"token": "5c914474db464af9860e68bc267b4720"}'></script>
@@ -699,8 +680,6 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body>
-<div class="cur-dot" aria-hidden="true"></div>
-<div class="cur-ring" aria-hidden="true"></div>
 
 
 <div class="path-bg" aria-hidden="true"><canvas id="pathCanvas"></canvas></div>
@@ -723,7 +702,7 @@
   </svg>
 </div>
 
-<div class="ship-banner">Free Shipping On Every Order — Across Egypt</div>
+<div class="ship-banner">Free Shipping On Every Order Across Egypt</div>
 <header>
   <div class="header-left">
     <button class="menu-btn" id="menuBtn" aria-label="Open menu" aria-expanded="false"><span></span><span></span><span></span></button>
@@ -732,7 +711,7 @@
     <a href="#home" class="logo" data-nav="home">ODOS</a>
   </div>
   <div class="header-right">
-    <div class="search-wrap" id="searchWrap"><input type="text" id="searchInput" placeholder="Search products…"></div>
+    <div class="search-wrap" id="searchWrap"><input type="text" id="searchInput" placeholder="Search products…" aria-label="Search products"></div>
     <button class="icon-btn" id="searchBtn" aria-label="Search"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></button>
     <button class="icon-btn" id="accountBtn" aria-label="Account">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
@@ -759,10 +738,10 @@
 
       <div id="authMagicLinkForm">
         <div class="field">
-          <input type="email" id="authEmailMagic" placeholder="Email address" autocomplete="email" style="width:100%; background:var(--black); border:1px solid var(--grey-line); border-radius:var(--radius-sm); color:var(--white); padding:12px; font-size:14px;">
+          <input type="email" id="authEmailMagic" placeholder="Email address" aria-label="Email address" autocomplete="email" style="width:100%; background:var(--black); border:1px solid var(--grey-line); border-radius:var(--radius-sm); color:var(--white); padding:12px; font-size:14px;">
         </div>
         <button class="btn" id="authMagicBtn" style="width:100%; text-align:center;">Send Magic Link</button>
-        <p class="copy" style="margin:12px 0 0; color:var(--grey); font-size:13px;">We'll email you a link — no password needed.</p>
+        <p class="copy" style="margin:12px 0 0; color:var(--grey); font-size:13px;">We'll email you a link. No password needed.</p>
       </div>
 
       <div style="display:flex; align-items:center; gap:10px; margin:20px 0; color:var(--grey); font-size:12px;">
@@ -773,10 +752,10 @@
 
       <div id="authPasswordForm">
         <div class="field">
-          <input type="email" id="authEmailPw" placeholder="Email address" autocomplete="email" style="width:100%; background:var(--black); border:1px solid var(--grey-line); border-radius:var(--radius-sm); color:var(--white); padding:12px; font-size:14px;">
+          <input type="email" id="authEmailPw" placeholder="Email address" aria-label="Email address" autocomplete="email" style="width:100%; background:var(--black); border:1px solid var(--grey-line); border-radius:var(--radius-sm); color:var(--white); padding:12px; font-size:14px;">
         </div>
         <div class="field">
-          <input type="password" id="authPassword" placeholder="Password" autocomplete="current-password" style="width:100%; background:var(--black); border:1px solid var(--grey-line); border-radius:var(--radius-sm); color:var(--white); padding:12px; font-size:14px;">
+          <input type="password" id="authPassword" placeholder="Password" aria-label="Password" autocomplete="current-password" style="width:100%; background:var(--black); border:1px solid var(--grey-line); border-radius:var(--radius-sm); color:var(--white); padding:12px; font-size:14px;">
         </div>
         <button class="btn" id="authPwSignInBtn" style="width:100%; text-align:center;">Sign In</button>
         <button class="btn ghost" id="authPwSignUpBtn" style="width:100%; text-align:center; margin-top:10px;">Create Account</button>
@@ -784,6 +763,7 @@
 
       <p class="copy" id="authError" style="color:#e88; font-size:13px; margin:14px 0 0; display:none;"></p>
       <p class="copy" id="authNotice" style="color:var(--white); font-size:13px; margin:14px 0 0; display:none;"></p>
+      <p class="copy" style="margin:16px 0 0; color:var(--grey); font-size:12px;">By signing in you agree to our <a href="#policies" data-nav="policies" data-closes-auth style="text-decoration:underline;">Terms and Privacy Policy</a>.</p>
     </div>
 
     <div id="authSignedInView" style="display:none;">
@@ -803,6 +783,7 @@
     <a href="#faq" data-nav="faq">FAQ / Q&amp;A</a>
     <a href="#story" data-nav="story">The Path &amp; The Moment</a>
     <a href="#track" data-nav="track">Track Order</a>
+    <a href="#policies" data-nav="policies">Policies</a>
   </nav>
   <p class="cat-label">CATEGORIES</p>
   <div class="categories" id="menuCategories"></div>
@@ -820,7 +801,7 @@
       <div class="hero-inner">
         <div class="hero-text">
           <h1>EVERY<br>CHOICE<br>IS A PATH.</h1>
-          <p class="copy">A local goods brand — clothing, caps, mugs, bags and more.<br>Built on one idea: <strong>the walk matters more than the destination.</strong></p>
+          <p class="copy">A local goods brand: clothing, caps, mugs, bags and more.<br>Built on one idea: <strong>the walk matters more than the destination.</strong></p>
           <div class="hero-cta">
             <a class="btn" href="#products" data-nav="products">Shop All Products</a>
             <a class="btn ghost" href="#faq" data-nav="faq">Read the FAQ</a>
@@ -840,7 +821,7 @@
         <div class="kt-meta">
           <strong>THE &ldquo;GRIT&rdquo; COLLECTION</strong>
           <span>ALREADY RELEASED SINCE 7.10.2026</span>
-          <span class="kt-cta">ENTER KAIROS &rarr;</span>
+          <span class="kt-cta">ENTER KAIROS</span>
         </div>
       </a>
     </div>
@@ -867,26 +848,26 @@
     <div class="wrap recent-wrap" style="display:none;"><div class="section-heading"><h2>RECENTLY VIEWED</h2></div><div class="recent-row"></div></div>
     <div class="wrap home-story reveal">
       <h3>WHY "ODOS"</h3>
-      <p class="copy">Odos is Greek for "path" — the one we're all on, walking, running, sometimes just crawling through it. Nobody's really ahead of anybody.<br><strong>Execute.</strong></p>
-      <p class="copy">Kairos is Greek for "opportunity." It's not something you plan for — it just shows up. You either take it and let it bend your path somewhere new, or it slips by.<br><strong>Seize.</strong></p>
-      <p class="copy">Whatever you're trying to surpass — a final, a GPA, your dream job — wear it. Every time you put it on, you remember why you started.<br><strong>Remember.</strong></p>
+      <p class="copy">Odos is Greek for "path": the one we're all on, walking, running, sometimes just crawling through it. Nobody's really ahead of anybody.<br><strong>Execute.</strong></p>
+      <p class="copy">Kairos is Greek for "opportunity." It's not something you plan for. It just shows up. You either take it and let it bend your path somewhere new, or it slips by.<br><strong>Seize.</strong></p>
+      <p class="copy">Whatever you're trying to surpass (a final, a GPA, your dream job), wear it. Every time you put it on, you remember why you started.<br><strong>Remember.</strong></p>
       <a class="btn ghost" href="#story" data-nav="story" style="margin-top:16px; display:inline-block;">Read Our Story</a>
     </div>
     <div class="wrap quality-section reveal">
       <h3>MADE TO LAST</h3>
-      <p class="copy">No stock photos, no promises we can't back up — just what actually goes into every piece before it ships.</p>
+      <p class="copy">What goes into every piece before it ships.</p>
       <div class="quality-grid">
         <div class="quality-item">
           <h4>Fabric</h4>
-          <p class="copy">100% cotton, 180 g/m² — light enough to move, dense enough to hold its shape wash after wash.</p>
+          <p class="copy">T-shirts: 100% cotton, 180 g/m². Light enough to move, dense enough to hold its shape.</p>
         </div>
         <div class="quality-item">
           <h4>Stitching</h4>
-          <p class="copy">Side-seamed construction with double-needle stitching — seams built to outlast the fabric around them.</p>
+          <p class="copy">Side-seamed construction with double-needle stitching on our T-shirts.</p>
         </div>
         <div class="quality-item">
           <h4>Print &amp; Finish</h4>
-          <p class="copy">Embroidery for a premium, textured finish on apparel and headwear; DTF for vibrant designs across fabric types; sublimation for permanent, infused color on polyester and coated pieces — each one matched to the product it suits best.</p>
+          <p class="copy">Embroidery for a textured finish on apparel and headwear; DTF for vibrant designs across fabric types; sublimation for dye-infused color on polyester and coated pieces. Each one is matched to the product it suits best.</p>
         </div>
       </div>
     </div>
@@ -902,7 +883,7 @@
       </div>
       <div class="grid kairos-grid" id="kairosGrid"></div>
       <div class="kairos-foot reveal">
-        <p class="copy">Kairos is Greek for &quot;opportunity.&quot; It's not something you plan for &mdash; it just shows up. You either take it and let it bend your path somewhere new, or it slips by.<br><strong>Seize.</strong></p>
+        <p class="copy">Kairos is Greek for &quot;opportunity.&quot; It's not something you plan for . It just shows up. You either take it and let it bend your path somewhere new, or it slips by.<br><strong>Seize.</strong></p>
         <a class="btn ghost" href="#products" data-nav="products" style="margin-top:16px; display:inline-block;">Shop All Products</a>
       </div>
     </div>
@@ -932,7 +913,7 @@
   <section class="page" id="page-wishlist">
     <div class="wrap">
       <h1 class="page-title">YOUR WISHLIST</h1>
-      <p class="cart-empty copy" id="wishlistEmptyMsg" style="display:none;">Nothing saved yet. <a href="#products" data-nav="products" style="text-decoration:underline;">Browse products →</a></p>
+      <p class="cart-empty copy" id="wishlistEmptyMsg" style="display:none;">Nothing saved yet. <a href="#products" data-nav="products" style="text-decoration:underline;">Browse products</a></p>
       <div class="grid" id="wishlistGrid"></div>
     </div>
   </section>
@@ -943,7 +924,7 @@
       <div class="cart-layout">
         <div>
           <div id="cartItemsList"></div>
-          <p class="cart-empty copy" id="cartEmptyMsg" style="display:none;">Your cart is empty. <a href="#products" data-nav="products" style="text-decoration:underline;">Browse products →</a></p>
+          <p class="cart-empty copy" id="cartEmptyMsg" style="display:none;">Your cart is empty. <a href="#products" data-nav="products" style="text-decoration:underline;">Browse products</a></p>
         </div>
         <div>
           <div class="summary-box">
@@ -973,7 +954,7 @@
             <div class="field"><label for="ord_name">Full name</label><input type="text" id="ord_name" name="name" required></div>
             <div class="field"><label for="ord_email">Email</label><input type="email" id="ord_email" name="email" autocomplete="email" placeholder="For your order confirmation" required></div>
             <div class="field"><label for="ord_phone">Phone number</label><input type="tel" id="ord_phone" name="phone" required></div>
-            <div class="field"><label for="ord_whatsapp">WhatsApp number</label><input type="tel" id="ord_whatsapp" name="whatsapp" placeholder="If different from phone number" required></div>
+            <div class="field"><label for="ord_whatsapp">WhatsApp number (optional)</label><input type="tel" id="ord_whatsapp" name="whatsapp" placeholder="If different from phone number"></div>
             <div class="field"><label for="ord_address">Delivery address</label><textarea id="ord_address" name="address" required></textarea></div>
             <div class="field"><label for="ord_city">City</label><input type="text" id="ord_city" name="city" required></div>
 
@@ -987,7 +968,7 @@
                 </label>
                 <label class="radio-option">
                   <input type="radio" name="payment" value="InstaPay">
-                  <span class="rtext">InstaPay<span class="sub">Send to: @omarkhaled2611 · tap the QR code to enlarge:</span><button type="button" class="copy-btn" data-copy="@omarkhaled2611">Copy</button><img src="https://odos.omardirty999.workers.dev/instapay-qr.webp" alt="InstaPay QR code — tap to enlarge" class="qr-trigger" id="instapayQr" style="width:120px; height:120px; margin-top:8px; display:block; border:1px solid var(--grey-line); border-radius: var(--radius-sm);"><span class="qr-hint">Tap to enlarge</span></span>
+                  <span class="rtext">InstaPay<span class="sub">Send to: @omarkhaled2611 · tap the QR code to enlarge:</span><button type="button" class="copy-btn" data-copy="@omarkhaled2611">Copy</button><img src="https://odos.omardirty999.workers.dev/instapay-qr.webp" alt="InstaPay QR code, tap to enlarge" class="qr-trigger" id="instapayQr" style="width:120px; height:120px; margin-top:8px; display:block; border:1px solid var(--grey-line); border-radius: var(--radius-sm);"><span class="qr-hint">Tap to enlarge</span></span>
                 </label>
                 <label class="radio-option">
                   <input type="radio" name="payment" value="Vodafone Cash">
@@ -1002,6 +983,7 @@
 
             <div class="field"><label for="ord_notes">Notes (anything else)</label><textarea id="ord_notes" name="notes"></textarea></div>
 
+            <label class="consent"><input type="checkbox" id="ord_agree" name="terms_accepted" value="Yes" required><span>I agree to the <a href="#policies" data-nav="policies">Terms, Privacy Policy and Refund Policy</a>.</span></label>
             <button type="submit" class="btn full" id="orderSubmitBtn">Place Order</button>
             <div class="form-msg" id="orderMsg"></div>
             <div class="order-track-cta" id="orderTrackCta" aria-live="polite"></div>
@@ -1016,7 +998,7 @@
       <h1 class="page-title">CONTACT US</h1>
       <div class="contact-layout">
         <div>
-          <p class="copy" style="margin-bottom:20px; max-width:420px;">Questions about an order, a product, or a bulk request — reach out directly, or use the form and we'll get back to you.</p>
+          <p class="copy" style="margin-bottom:20px; max-width:420px;">Questions about an order, a product, or a bulk request. Reach out directly, or use the form and we'll get back to you.</p>
           <div class="contact-info">
             <a href="mailto:odostore11@gmail.com">odostore11@gmail.com</a>
             <a href="https://wa.me/201556059711" target="_blank" rel="noopener">WhatsApp / Call: 01556059711</a>
@@ -1030,6 +1012,7 @@
           <div class="field"><label for="c_name">Name</label><input type="text" id="c_name" name="name" required></div>
           <div class="field"><label for="c_email">Email</label><input type="email" id="c_email" name="email" required></div>
           <div class="field"><label for="c_message">Message</label><textarea id="c_message" name="message" required></textarea></div>
+          <p class="form-note">We only use your details to reply to you. See our <a href="#policies" data-nav="policies">Privacy Policy</a>.</p>
           <button type="submit" class="btn full">Send Message</button>
           <div class="form-msg" id="contactMsg"></div>
         </form>
@@ -1057,13 +1040,51 @@
     </div>
   </section>
 
+  <section class="page" id="page-policies">
+    <div class="wrap policy">
+      <h1 class="page-title">POLICIES</h1>
+      <p class="copy">Last updated 16 October 2026. ODOS is an online clothing and lifestyle store based in Egypt. Questions about anything here: <a href="mailto:odostore11@gmail.com" style="text-decoration:underline;">odostore11@gmail.com</a>.</p>
+      <nav class="policy-toc" aria-label="Policy sections">
+        <a href="#policies" data-scroll="pol-privacy">Privacy</a>
+        <a href="#policies" data-scroll="pol-cookies">Cookies and storage</a>
+        <a href="#policies" data-scroll="pol-terms">Terms</a>
+        <a href="#policies" data-scroll="pol-refunds">Refunds and exchanges</a>
+      </nav>
+
+      <h2 id="pol-privacy">Privacy policy</h2>
+      <p class="copy"><strong>What we collect.</strong> When you place an order we collect your name, email, phone number, delivery address, city, the payment method you choose and any notes you add. Your WhatsApp number is optional. When you contact us we collect your name, email and message. If you join the newsletter or create an account we collect your email.</p>
+      <p class="copy"><strong>Why we use it.</strong> To confirm, deliver and support your order, to reply to your messages, to send your order confirmation, and, if you signed up, to send you emails and your discount code. We do not sell your data.</p>
+      <p class="copy"><strong>Who handles it.</strong> We use a few services to run the shop: Web3Forms (delivers order and contact forms to us), Supabase (accounts, carts, wishlists and order tracking), Resend (order confirmation emails), Cloudflare (hosting, image delivery and analytics) and Google Fonts. These providers process data on our behalf. Payments are sent by you directly through Telda, InstaPay or Vodafone Cash, or paid in cash on delivery. We do not see or store card numbers.</p>
+      <p class="copy"><strong>How long we keep it.</strong> We keep order records as long as we need them to fulfil your order, handle returns and meet our legal and accounting duties. Newsletter emails are kept until you unsubscribe.</p>
+      <p class="copy"><strong>Your rights.</strong> You can ask us to show you, correct or delete the personal data we hold about you, or to stop sending you emails, by writing to odostore11@gmail.com. Egypt's Personal Data Protection Law (Law No. 151 of 2020) gives you these rights.</p>
+
+      <h2 id="pol-cookies">Cookies and storage</h2>
+      <p class="copy">ODOS does not use advertising or marketing cookies. We use Cloudflare Web Analytics, which counts visits without cookies and without tracking you across sites.</p>
+      <p class="copy">To make the shop work, your browser stores a few items on your device: your cart, wishlist, recently viewed products, the order numbers you placed on this device, a discount code if you applied one, and whether you have dismissed our notices. If you sign in, your cart and wishlist are also saved to your account. You can clear this any time in your browser settings. Doing so empties your cart and wishlist on this device.</p>
+      <p class="copy">Fonts load from Google Fonts, which means your browser makes a request to Google's servers when you open the site.</p>
+
+      <h2 id="pol-terms">Terms and conditions</h2>
+      <p class="copy"><strong>Orders.</strong> Placing an order is a request to buy. We confirm each order with you by phone, WhatsApp or email before it ships. Prices are in Egyptian pounds (EGP). Items are subject to stock.</p>
+      <p class="copy"><strong>Payment.</strong> You can pay by Telda, InstaPay, Vodafone Cash or cash on delivery. Cash on delivery is available in every governorate in Egypt.</p>
+      <p class="copy"><strong>Delivery.</strong> Delivery is free across Egypt. Orders usually arrive within 3 to 5 business days after confirmation. We do not ship outside Egypt yet.</p>
+      <p class="copy"><strong>Products.</strong> We show photos of the actual products. Colors can look slightly different depending on your screen.</p>
+      <p class="copy"><strong>Governing law.</strong> These terms are governed by the laws of Egypt.</p>
+
+      <h2 id="pol-refunds">Refunds and exchanges</h2>
+      <p class="copy"><strong>Time limit.</strong> Contact us within 7 days of receiving your order, with your order number, by email at odostore11@gmail.com, on WhatsApp at 01556059711, or through the contact form.</p>
+      <p class="copy"><strong>Exchanges.</strong> We can exchange a size, subject to stock.</p>
+      <p class="copy"><strong>Refunds.</strong> You can ask for a refund instead of an exchange. Items should be unused and in their original condition. If your item arrives damaged or is not what you ordered, we will replace it or refund you.</p>
+      <p class="copy"><strong>How refunds are paid.</strong> We refund to the payment method you used, or to another method we agree with you. We confirm the details, including return shipping, when you contact us.</p>
+    </div>
+  </section>
+
   <section class="page" id="page-story">
     <div class="story-line" aria-hidden="true"><i></i></div>
     <div class="wrap story-wrap">
       <h1 class="page-title">THE PATH &amp; THE MOMENT</h1>
-      <div class="story-chapter"><span class="story-num">01</span><h2 class="story-q">What's ODOS?</h2><p class="story-text">Odos is Greek for "path". It's the one we're all on — walking, running, sometimes just crawling through it. Nobody's really ahead of anybody. We're all just trying to figure ourselves out along the way.<br><strong>Execute.</strong></p></div>
-      <div class="story-chapter"><span class="story-num">02</span><h2 class="story-q">What's KAIROS then?</h2><p class="story-text">Kairos is Greek for "opportunity". It's not something you plan for — it just shows up. A moment, an opening, a shot you didn't see coming. You either take it and let it bend your path somewhere new, or it slips by and you keep walking the same way you were.<br><strong>Seize.</strong></p></div>
-      <div class="story-chapter"><span class="story-num">03</span><h2 class="story-q">Why We Do It?</h2><p class="story-text">Whatever you're trying to surpass or achieve — a final, a certain GPA, your dream job, a shot you've been waiting on — wear it. Every time you put it on, you remember why you started.<br><strong>Remember.</strong></p></div>
+      <div class="story-chapter"><span class="story-num">01</span><h2 class="story-q">What's ODOS?</h2><p class="story-text">Odos is Greek for "path". It's the one we're all on: walking, running, sometimes just crawling through it. Nobody's really ahead of anybody. We're all just trying to figure ourselves out along the way.<br><strong>Execute.</strong></p></div>
+      <div class="story-chapter"><span class="story-num">02</span><h2 class="story-q">What's KAIROS then?</h2><p class="story-text">Kairos is Greek for "opportunity". It's not something you plan for. It just shows up. A moment, an opening, a shot you didn't see coming. You either take it and let it bend your path somewhere new, or it slips by and you keep walking the same way you were.<br><strong>Seize.</strong></p></div>
+      <div class="story-chapter"><span class="story-num">03</span><h2 class="story-q">Why We Do It?</h2><p class="story-text">Whatever you're trying to surpass or achieve (a final, a certain GPA, your dream job, a shot you've been waiting on), wear it. Every time you put it on, you remember why you started.<br><strong>Remember.</strong></p></div>
     </div>
   </section>
 </main>
@@ -1104,7 +1125,7 @@
 
       <div id="modalDesignWrap">
         <p class="opt-label">DESIGN: <span id="modalDesignSelected">Blank</span></p>
-        <div class="free-print-badge" id="freePrintBadge" style="display:none;">Printing Included — Free On This Item</div>
+        <div class="free-print-badge" id="freePrintBadge" style="display:none;">Printing included, free on this item</div>
         <div class="opt-row" id="modalDesignRow"></div>
       </div>
 
@@ -1153,6 +1174,7 @@
       <a href="#story" data-nav="story">The Path &amp; The Moment</a>
     <a href="#track" data-nav="track">Track Order</a>
       <a href="#kairos" data-nav="kairos">Kairos</a>
+      <a href="#policies" data-nav="policies">Policies</a>
     </div>
     <div class="footer-col">
       <h4>CONTACT</h4>
@@ -1169,7 +1191,7 @@
 
 <script>
 /* ============================================================
-   PATH BACKGROUND — a walked route: smooth, organic, meaningful.
+   PATH BACKGROUND - a walked route: smooth, organic, meaningful.
    Reads as: a path forks (a choice), one branch is taken and
    glows brighter while the other fades, and the taken path ends
    in a bright flare (the moment seized) before a new route begins.
@@ -1272,7 +1294,7 @@
         y: H * (0.18 + Math.random()*0.64)
       }, i===n ? Math.max(mx, 48) : mx));       // extra room at the end so the flare ring isn't clipped
     }
-    // the spline can swing slightly past its control points — clamp the sampled curve too
+    // the spline can swing slightly past its control points - clamp the sampled curve too
     var main = smoothPoints(raw, 24).map(function(p){ return clampPt({x:p.x, y:p.y}, Math.max(mx, 48)); });
     var mainLens = [0]; for(var k=1;k<main.length;k++){ var dx=main[k].x-main[k-1].x, dy=main[k].y-main[k-1].y; mainLens.push(Math.sqrt(dx*dx+dy*dy)); }
     var mainTotal = pathLength(main);
@@ -1291,7 +1313,7 @@
     var forkLens = [0]; for(var m=1;m<fork.length;m++){ var fdx=fork[m].x-fork[m-1].x, fdy=fork[m].y-fork[m-1].y; forkLens.push(Math.sqrt(fdx*fdx+fdy*fdy)); }
     var forkTotal = pathLength(fork);
 
-    /* KAIROS line — an almost-vertical golden curve that cuts across the
+    /* KAIROS line - an almost-vertical golden curve that cuts across the
        white path just after the middle of the screen and overshoots it on
        both sides: the moment that crosses the path. */
     var goldAt = 0.6;
@@ -1361,7 +1383,7 @@
     ctx.beginPath(); ctx.arc(tp.x,tp.y,r,0,Math.PI*2); ctx.fill();
   }
 
-  /* Pause the animation loop while the tab isn't visible — no point
+  /* Pause the animation loop while the tab isn't visible - no point
      burning battery/CPU drawing a canvas nobody's looking at. */
   var animPaused = false;
   function scheduleFrame(){ if(!animPaused) requestAnimationFrame(frame); }
@@ -1398,7 +1420,7 @@
 
       ctx.lineJoin="round"; ctx.lineCap="round";
 
-      // fork (road not taken) — thinner, dimmer, fades before it finishes
+      // fork (road not taken) - thinner, dimmer, fades before it finishes
       if(forkState==="drawing" || forkState==="fading"){
         var forkCut = forkState==="drawing" ? Math.min(1, forkT/FORK_DRAW_MS) : 1;
         var forkFade = forkState==="fading" ? Math.max(0, 1-(forkT/FORK_FADE_MS)) : 1;
@@ -1410,7 +1432,7 @@
         ctx.restore();
       }
 
-      // main path — the chosen route, bold and glowing
+      // main path - the chosen route, bold and glowing
       ctx.save();
       ctx.shadowColor = "rgba(245,245,240,0.65)"; ctx.shadowBlur = 8;
       ctx.lineWidth = 1.8;
@@ -1418,7 +1440,7 @@
       strokeCut(journey.main, journey.mainLens, journey.mainTotal, progress);
       ctx.restore();
 
-      // traveler — glowing point at the leading edge, with a soft trail
+      // traveler - glowing point at the leading edge, with a soft trail
       var tip = pointAt(journey.main, journey.mainLens, journey.mainTotal, progress);
       for(var e=3;e>=0;e--){
         var trailCut = Math.max(0, progress - e*0.012);
@@ -1452,7 +1474,7 @@
 
       drawGold(goldCut, fadeMul);
 
-      // the flare — the moment seized (Kairos): a bright burst at the path's end
+      // the flare - the moment seized (Kairos): a bright burst at the path's end
       var end = journey.main[journey.main.length-1];
       var burstProgress = state==="flare" ? Math.min(1, frame.elapsed/FLARE_MS) : 1;
       var ringR = 6 + burstProgress*34;
@@ -1489,7 +1511,7 @@
   "use strict";
 
   /* ============================================================
-     SIZE GUIDES (cm) — from your size-chart screenshots
+     SIZE GUIDES (cm) - from your size-chart screenshots
   ============================================================= */
   var SIZE_GUIDES = {
     sweatWH: { headers:["Size","Width","Length","User Height"], rows:[
@@ -1525,11 +1547,11 @@
   };
 
   /* ============================================================
-     LIVE SHEET OVERRIDES (optional) — edit price, stock, the
+     LIVE SHEET OVERRIDES (optional) - edit price, stock, the
      Best Seller/New badges, and descriptions from a spreadsheet
      instead of this file, without a redeploy.
 
-     Images, colors, sizes, and size/design data stay coded below —
+     Images, colors, sizes, and size/design data stay coded below -
      they're nested/structured data (multiple photos, phone-model
      lists, per-color design photos, etc.) that don't translate
      cleanly to spreadsheet rows, and they change far less often
@@ -1539,7 +1561,7 @@
      1. Make a Google Sheet with these exact headers in row 1:
           id | price | stock | bestseller | new | desc
         - id: must match a product's "id" below exactly (e.g. p15)
-        - price: a plain number, e.g. 724.99 — leave blank to keep
+        - price: a plain number, e.g. 724.99 - leave blank to keep
           the coded price
         - stock: leave blank for "in stock", or type low / out
         - bestseller: type yes to show the Best Seller badge,
@@ -1547,12 +1569,12 @@
         - new: type yes to show the New badge, leave blank to hide it
         - desc: leave blank to keep the coded description, or type
           a new one to replace it
-        Add one row per product you want to control this way —
+        Add one row per product you want to control this way -
         any product without a row (or with an id that doesn't
         match) is simply left exactly as coded below.
-     2. File → Share → Publish to web → pick the sheet → CSV → Publish.
+     2. File > Share > Publish to web > pick the sheet > CSV > Publish.
      3. Paste the generated link into SHEET_CSV_URL below.
-     4. That's it — on every page load the site fetches that CSV
+     4. That's it - on every page load the site fetches that CSV
         and applies it over the built-in data below. If the fetch
         fails or SHEET_CSV_URL is blank, the coded data is used
         as-is, so the site always works even if the sheet is down.
@@ -1560,13 +1582,13 @@
   var SHEET_CSV_URL = ""; // paste your published Google Sheet CSV link here
 
   /* ============================================================
-     PRODUCT DATA — photos live on Cloudflare (see "images"
+     PRODUCT DATA - photos live on Cloudflare (see "images"
      on each product below); update a URL there to swap a photo.
   ============================================================= */
   /* ---- KAIROS "GRIT" collection: one bundle product (id kairos-grit) made of three pieces ---- */
   var KAIROS_BUNDLE_ID = "kairos-grit";
   var KAIROS_COLOR = "Dark Grey", openFromKairos = false;
-  var KAIROS_CAP_DEDUCT = 270;   // taken off the set price if the customer removes the cap — change to your number
+  var KAIROS_CAP_DEDUCT = 270;   // taken off the set price if the customer removes the cap - change to your number
   var BUNDLE_PARTS = [
     { key:"tee",   pid:"p32", label:"T-Shirt" },
     { key:"pants", pid:"p15", label:"Sweatpants" },
@@ -1590,12 +1612,12 @@
     { id:"p14", name:"Regular Sweatshorts", category:"Clothing", price:429.99, img:"", images:["https://odos.omardirty999.workers.dev/sweatshorts-1.webp","https://odos.omardirty999.workers.dev/sweatshorts-2.webp","https://odos.omardirty999.workers.dev/sweatshorts-3.webp","https://odos.omardirty999.workers.dev/sweatshorts-black-bold.webp","https://odos.omardirty999.workers.dev/sweatshorts-black-drip.webp","https://odos.omardirty999.workers.dev/sweatshorts-black-brush.webp","https://odos.omardirty999.workers.dev/sweatshorts-green-bold.webp","https://odos.omardirty999.workers.dev/sweatshorts-green-drip.webp","https://odos.omardirty999.workers.dev/sweatshorts-green-brush.webp","https://odos.omardirty999.workers.dev/sweatshorts-grey-bold.webp","https://odos.omardirty999.workers.dev/sweatshorts-grey-drip.webp","https://odos.omardirty999.workers.dev/sweatshorts-grey-brush.webp"], colors:["Black","Green","Grey"], sizes:["S","M","L","XL","2XL"], sizeGuide:"sweatWH", designPhotos:{ "Black":{ d3:"https://odos.omardirty999.workers.dev/sweatshorts-black-bold.webp", d2:"https://odos.omardirty999.workers.dev/sweatshorts-black-drip.webp", d1:"https://odos.omardirty999.workers.dev/sweatshorts-black-brush.webp" }, "Green":{ d3:"https://odos.omardirty999.workers.dev/sweatshorts-green-bold.webp", d2:"https://odos.omardirty999.workers.dev/sweatshorts-green-drip.webp", d1:"https://odos.omardirty999.workers.dev/sweatshorts-green-brush.webp" }, "Grey":{ d3:"https://odos.omardirty999.workers.dev/sweatshorts-grey-bold.webp", d2:"https://odos.omardirty999.workers.dev/sweatshorts-grey-drip.webp", d1:"https://odos.omardirty999.workers.dev/sweatshorts-grey-brush.webp" } }, desc:"Regular, straight fit, suitable for comfy everyday wear." },
     { id:"p15", name:"Washed Milton Sweatpants", category:"Clothing", price:579.99, img:"", images:["https://odos.omardirty999.workers.dev/washed-milton-sweatpants-1.webp","https://odos.omardirty999.workers.dev/washed-milton-sweatpants-2.webp","https://odos.omardirty999.workers.dev/washed-milton-sweatpants-dark-grey-bold.webp","https://odos.omardirty999.workers.dev/washed-milton-sweatpants-dark-grey-drip.webp","https://odos.omardirty999.workers.dev/washed-milton-sweatpants-dark-grey-brush.webp"], colors:["Dark Grey"], sizes:["S","M","L","XL"], bestSeller:true, stock:"low", designPhotos:{ "Dark Grey":{ d3:"https://odos.omardirty999.workers.dev/washed-milton-sweatpants-dark-grey-bold.webp", d2:"https://odos.omardirty999.workers.dev/washed-milton-sweatpants-dark-grey-drip.webp", d1:"https://odos.omardirty999.workers.dev/washed-milton-sweatpants-dark-grey-brush.webp" } }, desc:"Heavy washed fleece sweatpants, relaxed fit." },
     { id:"p16", name:"Banded Regular Sweatpants", category:"Clothing", price:499.99, img:"", images:["https://odos.omardirty999.workers.dev/banded-sweatpants-1.webp","https://odos.omardirty999.workers.dev/banded-sweatpants-2.webp"], colors:["Black","White","Grey"], sizes:["S","M","L","XL","2XL"], sizeGuide:"bandedSweatpants", desc:"Banded leg, slim fit, suitable for a comfy everyday fit." },
-    { id:"p17", name:"Magic Mug", category:"Mugs & Coasters", price:279.99, img:"", images:["https://odos.omardirty999.workers.dev/magic-mug-1.webp","https://odos.omardirty999.workers.dev/mug-white-bold.webp","https://odos.omardirty999.workers.dev/mug-white-drip.webp","https://odos.omardirty999.workers.dev/mug-white-brush.webp"], colors:["White (color-changing)"], sizes:[], printMethods:[{ id:"standard", name:"Standard Printing", surcharge:25 }], designPhotos:{ "White (color-changing)":{ d3:"https://odos.omardirty999.workers.dev/mug-white-bold.webp", d2:"https://odos.omardirty999.workers.dev/mug-white-drip.webp", d1:"https://odos.omardirty999.workers.dev/mug-white-brush.webp" } }, desc:"Color-changing ceramic mug — reveals your design when filled with something hot." },
+    { id:"p17", name:"Magic Mug", category:"Mugs & Coasters", price:279.99, img:"", images:["https://odos.omardirty999.workers.dev/magic-mug-1.webp","https://odos.omardirty999.workers.dev/mug-white-bold.webp","https://odos.omardirty999.workers.dev/mug-white-drip.webp","https://odos.omardirty999.workers.dev/mug-white-brush.webp"], colors:["White (color-changing)"], sizes:[], printMethods:[{ id:"standard", name:"Standard Printing", surcharge:25 }], designPhotos:{ "White (color-changing)":{ d3:"https://odos.omardirty999.workers.dev/mug-white-bold.webp", d2:"https://odos.omardirty999.workers.dev/mug-white-drip.webp", d1:"https://odos.omardirty999.workers.dev/mug-white-brush.webp" } }, desc:"Color-changing ceramic mug - reveals your design when filled with something hot." },
     { id:"p18", name:"Boulevard Oversized T-Shirt", category:"Clothing", price:459.99, img:"", images:["https://odos.omardirty999.workers.dev/boulevard-tee-1.webp","https://odos.omardirty999.workers.dev/boulevard-tee-2.webp","https://odos.omardirty999.workers.dev/boulevard-tee-3.webp","https://odos.omardirty999.workers.dev/boulevard-tee-4.webp","https://odos.omardirty999.workers.dev/boulevard-tee-5.webp","https://odos.omardirty999.workers.dev/boulevard-tee-6.webp","https://odos.omardirty999.workers.dev/boulevard-tee-7.webp","https://odos.omardirty999.workers.dev/boulevard-tee-8.webp","https://odos.omardirty999.workers.dev/boulevard-tee-9.webp","https://odos.omardirty999.workers.dev/tee-black-bold.webp","https://odos.omardirty999.workers.dev/tee-black-drip.webp","https://odos.omardirty999.workers.dev/tee-black-brush.webp","https://odos.omardirty999.workers.dev/tee-white-bold.webp","https://odos.omardirty999.workers.dev/tee-white-drip.webp","https://odos.omardirty999.workers.dev/tee-white-brush.webp","https://odos.omardirty999.workers.dev/tee-dark-green-bold.webp","https://odos.omardirty999.workers.dev/tee-dark-green-drip.webp","https://odos.omardirty999.workers.dev/tee-dark-green-brush.webp","https://odos.omardirty999.workers.dev/tee-maroon-bold.webp","https://odos.omardirty999.workers.dev/tee-maroon-drip.webp","https://odos.omardirty999.workers.dev/tee-maroon-brush.webp"], colors:["Black","White","Green","Maroon"], sizes:["S","M","L","XL","2XL"], sizeGuide:"boulevardTee", bestSeller:true, designPhotos:{ Black:{ d3:"https://odos.omardirty999.workers.dev/tee-black-bold.webp", d2:"https://odos.omardirty999.workers.dev/tee-black-drip.webp", d1:"https://odos.omardirty999.workers.dev/tee-black-brush.webp" }, White:{ d3:"https://odos.omardirty999.workers.dev/tee-white-bold.webp", d2:"https://odos.omardirty999.workers.dev/tee-white-drip.webp", d1:"https://odos.omardirty999.workers.dev/tee-white-brush.webp" }, Green:{ d3:"https://odos.omardirty999.workers.dev/tee-dark-green-bold.webp", d2:"https://odos.omardirty999.workers.dev/tee-dark-green-drip.webp", d1:"https://odos.omardirty999.workers.dev/tee-dark-green-brush.webp" }, Maroon:{ d3:"https://odos.omardirty999.workers.dev/tee-maroon-bold.webp", d2:"https://odos.omardirty999.workers.dev/tee-maroon-drip.webp", d1:"https://odos.omardirty999.workers.dev/tee-maroon-brush.webp" } }, desc:"Oversized, loose-shoulder fit in heavy material for a premium look." },
     { id:"p19", name:"Parasola Oversized T-Shirt", category:"Clothing", price:399.99, img:"", images:["https://odos.omardirty999.workers.dev/parasola-tee-1.webp","https://odos.omardirty999.workers.dev/parasola-tee-2.webp","https://odos.omardirty999.workers.dev/parasola-tee-3.webp","https://odos.omardirty999.workers.dev/parasola-tee-4.webp","https://odos.omardirty999.workers.dev/parasola-tee-5.webp","https://odos.omardirty999.workers.dev/parasola-tee-6.webp","https://odos.omardirty999.workers.dev/parasola-tee-7.webp","https://odos.omardirty999.workers.dev/tee-black-bold.webp","https://odos.omardirty999.workers.dev/tee-black-drip.webp","https://odos.omardirty999.workers.dev/tee-black-brush.webp","https://odos.omardirty999.workers.dev/tee-white-bold.webp","https://odos.omardirty999.workers.dev/tee-white-drip.webp","https://odos.omardirty999.workers.dev/tee-white-brush.webp","https://odos.omardirty999.workers.dev/tee-blue-bold.webp","https://odos.omardirty999.workers.dev/tee-blue-drip.webp","https://odos.omardirty999.workers.dev/tee-blue-brush.webp","https://odos.omardirty999.workers.dev/tee-bright-green-bold.webp","https://odos.omardirty999.workers.dev/tee-bright-green-drip.webp","https://odos.omardirty999.workers.dev/tee-bright-green-brush.webp"], colors:["Black","White","Blue","Green"], sizes:["S","M","L","XL","2XL"], sizeGuide:"parasola", designPhotos:{ Black:{ d3:"https://odos.omardirty999.workers.dev/tee-black-bold.webp", d2:"https://odos.omardirty999.workers.dev/tee-black-drip.webp", d1:"https://odos.omardirty999.workers.dev/tee-black-brush.webp" }, White:{ d3:"https://odos.omardirty999.workers.dev/tee-white-bold.webp", d2:"https://odos.omardirty999.workers.dev/tee-white-drip.webp", d1:"https://odos.omardirty999.workers.dev/tee-white-brush.webp" }, Blue:{ d3:"https://odos.omardirty999.workers.dev/tee-blue-bold.webp", d2:"https://odos.omardirty999.workers.dev/tee-blue-drip.webp", d1:"https://odos.omardirty999.workers.dev/tee-blue-brush.webp" }, Green:{ d3:"https://odos.omardirty999.workers.dev/tee-bright-green-bold.webp", d2:"https://odos.omardirty999.workers.dev/tee-bright-green-drip.webp", d1:"https://odos.omardirty999.workers.dev/tee-bright-green-brush.webp" } }, desc:"Oversized, loose-shoulder fit, light material suitable for sunny days." },
     { id:"p20", name:"Washed Oversized Long Sleeves", category:"Clothing", price:519.99, img:"", images:["https://odos.omardirty999.workers.dev/washed-long-sleeves-1.webp","https://odos.omardirty999.workers.dev/washed-long-sleeves-2.webp","https://odos.omardirty999.workers.dev/washed-long-sleeves-green-bold.webp","https://odos.omardirty999.workers.dev/washed-long-sleeves-green-drip.webp","https://odos.omardirty999.workers.dev/washed-long-sleeves-green-brush.webp","https://odos.omardirty999.workers.dev/washed-long-sleeves-pink-bold.webp","https://odos.omardirty999.workers.dev/washed-long-sleeves-pink-drip.webp","https://odos.omardirty999.workers.dev/washed-long-sleeves-pink-brush.webp","https://odos.omardirty999.workers.dev/washed-long-sleeves-dark-grey-bold.webp","https://odos.omardirty999.workers.dev/washed-long-sleeves-dark-grey-drip.webp","https://odos.omardirty999.workers.dev/washed-long-sleeves-dark-grey-brush.webp"], colors:["Green","Pink","Dark Grey"], sizes:["M","L","XL"], sizeGuide:"washedLongSleeves", designPhotos:{ Green:{ d3:"https://odos.omardirty999.workers.dev/washed-long-sleeves-green-bold.webp", d2:"https://odos.omardirty999.workers.dev/washed-long-sleeves-green-drip.webp", d1:"https://odos.omardirty999.workers.dev/washed-long-sleeves-green-brush.webp" }, Pink:{ d3:"https://odos.omardirty999.workers.dev/washed-long-sleeves-pink-bold.webp", d2:"https://odos.omardirty999.workers.dev/washed-long-sleeves-pink-drip.webp", d1:"https://odos.omardirty999.workers.dev/washed-long-sleeves-pink-brush.webp" }, "Dark Grey":{ d3:"https://odos.omardirty999.workers.dev/washed-long-sleeves-dark-grey-bold.webp", d2:"https://odos.omardirty999.workers.dev/washed-long-sleeves-dark-grey-drip.webp", d1:"https://odos.omardirty999.workers.dev/washed-long-sleeves-dark-grey-brush.webp" } }, desc:"Oversized, loose-shoulder fit with wide sleeves." },
-    { id:"p21", name:"AirPods Pro Case", category:"Tech Accessories", price:199.99, img:"", images:["https://odos.omardirty999.workers.dev/airpods-pro-case-1.webp"], colors:[], sizes:["AirPods Pro","AirPods Pro 2"], printMethods:[{ id:"standard", name:"Standard Printing", surcharge:20 }], desc:"Clear protective case with carabiner clip — customize with your own design." },
-    { id:"p22", name:"AirPods Case", category:"Tech Accessories", price:199.99, img:"", images:["https://odos.omardirty999.workers.dev/airpods-case-1.webp"], colors:[], sizes:["AirPods 1","AirPods 2","AirPods 3"], printMethods:[{ id:"standard", name:"Standard Printing", surcharge:20 }], desc:"Clear protective case with carabiner clip — customize with your own design." },
+    { id:"p21", name:"AirPods Pro Case", category:"Tech Accessories", price:199.99, img:"", images:["https://odos.omardirty999.workers.dev/airpods-pro-case-1.webp"], colors:[], sizes:["AirPods Pro","AirPods Pro 2"], printMethods:[{ id:"standard", name:"Standard Printing", surcharge:20 }], desc:"Clear protective case with carabiner clip - customize with your own design." },
+    { id:"p22", name:"AirPods Case", category:"Tech Accessories", price:199.99, img:"", images:["https://odos.omardirty999.workers.dev/airpods-case-1.webp"], colors:[], sizes:["AirPods 1","AirPods 2","AirPods 3"], printMethods:[{ id:"standard", name:"Standard Printing", surcharge:20 }], desc:"Clear protective case with carabiner clip - customize with your own design." },
     { id:"p23", name:"Laptop Sleeve", category:"Bags & Sleeves", price:359.99, img:"", images:["https://odos.omardirty999.workers.dev/laptop-sleeve-1.webp"], colors:[], sizes:["12\"","13\"","14\"","15.6\"","17\""], freeDesign:true, desc:"Padded zip sleeve, available with or without a shoulder strap." },
     { id:"p24", name:"Standard Tote Bag", category:"Bags & Sleeves", price:199.99, img:"", images:["https://odos.omardirty999.workers.dev/tote-bag-1.webp"], colors:["Black","Beige"], sizes:[], desc:"Durable canvas tote, everyday carry." },
     { id:"p25", name:"Men Swim Shorts", category:"Clothing", price:499.99, img:"", images:["https://odos.omardirty999.workers.dev/swim-shorts-1.webp"], colors:["Black","White"], sizes:["S","M","L","XL"], desc:"Quick-dry swim shorts with custom all-over print." },
@@ -1656,7 +1678,7 @@
     if(rows.length < 2) return;
     var header = rows[0].map(function(h){ return String(h||"").trim().toLowerCase(); });
     var idIdx = header.indexOf("id");
-    if(idIdx === -1) return; // no id column — can't safely match rows to products
+    if(idIdx === -1) return; // no id column - can't safely match rows to products
     var priceIdx = header.indexOf("price"), stockIdx = header.indexOf("stock");
     var bestsellerIdx = header.indexOf("bestseller"), newIdx = header.indexOf("new"), descIdx = header.indexOf("desc");
     for(var r=1; r<rows.length; r++){
@@ -1664,7 +1686,7 @@
       var id = String(row[idIdx] || "").trim();
       if(!id) continue;
       var p = findProduct(id);
-      if(!p) continue; // unknown id in the sheet — skip it, don't touch PRODUCTS
+      if(!p) continue; // unknown id in the sheet - skip it, don't touch PRODUCTS
       if(priceIdx !== -1 && String(row[priceIdx]||"").trim() !== ""){
         var num = parseFloat(row[priceIdx]);
         if(!isNaN(num)) p.price = num;
@@ -1697,7 +1719,7 @@
     { id:"embroidery", name:"Embroidery", surcharge: EMBROIDERY_SURCHARGE }
   ];
   /* Some products (mugs, coasters, tech accessories, caps/hats, polo) use their own
-     printMethods list instead of the default DTF+Embroidery pair above — either because
+     printMethods list instead of the default DTF+Embroidery pair above - either because
      embroidery isn't physically possible on them, or because their surcharge differs. */
   function getPrintMethods(p){ return (p && p.printMethods) ? p.printMethods : PRINT_METHODS; }
   function findPrintMethod(id, p){ var list = getPrintMethods(p); return list.filter(function(m){ return m.id === id; })[0] || list[0]; }
@@ -1722,7 +1744,7 @@
       if(d[i] === "none") return part.label + ": removed";
       var bits = [];
       if(sz[i] && sz[i] !== "-") bits.push(sz[i]);
-      if(d[i] && d[i] !== "-"){ var dd = findDesign(d[i]), pm = findPrintMethod(m[i], findProduct(part.pid)); bits.push((dd ? dd.name : "Design") + (pm ? " — " + pm.name : "")); }
+      if(d[i] && d[i] !== "-"){ var dd = findDesign(d[i]), pm = findPrintMethod(m[i], findProduct(part.pid)); bits.push((dd ? dd.name : "Design") + (pm ? ", " + pm.name : "")); }
       else { bits.push("Blank"); }
       return part.label + ": " + bits.join(", ");
     });
@@ -1730,7 +1752,7 @@
   function cartBits(c, p){
     if(p.bundle) return bundleBits(c);
     var bits = []; if(c.color) bits.push(c.color); if(c.size) bits.push(c.size);
-    if(c.design){ var d = findDesign(c.design); var pm = findPrintMethod(c.printMethod, p); bits.push((d ? d.name+" design" : "Design") + (pm ? " — "+pm.name : "")); } else { bits.push("Blank"); }
+    if(c.design){ var d = findDesign(c.design); var pm = findPrintMethod(c.printMethod, p); bits.push((d ? d.name+" design" : "Design") + (pm ? ", "+pm.name : "")); } else { bits.push("Blank"); }
     return bits;
   }
   function itemPrice(p, design, printMethod){
@@ -1741,7 +1763,7 @@
   }
 
   /* ============================================================
-     SUPABASE CLIENT — auth + per-account data (cart/wishlist sync)
+     SUPABASE CLIENT - auth + per-account data (cart/wishlist sync)
   ============================================================= */
   var SUPABASE_URL = "https://pqznwgluuiuncdgdkpbp.supabase.co";
   var SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBxem53Z2x1dWl1bmNkZ2RrcGJwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTAxNjc3MjUsImV4cCI6MjEwNTc0MzcyNX0.PPX3n6-CcGSRIvKSDSJIY8kQbPNMDVH8BYkS8VnVLa8";
@@ -1751,7 +1773,7 @@
   var currentUser = null; // set once we know the session state, see initAuth() below
 
   /* ============================================================
-     STATE — cart items keyed by id+color+size
+     STATE - cart items keyed by id+color+size
   ============================================================= */
   var cart = JSON.parse(localStorage.getItem("odos_cart") || "[]");
   var wishlist = JSON.parse(localStorage.getItem("odos_wishlist") || "[]"); // array of product ids, this device only
@@ -1883,7 +1905,7 @@
   }
 
   /* ============================================================
-     RENDERING — product cards
+     RENDERING - product cards
   ============================================================= */
   function primaryImg(p){
     if(p.images && p.images.length) return p.images[0];
@@ -1892,7 +1914,7 @@
   }
   function imgBlock(p){
     var src = primaryImg(p);
-    if(!src){ return '<span class="img-placeholder">'+p.name.toUpperCase()+' — ADD PHOTO</span>'; }
+    if(!src){ return '<span class="img-placeholder">'+p.name.toUpperCase()+' : ADD PHOTO</span>'; }
     var second = (p.images && p.images.length > 1) ? p.images[1] : null;
     if(second){
       return '<div class="img-swap-wrap'+(p.bundle ? ' bundle-img' : '')+'">' +
@@ -1909,7 +1931,7 @@
     return '<button type="button" class="wish-btn'+(active?' active':'')+'" data-wish="'+p.id+'" aria-pressed="'+active+'" aria-label="'+(active?'Remove from wishlist':'Add to wishlist')+'">'+WISH_ICON+'</button>';
   }
   function badgesHTML(p){
-    /* one band per product (a diagonal ribbon can't stack cleanly) — most
+    /* one band per product (a diagonal ribbon can't stack cleanly) - most
        important status wins: sold out > low stock > best seller > new */
     var label = null, cls = "card-badge";
     if(p.stock === "out"){ label = "Sold Out"; cls += " outline"; }
@@ -1988,7 +2010,7 @@
   }
 
   /* ============================================================
-     WISHLIST — device-local (localStorage), same pattern as cart.
+     WISHLIST - device-local (localStorage), same pattern as cart.
      No accounts on this site, so a wishlist can't follow a
      customer across devices; it lives in their browser like the
      cart already does.
@@ -2100,18 +2122,19 @@
   }
 
   /* ============================================================
-     FAQ (placeholders — kept as requested)
+     FAQ
   ============================================================= */
   var FAQS = [
-    { q:"How long does delivery take?", a:"Orders inside Egypt typically arrive within 3–5 business days after confirmation. You'll be contacted directly to confirm delivery details." },
-    { q:"What payment methods do you accept?", a:"Telda, InstaPay, Vodafone Cash, and cash on delivery in most areas. You'll choose your method at checkout." },
-    { q:"Can I exchange a size?", a:"Yes — reach out within 7 days of receiving your order and we'll arrange an exchange, subject to stock." },
-    { q:"Do you ship outside Egypt?", a:"Not yet — right now ODOS ships within Egypt only. Follow our Instagram for updates on that." },
+    { q:"How long does delivery take?", a:"Orders inside Egypt typically arrive within 3 to 5 business days after confirmation. You'll be contacted directly to confirm delivery details." },
+    { q:"What payment methods do you accept?", a:"Telda, InstaPay, Vodafone Cash, and cash on delivery in every governorate in Egypt. You'll choose your method at checkout." },
+    { q:"Can I exchange a size?", a:"Yes. Contact us within 7 days of receiving your order and we'll arrange an exchange, subject to stock." },
+    { q:"Can I return an order for a refund?", a:"Yes. Contact us within 7 days of receiving your order with your order number. Full details are on our Policies page." },
+    { q:"Do you ship outside Egypt?", a:"Not yet. Right now ODOS ships within Egypt only. Follow our Instagram for updates on that." },
     { q:"How do I know my order went through?", a:"After checkout you'll see a confirmation on screen, and we'll follow up directly by phone or email to confirm details and payment." },
     { q:"Are the product photos accurate?", a:"Yes, all photos are of the actual product. Slight color variation can happen depending on your screen." },
-    { q:"What does \"ODOS\" mean?", a:"Odos is Greek for \"path\" — the one we're all on, walking, running, sometimes just crawling through it. Nobody's really ahead of anybody. We're all just trying to figure ourselves out along the way. Execute." },
-    { q:"What is KAIROS?", a:"Kairos is Greek for \"opportunity.\" It's not something you plan for — it just shows up, and you either take it and let it bend your path, or it slips by. KAIROS is our limited-drop line, built around that idea. Seize." },
-    { q:"Why do people wear ODOS?", a:"Whatever you're trying to surpass or achieve — a final, a GPA, your dream job, a shot you've been waiting on — wear it. Every time you put it on, you remember why you started. Remember." }
+    { q:"What does \"ODOS\" mean?", a:"Odos is Greek for \"path\": the one we're all on, walking, running, sometimes just crawling through it. Nobody's really ahead of anybody. We're all just trying to figure ourselves out along the way. Execute." },
+    { q:"What is KAIROS?", a:"Kairos is Greek for \"opportunity.\" It's not something you plan for. It just shows up, and you either take it and let it bend your path, or it slips by. KAIROS is our limited-drop line, built around that idea. Seize." },
+    { q:"Why do people wear ODOS?", a:"Whatever you're trying to surpass or achieve (a final, a GPA, your dream job, a shot you've been waiting on), wear it. Every time you put it on, you remember why you started. Remember." }
   ];
   function renderFAQ(){
     document.getElementById("faqList").innerHTML = FAQS.map(function(f, i){
@@ -2122,7 +2145,7 @@
   /* ============================================================
      NAVIGATION
   ============================================================= */
-  var PAGES = ["home","products","wishlist","cart","contact","faq","story","kairos","track"];
+  var PAGES = ["home","products","wishlist","cart","contact","faq","story","kairos","track","policies"];
   function goTo(page){
     if(PAGES.indexOf(page) === -1) page = "home";
     PAGES.forEach(function(p){ document.getElementById("page-"+p).classList.toggle("active", p === page); });
@@ -2240,7 +2263,7 @@
     });
   }
 
-  /* set upsell inside the product popup — only if the collection product exists */
+  /* set upsell inside the product popup - only if the collection product exists */
   function renderSetUpsell(){
     var box = document.getElementById("modalSetUpsell"); if(!box) return;
     box.style.display = "none"; box.innerHTML = "";
@@ -2249,7 +2272,7 @@
     if(!BUNDLE_PARTS.some(function(x){ return x.pid === modalProduct.id; })) return;
     var sum = 0; BUNDLE_PARTS.forEach(function(x){ var q = findProduct(x.pid); if(q) sum += q.price; });
     var save = sum - b.price;
-    box.innerHTML = '<div class="up"><div class="up-title">Complete the set · '+b.name+'</div><div class="up-sub">Tee + sweatpants + cap in Dark Grey for '+fmt(b.price)+(save > 0 ? ' — save '+fmt(save) : '')+'</div><button type="button" class="up-btn" data-open-set="1">View the set →</button></div>';
+    box.innerHTML = '<div class="up"><div class="up-title">Complete the set · '+b.name+'</div><div class="up-sub">Tee + sweatpants + cap in Dark Grey for '+fmt(b.price)+(save > 0 ? ', save '+fmt(save) : '')+'</div><button type="button" class="up-btn" data-open-set="1">View the set</button></div>';
     box.style.display = "block";
   }
   document.addEventListener("click", function(e){
@@ -2258,7 +2281,7 @@
 
   /* payment helper: tap to copy handles / number / amount */
   function copyText(t, btn){
-    function done(){ var old = btn.textContent; btn.textContent = "Copied ✓"; showToast("Copied"); setTimeout(function(){ btn.textContent = old; }, 1500); }
+    function done(){ var old = btn.textContent; btn.textContent = "Copied"; showToast("Copied"); setTimeout(function(){ btn.textContent = old; }, 1500); }
     if(navigator.clipboard && navigator.clipboard.writeText){ navigator.clipboard.writeText(t).then(done, done); }
     else { var ta = document.createElement("textarea"); ta.value = t; document.body.appendChild(ta); ta.select(); try{ document.execCommand("copy"); }catch(e){} ta.remove(); done(); }
   }
@@ -2296,7 +2319,7 @@
   }
 
   /* ============================================================
-     ORDER TRACKING — customer enters an order number, sees the status you set in Supabase
+     ORDER TRACKING - customer enters an order number, sees the status you set in Supabase
   ============================================================= */
   var TRACK_STEPS = [["received","Order received"],["confirmed","Confirmed"],["preparing","Preparing"],["shipped","Shipped"],["out_for_delivery","Out for delivery"],["delivered","Delivered"]];
   var TRACK_LABEL = { received:"Received", confirmed:"Confirmed", preparing:"Preparing", shipped:"Shipped", out_for_delivery:"Out for delivery", delivered:"Delivered", cancelled:"Cancelled" };
@@ -2473,7 +2496,7 @@
       sb.auth.signInWithOtp({ email: email, options: { emailRedirectTo: window.location.origin } }).then(function(res){
         btn.disabled = false; btn.textContent = "Send Magic Link";
         if(res.error){ showAuthError(res.error.message); return; }
-        showAuthNotice("Check your email — we sent you a sign-in link.");
+        showAuthNotice("Check your email. We sent you a sign-in link.");
       });
     });
 
@@ -2506,7 +2529,7 @@
       sb.auth.signOut().then(function(){ closeAuth(); });
     });
   } else {
-    accountBtn.addEventListener("click", function(){ /* sb not available — no-op beyond default openAuth above */ });
+    accountBtn.addEventListener("click", function(){ /* sb not available - no-op beyond default openAuth above */ });
   }
 
   /* ---------- search ---------- */
@@ -2574,7 +2597,7 @@
     document.getElementById("modalName").textContent = modalProduct.name;
     document.getElementById("modalDesc").textContent = modalProduct.desc;
     updateModalPrice();
-    document.getElementById("modalImg").innerHTML = primaryImg(modalProduct) ? '<img src="'+primaryImg(modalProduct)+'" alt="'+modalProduct.name+'">' : '<span class="img-placeholder">'+modalProduct.name.toUpperCase()+' — ADD PHOTO</span>';
+    document.getElementById("modalImg").innerHTML = primaryImg(modalProduct) ? '<img src="'+primaryImg(modalProduct)+'" alt="'+modalProduct.name+'">' : '<span class="img-placeholder">'+modalProduct.name.toUpperCase()+' : ADD PHOTO</span>';
 
     var modalWishBtn = document.getElementById("modalWishBtn");
     var modalWished = isWished(modalProduct.id);
@@ -2721,7 +2744,7 @@
       var m0 = findPrintMethod(modalPrintMethod, modalProduct);
       printMethodSelected.textContent = m0 ? m0.name : "";
     }
-    var blankBtn = '<button type="button" class="design-thumb" data-design=""><span style="width:44px;height:44px;display:flex;align-items:center;justify-content:center;background:#fff;color:#000;border-radius:2px;">—</span><span>Blank</span></button>';
+    var blankBtn = '<button type="button" class="design-thumb" data-design=""><span style="width:44px;height:44px;display:flex;align-items:center;justify-content:center;background:#fff;color:#000;border-radius:2px;">-</span><span>Blank</span></button>';
     var designBtns = DESIGNS.map(function(d){
       return '<button type="button" class="design-thumb" data-design="'+d.id+'"><img src="'+d.img+'" alt="'+d.name+'"><span>'+d.name+'</span></button>';
     }).join("");
@@ -2850,7 +2873,7 @@
     })
       .then(function(res){ return res.json().then(function(data){ return { ok: res.ok, data: data }; }); })
       .then(function(result){
-        if(result.ok && result.data && result.data.success){ msgEl.textContent = successText || "Thanks — your message has been sent. We'll be in touch shortly."; msgEl.className = "form-msg show ok"; if(onSuccess) onSuccess(); }
+        if(result.ok && result.data && result.data.success){ msgEl.textContent = successText || "Thanks, your message has been sent. We'll be in touch shortly."; msgEl.className = "form-msg show ok"; if(onSuccess) onSuccess(); }
         else { throw new Error("Bad response"); }
       })
       .catch(function(){ msgEl.textContent = "Something went wrong sending this. Please try again, or contact us directly."; msgEl.className = "form-msg show err"; });
@@ -2878,7 +2901,7 @@
   });
 
   /* ============================================================
-     ORDER CONFIRMATION EMAIL — Supabase Edge Function -> Resend
+     ORDER CONFIRMATION EMAIL - Supabase Edge Function -> Resend
      Fire-and-forget: if it fails, the order itself is already sent.
   ============================================================= */
   function sendOrderEmail(payload){
@@ -2930,7 +2953,7 @@
       var p = findProduct(c.id); if(!p) return "";
       var bits = cartBits(c, p);
       var unit = itemPrice(p, c.design, c.printMethod);
-      return p.name + (bits.length ? " ("+bits.join(" / ")+")" : "") + " x" + c.qty + " — " + fmt(unit*c.qty);
+      return p.name + (bits.length ? " ("+bits.join(" / ")+")" : "") + " x" + c.qty + ", " + fmt(unit*c.qty);
     });
     var orderId = newOrderId();
     document.getElementById("orderIdField").value = orderId;
@@ -2955,7 +2978,7 @@
     document.getElementById("orderTotalField").value = fmt(total) + (appliedCode ? " (after " + showCode(appliedCode) + " discount)" : "");
     document.getElementById("orderDiscountCodeField").value = appliedCode ? showCode(appliedCode) : "none";
     document.getElementById("orderDiscountAmountField").value = appliedCode ? fmt(disc) : "EGP 0";
-    submitNetlifyForm(orderForm, document.getElementById("orderMsg"), function(){ createOrderRecord(emailPayload); sendOrderEmail(emailPayload); rememberOrder(emailPayload.orderId); showTrackCta(emailPayload.orderId); cart = []; appliedCode = null; appliedPct = 0; saveCode(); saveCart(); orderForm.reset(); prefillOrderEmail(); document.getElementById("discountInput").value = ""; discountMsg("", ""); }, "Thank you — your order has been placed! Your order number is " + orderId + " — track it anytime from the menu (Track Order). A confirmation email is on its way to " + emailPayload.email + ". If you don't see it within a few minutes, please check your spam or junk folder. We'll also contact you shortly to confirm the details.");
+    submitNetlifyForm(orderForm, document.getElementById("orderMsg"), function(){ createOrderRecord(emailPayload); sendOrderEmail(emailPayload); rememberOrder(emailPayload.orderId); showTrackCta(emailPayload.orderId); cart = []; appliedCode = null; appliedPct = 0; saveCode(); saveCart(); orderForm.reset(); prefillOrderEmail(); document.getElementById("discountInput").value = ""; discountMsg("", ""); }, "Thank you - your order has been placed! Your order number is " + orderId + " - track it anytime from the menu (Track Order). A confirmation email is on its way to " + emailPayload.email + ". If you don't see it within a few minutes, please check your spam or junk folder. We'll also contact you shortly to confirm the details.");
   });
 
   var contactForm = document.getElementById("contactForm");
@@ -2984,6 +3007,11 @@
 })();
 </script>
 
+<div class="storage-notice" id="storageNotice" role="region" aria-label="Storage notice">
+  <p>ODOS saves your cart, wishlist and recent orders on this device so the shop works. We use cookieless analytics and Google Fonts. No ad or marketing cookies. <a href="#policies" data-nav="policies">Read more</a></p>
+  <button type="button" class="btn" id="storageNoticeBtn">Got it</button>
+</div>
+
 <aside class="nl-pop" id="nlPop" role="dialog" aria-labelledby="nlTitle" aria-live="polite">
   <button type="button" class="nl-close" id="nlClose" aria-label="Close">&times;</button>
   <p class="nl-eyebrow">JOIN THE LIST</p>
@@ -2994,6 +3022,7 @@
     <input type="text" name="botcheck" class="nl-trap" tabindex="-1" autocomplete="off" aria-hidden="true">
     <button type="submit" class="btn" id="nlBtn">Get 10% Off</button>
   </form>
+  <p class="nl-consent">By signing up you agree to receive emails from ODOS. Unsubscribe any time. See our <a href="#policies" data-nav="policies">Privacy Policy</a>.</p>
   <p class="nl-msg" id="nlMsg" role="status"></p>
   <div class="nl-code" id="nlCode">
     <p class="nl-code-label">YOUR 10% OFF CODE</p>
@@ -3032,7 +3061,8 @@
   function close(status){ pop.classList.remove("show"); if(status) setState(status); }
   function say(text, kind){ msg.textContent = text; msg.className = "nl-msg show " + kind; }
 
-  if(shouldShow()){ setTimeout(open, SHOW_AFTER_MS); }
+  function openWhenFree(){ var n = document.getElementById("storageNotice"); if(n && n.classList.contains("show")){ setTimeout(openWhenFree, 2000); } else { open(); } }
+  if(shouldShow()){ setTimeout(openWhenFree, SHOW_AFTER_MS); }
 
   document.getElementById("nlClose").addEventListener("click", function(){ close("dismissed"); });
   document.addEventListener("keydown", function(e){ if(e.key === "Escape" && pop.classList.contains("show")) close("dismissed"); });
@@ -3073,7 +3103,7 @@
           subject: "New ODOS newsletter signup (10% off)",
           from_name: "ODOS Newsletter",
           email: email,
-          message: "New newsletter signup. " + (shown ? ("Discount code shown to this customer: " + shown) : "No code could be generated on their device — please send them a 10% code.")
+          message: "New newsletter signup. " + (shown ? ("Discount code shown to this customer: " + shown) : "No code could be generated on their device - please send them a 10% code.")
         })
       })
       .then(function(res){
@@ -3112,179 +3142,18 @@
 </script>
 
 <script>
-/* Custom cursor: dot + ring. Ring grows on clickables, becomes a "View" label on product images. */
+/* storage notice (info only), policy section links, close sign-in popup when its policy link is used */
 (function(){
-  if (!window.matchMedia || !matchMedia("(hover: hover) and (pointer: fine)").matches) return;
-  var root = document.documentElement;
-  var dot = document.querySelector(".cur-dot");
-  var ring = document.querySelector(".cur-ring");
-  if (!dot || !ring) return;
-  root.classList.add("has-cursor");
-
-  var reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
-  var ease = reduce ? 1 : 0.15;
-  var x = 0, y = 0, rx = 0, ry = 0, started = false;
-  var wrapEl = null, rw = 34, rh = 34;
-
-  addEventListener("mousemove", function(e){
-    x = e.clientX; y = e.clientY;
-    if (!started){ rx = x; ry = y; started = true; root.classList.add("cursor-live"); }
-    dot.style.transform = "translate(" + x + "px," + y + "px) translate(-50%,-50%)";
-  }, { passive: true });
-
-  // Magnetic pull: option elements drift a few px toward the cursor while hovered, then ease back.
-  var MAGNET_SEL = ".opt-row button, .design-thumb, [data-size], [data-design]";
-  var mx = 0, my = 0, magnetOn = false, settling = [];
-  function clamp(v, lo, hi){ return v < lo ? lo : v > hi ? hi : v; }
-  function releaseMagnet(){
-    if (wrapEl && magnetOn && (Math.abs(mx) > 0.1 || Math.abs(my) > 0.1)) settling.push({ el: wrapEl, x: mx, y: my });
-    mx = 0; my = 0; magnetOn = false;
-  }
-  function releaseWrap(){
-    releaseMagnet();
-    wrapEl = null;
-    ring.classList.remove("wrap", "fill", "brackets");
-    ring.style.width = ""; ring.style.height = "";
-  }
-
-  (function loop(){
-    for (var i = settling.length - 1; i >= 0; i--){
-      var q = settling[i];
-      q.x *= 0.78; q.y *= 0.78;
-      if (Math.abs(q.x) < 0.1 && Math.abs(q.y) < 0.1){ q.el.style.translate = ""; settling.splice(i, 1); }
-      else q.el.style.translate = q.x + "px " + q.y + "px";
-    }
-    if (wrapEl && document.contains(wrapEl)){
-      // Ring wraps the hovered element and follows it (even while scrolling)
-      var r = wrapEl.getBoundingClientRect(), k = reduce ? 1 : 0.25;
-      var cx = r.left + r.width / 2, cy = r.top + r.height / 2;
-      if (magnetOn){
-        var bx = cx - mx, by = cy - my; // element centre without the current pull
-        mx += (clamp((x - bx) * 0.22, -6, 6) - mx) * 0.2;
-        my += (clamp((y - by) * 0.22, -6, 6) - my) * 0.2;
-        wrapEl.style.translate = mx + "px " + my + "px";
-        cx = bx + mx; cy = by + my;
-      }
-      rx += (cx - rx) * k;
-      ry += (cy - ry) * k;
-      rw += (r.width + wrapPad - rw) * k;
-      rh += (r.height + wrapPad - rh) * k;
-      ring.style.width = rw + "px";
-      ring.style.height = rh + "px";
-    } else {
-      if (wrapEl) releaseWrap();
-      rx += (x - rx) * ease;
-      ry += (y - ry) * ease;
-    }
-    ring.style.transform = "translate(" + rx + "px," + ry + "px) translate(-50%,-50%)";
-    requestAnimationFrame(loop);
-  })();
-
-  document.addEventListener("mouseleave", function(){ root.classList.remove("cursor-live"); });
-  document.addEventListener("mouseenter", function(){ if (started) root.classList.add("cursor-live"); });
-  addEventListener("mousedown", function(){ ring.classList.add("down"); });
-  addEventListener("mouseup", function(){ ring.classList.remove("down"); });
-
-  var HOVER_SEL = "a, button, select, label, summary, [data-open], [data-wish], .logo, .swatch, .radio-option, .qr-trigger, .faq-q";
-  // Small controls that should only grow the ring (a pill would cover them)
-  // Selectors: dot stays, ring tightens (sizes, design/print options, qty +/-, payment methods, swatches...)
-  // Ring morphs into a frame/capsule around these (payment methods, sizes, designs, print methods)
-  var WRAP_SEL = ".radio-option, .opt-row button, .design-thumb, [data-size], [data-design]";
-  // Text options get a solid white capsule that inverts the label via blend mode; image/payment options get an outline frame
-  var OUTLINE_SEL = ".radio-option, .design-thumb, [data-design]";
-  var wrapPad = 10;
-  var TIGHT_SEL = ".opt-row button, .design-thumb, [data-size], [data-design], .qty-row button, .radio-option, .swatch, .modal-thumbs button, .filter-row button, .size-select";
-  var SMALL_SEL = ".opt-row button, .qty-row button, .modal-thumbs button, .filter-row button, .swatch, .size-select, .faq-q, .radio-option, select, label";
-  var NAV_NAMES = { home:"Home", products:"Shop", contact:"Contact", faq:"FAQ", story:"Story", wishlist:"Wishlist", cart:"Cart" };
-  var labelText = "", lastTarget = null;
-
-  function clean(str){
-    str = (str || "").replace(/[\u2192\u2190]/g, "").replace(/\s+/g, " ").trim();
-    return str.length > 18 ? str.slice(0, 17).trim() + "\u2026" : str;
-  }
-
-  // Returns the pill text for an element, or "" if it should only get the hover ring.
-  function labelFor(t){
-    var el;
-    if ((el = t.closest("[data-cursor]"))) return clean(el.getAttribute("data-cursor"));
-    if (t.closest(TIGHT_SEL) || t.closest(SMALL_SEL)) return "";
-    if ((el = t.closest(".wish-btn"))) return el.classList.contains("active") ? "Remove" : "Save";
-    if (t.closest(".modal-close, .nl-close, .qr-lightbox-close")) return "Close";
-    if (t.closest(".menu-btn")) return "Menu";
-    if (t.closest(".logo")) return "Home";
-    if ((el = t.closest(".icon-btn"))) return clean(el.getAttribute("aria-label")) || "";
-    if ((el = t.closest(".btn"))) return clean(el.textContent);
-    if ((el = t.closest("[data-nav]"))) return NAV_NAMES[el.getAttribute("data-nav")] || clean(el.textContent);
-    if (t.closest(".card-img[data-open], .card-name[data-open]")) return "View";
-    if ((el = t.closest("[data-catgo]"))) return clean(el.textContent);
-    if (t.closest(".cart-item .remove, .discount-remove")) return "Remove";
-    if ((el = t.closest("a[href]"))) {
-      var h = el.getAttribute("href") || "";
-      if (h.indexOf("mailto:") === 0) return "Email";
-      if (h.indexOf("wa.me") > -1) return "WhatsApp";
-      if (h.indexOf("instagram.com") > -1) return "Instagram";
-      return "Open";
-    }
-    return "";
-  }
-
-  function setLabel(text){
-    if (text === labelText) return;
-    labelText = text;
-    ring.textContent = text;
-    if (text){
-      ring.style.width = Math.max(72, text.length * 8 + 40) + "px";
-      ring.style.height = "44px";
-    } else {
-      ring.style.width = ""; ring.style.height = "";
-    }
-  }
-
-  function update(t){
-    if (!t || !t.closest) return;
-    var text = labelFor(t);
-    var wrapT = !text ? t.closest(WRAP_SEL) : null;
-    var tight = !text && !wrapT && !!t.closest(TIGHT_SEL);
-    if (wrapEl && wrapEl !== wrapT) releaseWrap();
-    var isClickable = !!t.closest(HOVER_SEL);
-    if (text){
-      setLabel(text);
-      ring.classList.add("label"); ring.classList.remove("hover", "tight", "wrap", "fill", "brackets");
-      dot.classList.add("hide");
-    } else if (wrapT){
-      setLabel("");
-      if (wrapEl !== wrapT){
-        wrapEl = wrapT; rw = ring.offsetWidth; rh = ring.offsetHeight;
-        magnetOn = !reduce && wrapT.matches(MAGNET_SEL);
-        mx = 0; my = 0;
-        // If this element was still easing back from an earlier hover, pick up where it left off
-        for (var i = settling.length - 1; i >= 0; i--){
-          if (settling[i].el === wrapT){ mx = settling[i].x; my = settling[i].y; settling.splice(i, 1); }
-        }
-      }
-      var isDesign = !!wrapT.matches(".design-thumb, [data-design]");
-      var outline = !!wrapT.matches(OUTLINE_SEL);
-      wrapPad = isDesign ? 16 : outline ? 10 : 4;
-      ring.classList.remove("label", "hover", "tight"); ring.classList.add("wrap");
-      ring.classList.toggle("brackets", isDesign);
-      ring.classList.toggle("fill", !outline);
-      dot.classList.remove("hide");
-    } else if (tight){
-      setLabel("");
-      ring.classList.remove("label", "hover", "wrap", "fill", "brackets"); ring.classList.add("tight");
-      dot.classList.remove("hide");
-    } else {
-      setLabel("");
-      ring.classList.remove("label", "tight", "wrap", "fill", "brackets");
-      ring.classList.toggle("hover", isClickable);
-      dot.classList.toggle("hide", isClickable);
-    }
-  }
-
-  // Delegation, so anything rendered later from JS (cards, cart rows, related row) works automatically.
-  document.addEventListener("mouseover", function(e){ lastTarget = e.target; update(e.target); });
-  // Button text can change after a click ("Add to Cart" -> "Added"), so refresh the pill.
-  document.addEventListener("click", function(){ setTimeout(function(){ if (lastTarget && document.contains(lastTarget)) update(lastTarget); }, 80); });
+  var KEY = "odos_notice_seen";
+  var n = document.getElementById("storageNotice"), b = document.getElementById("storageNoticeBtn");
+  var seen = false; try{ seen = !!localStorage.getItem(KEY); }catch(e){}
+  if(n && !seen){ setTimeout(function(){ n.classList.add("show"); }, 800); }
+  if(b){ b.addEventListener("click", function(){ try{ localStorage.setItem(KEY, "1"); }catch(e){} n.classList.remove("show"); }); }
+  document.addEventListener("click", function(e){
+    var sc = e.target.closest("[data-scroll]");
+    if(sc){ e.preventDefault(); var t = document.getElementById(sc.getAttribute("data-scroll")); if(t) t.scrollIntoView({ behavior: matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth" }); return; }
+    if(e.target.closest("[data-closes-auth]")){ var c = document.getElementById("authClose"); if(c) c.click(); }
+  });
 })();
 </script>
 <script>
