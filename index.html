@@ -674,6 +674,20 @@
   .policy .copy{ margin:0 0 14px; }
   .policy-toc{ display:flex; flex-wrap:wrap; gap:8px; margin:22px 0 4px; }
   .policy-toc a{ border:1px solid var(--grey-line); border-radius:20px; padding:6px 14px; font-size:12px; letter-spacing:.06em; color:var(--white); }
+
+  /* ---------- ongoing orders (editable) ---------- */
+  .ord-card{ border:1px solid var(--white); border-radius:20px; background:var(--black-2); padding:18px; margin-bottom:12px; display:flex; flex-direction:column; gap:12px; }
+  .ord-top{ display:flex; justify-content:space-between; align-items:center; gap:10px; flex-wrap:wrap; font-size:12px; letter-spacing:.08em; color:var(--grey); }
+  .ord-pill{ border:1px solid var(--white); color:var(--white); border-radius:999px; padding:3px 10px; font-size:10px; letter-spacing:.14em; }
+  .ord-thumbs{ display:flex; gap:8px; align-items:center; }
+  .ord-thumb{ width:52px; height:64px; border:1px solid var(--grey-line); border-radius:10px; background:#1a1a18; overflow:hidden; display:flex; align-items:center; justify-content:center; font-size:12px; color:var(--grey); }
+  .ord-thumb img{ width:100%; height:100%; object-fit:cover; display:block; }
+  .ord-actions{ display:flex; gap:10px; flex-wrap:wrap; }
+  .ord-actions .btn{ padding:10px 18px; font-size:13px; }
+  .ord-row{ display:flex; justify-content:space-between; gap:12px; padding:8px 0; border-bottom:1px solid var(--grey-line); font-size:14px; }
+  .ord-row small{ display:block; color:var(--grey); font-size:12px; }
+  .edit-banner{ display:none; border:1px solid var(--white); border-radius:14px; padding:12px 14px; background:rgba(245,245,240,.06); font-size:13px; line-height:1.6; margin-bottom:16px; }
+  .edit-banner button{ background:none; border:none; color:var(--grey); text-decoration:underline; cursor:pointer; font-size:13px; padding:0; margin-left:6px; font-family:inherit; }
 </style>
 <!-- Cloudflare Web Analytics -->
 <script type='module' src='https://static.cloudflareinsights.com/beacon.min.js' data-cf-beacon='{"token": "5c914474db464af9860e68bc267b4720"}'></script>
@@ -846,7 +860,8 @@
         <a class="btn spin-cta" id="spinCta" href="#products" data-nav="products">Shop all products</a>
       </div>
     </section>
-    <div class="wrap recent-wrap" style="display:none;"><div class="section-heading"><h2>RECENTLY VIEWED</h2></div><div class="recent-row"></div></div>
+    <div class="wrap" id="ongoingOrders" style="display:none;margin-top:40px;"><div class="section-heading"><h2>YOUR ONGOING ORDER</h2></div><div id="ongoingList"></div></div>
+      <div class="wrap recent-wrap" style="display:none;"><div class="section-heading"><h2>RECENTLY VIEWED</h2></div><div class="recent-row"></div></div>
     <div class="wrap home-story reveal">
       <h3>WHY "ODOS"</h3>
       <p class="copy">Odos is Greek for "path": the one we're all on, walking, running, sometimes just crawling through it. Nobody's really ahead of anybody.<br><strong>Execute.</strong></p>
@@ -922,6 +937,7 @@
   <section class="page" id="page-cart">
     <div class="wrap">
       <h1 class="page-title">YOUR CART</h1>
+      <div class="edit-banner" id="editBanner">Editing order <strong id="editRef"></strong>. Add items from the shop, change quantities, then send the update with the button at the bottom. <button type="button" data-ord-cancel>Cancel editing</button></div>
       <div class="cart-layout">
         <div>
           <div id="cartItemsList"></div>
@@ -949,6 +965,7 @@
             <input type="hidden" name="discount_code" id="orderDiscountCodeField">
             <input type="hidden" name="discount_amount" id="orderDiscountAmountField">
             <input type="hidden" name="order_id" id="orderIdField">
+            <input type="hidden" name="order_type" id="orderTypeField">
 
             <div class="field"><label for="ord_name">Full name</label><input type="text" id="ord_name" name="name" required></div>
             <div class="field"><label for="ord_email">Email</label><input type="email" id="ord_email" name="email" autocomplete="email" placeholder="For your order confirmation" required></div>
@@ -959,7 +976,7 @@
 
             <div class="field">
               <label>Payment method</label>
-              <p class="pay-amount">Amount to send: <b id="payAmt">EGP 0</b><button type="button" class="copy-btn" data-copy-amt="1">Copy amount</button></p>
+              <p class="pay-amount"><span id="payLbl">Amount to send:</span> <b id="payAmt">EGP 0</b><button type="button" class="copy-btn" data-copy-amt="1">Copy amount</button></p>
               <div class="radio-group">
                 <label class="radio-option">
                   <input type="radio" name="payment" value="Telda" required>
@@ -1091,6 +1108,13 @@
   <div class="qr-lightbox-box">
     <img src="https://odos.omardirty999.workers.dev/instapay-qr.webp" alt="InstaPay QR code, enlarged">
     <p>Scan or screenshot this to pay via InstaPay</p>
+  </div>
+</div>
+
+<div class="modal-overlay" id="orderModalOverlay">
+  <div class="modal" style="max-width:520px; grid-template-columns:1fr;">
+    <button class="modal-close" id="orderModalClose" aria-label="Close">&times;</button>
+    <div class="modal-body" id="orderModalBody" style="max-height:75vh; overflow-y:auto; padding:26px 22px;"></div>
   </div>
 </div>
 
@@ -2985,6 +3009,134 @@
   prefillOrderEmail();
   if(sb) sb.auth.onAuthStateChange(function(){ prefillOrderEmail(); });
 
+  /* ============================================================
+     ONGOING ORDERS: saved on this device after checkout. Home shows them;
+     "Edit order" loads the items back into the cart and sends the changes
+     to us as an UPDATE to the same order number (no duplicate order record).
+  ============================================================= */
+  var ORDER_TTL = 45 * 864e5;
+  var orders = []; try{ orders = JSON.parse(localStorage.getItem("odos_my_orders") || "[]"); }catch(e){ orders = []; }
+  if(!Array.isArray(orders)) orders = [];
+  orders = orders.filter(function(o){ return o && o.ref && Array.isArray(o.items) && (Date.now() - (o.upd || o.at || 0)) < ORDER_TTL; })
+    .map(function(o){ o.items = o.items.filter(function(c){ return c && findProduct(c.id); }); return o; })
+    .filter(function(o){ return o.items.length; }).slice(0, 3);
+  var editingRef = null; try{ editingRef = localStorage.getItem("odos_editing") || null; }catch(e){}
+  function getOrder(ref){ return ref ? orders.filter(function(o){ return o.ref === ref; })[0] : null; }
+  if(editingRef && !getOrder(editingRef)){ editingRef = null; try{ localStorage.removeItem("odos_editing"); localStorage.removeItem("odos_cart_stash"); }catch(e){} }
+  function saveOrders(){ try{ localStorage.setItem("odos_my_orders", JSON.stringify(orders)); }catch(e){} renderOrders(); }
+  function copyItems(arr){ return arr.map(function(c){ return { key:c.key, id:c.id, color:c.color||"", size:c.size||"", design:c.design||"", printMethod:c.printMethod||"", qty:c.qty }; }); }
+  function snapOrder(id, ed, total){
+    var v = function(i){ var el = document.getElementById(i); return el ? el.value.trim() : ""; };
+    var pay = document.getElementById("orderForm").querySelector('input[name="payment"]:checked');
+    return { ref:id, at: ed ? ed.at : Date.now(), upd: Date.now(), rev: ed ? (ed.rev || 0) + 1 : 0, total: total, code: appliedCode || "", pct: appliedPct || 0,
+      items: copyItems(cart),
+      cust: { name:v("ord_name"), email:v("ord_email"), phone:v("ord_phone"), whatsapp:v("ord_whatsapp"), address:v("ord_address"), city:v("ord_city"), payment: pay ? pay.value : "" } };
+  }
+  function itemLabel(c){ var p = findProduct(c.id), b = p ? cartBits(c, p).join(" / ") : ""; return (p ? p.name : c.id) + (b ? " (" + b + ")" : ""); }
+  function diffText(o, n){
+    var om = {}, nm = {}, out = [];
+    o.items.forEach(function(c){ om[c.key] = c; }); n.items.forEach(function(c){ nm[c.key] = c; });
+    n.items.forEach(function(c){ var x = om[c.key]; if(!x) out.push("ADDED " + itemLabel(c) + " x" + c.qty); else if(x.qty !== c.qty) out.push("QTY " + itemLabel(c) + " " + x.qty + " -> " + c.qty); });
+    o.items.forEach(function(c){ if(!nm[c.key]) out.push("REMOVED " + itemLabel(c)); });
+    return "CHANGES: " + (out.length ? out.join("; ") : "contact/delivery details only");
+  }
+  function exitEdit(){
+    var st = {}; try{ st = JSON.parse(localStorage.getItem("odos_cart_stash") || "{}") || {}; }catch(e){}
+    cart = Array.isArray(st.cart) ? st.cart : []; appliedCode = st.code || null; appliedPct = st.pct || 0; saveCode();
+    editingRef = null; try{ localStorage.removeItem("odos_editing"); localStorage.removeItem("odos_cart_stash"); }catch(e){}
+  }
+  function finishOrder(snap, ed){
+    if(ed){ orders[orders.indexOf(ed)] = snap; exitEdit(); }
+    else { orders.unshift(snap); orders = orders.slice(0, 3); cart = []; }
+    saveCart(); saveOrders();
+  }
+  function startEdit(ref){
+    var o = getOrder(ref); if(!o) return;
+    if(editingRef && editingRef !== ref) exitEdit();
+    if(!editingRef){ try{ localStorage.setItem("odos_cart_stash", JSON.stringify({ cart:cart, code:appliedCode, pct:appliedPct })); }catch(e){} }
+    editingRef = ref; try{ localStorage.setItem("odos_editing", ref); }catch(e){}
+    cart = copyItems(o.items); appliedCode = o.code || null; appliedPct = o.pct || 0; saveCode();
+    var c = o.cust || {};
+    [["ord_name","name"],["ord_email","email"],["ord_phone","phone"],["ord_whatsapp","whatsapp"],["ord_address","address"],["ord_city","city"]].forEach(function(m){ var el = document.getElementById(m[0]); if(el) el.value = c[m[1]] || ""; });
+    document.getElementById("ord_notes").value = "";
+    var ag = document.getElementById("ord_agree"); if(ag) ag.checked = true;   // terms were accepted on the original order
+    var r = document.getElementById("orderForm").querySelector('input[name="payment"][value="' + (c.payment || "") + '"]'); if(r) r.checked = true;
+    saveCart(); renderOrders(); goTo("cart");
+  }
+  function cancelEdit(){ exitEdit(); document.getElementById("orderForm").reset(); saveCart(); renderOrders(); }
+
+  function syncEdit(){
+    var o = getOrder(editingRef), sub = cartSubtotal(), t = sub - discountFor(sub), amt = o ? Math.max(0, t - o.total) : t;
+    var b = document.getElementById("editBanner"); b.style.display = o ? "block" : "none";
+    if(o) document.getElementById("editRef").textContent = o.ref;
+    document.getElementById("payLbl").textContent = o ? "Additional amount to send:" : "Amount to send:";
+    document.getElementById("payAmt").textContent = fmt(amt);
+    var btn = document.getElementById("orderSubmitBtn"), f = document.getElementById("orderForm");
+    if(f.dataset.sending !== "1") btn.textContent = o ? "Send Order Update" : "Place Order";
+  }
+  var _renderCart = renderCart; renderCart = function(){ _renderCart(); syncEdit(); };
+  (function(){ var tot = document.getElementById("cartTotal"); if(tot) new MutationObserver(syncEdit).observe(tot, {childList:true, characterData:true, subtree:true}); })();
+  document.addEventListener("click", function(e){          // "Copy amount" copies the extra amount while editing
+    var b = e.target.closest && e.target.closest("[data-copy-amt]"); if(!b || !getOrder(editingRef)) return;
+    e.preventDefault(); e.stopImmediatePropagation();
+    copyText(document.getElementById("payAmt").textContent.replace(/[^0-9.]/g,""), b);
+  }, true);
+
+  function orderDate(t){ return new Date(t).toLocaleDateString("en-GB", { day:"numeric", month:"short" }); }
+  function renderOrders(){
+    var sec = document.getElementById("ongoingOrders"), box = document.getElementById("ongoingList");
+    if(!sec) return;
+    if(!orders.length){ sec.style.display = "none"; return; }
+    sec.style.display = "";
+    box.innerHTML = orders.map(function(o){
+      var n = o.items.reduce(function(s, c){ return s + c.qty; }, 0), isEd = o.ref === editingRef;
+      var thumbs = o.items.slice(0, 4).map(function(c){
+        var p = findProduct(c.id), src = p ? primaryImg(p) : "";
+        return '<span class="ord-thumb">' + (src ? '<img src="' + src + '" alt="" loading="lazy" decoding="async">' : "") + '</span>';
+      }).join("") + (o.items.length > 4 ? '<span class="ord-thumb">+' + (o.items.length - 4) + '</span>' : "");
+      return '<div class="ord-card">' +
+        '<div class="ord-top"><span>ORDER ' + trackEsc(o.ref) + ' - PLACED ' + orderDate(o.at).toUpperCase() + (o.rev ? ' - UPDATED ' + orderDate(o.upd).toUpperCase() : "") + '</span><span class="ord-pill">' + (isEd ? "EDITING" : "ONGOING") + '</span></div>' +
+        '<div class="ord-thumbs">' + thumbs + '</div>' +
+        '<div>' + n + (n === 1 ? " item" : " items") + ' - <strong>' + fmt(o.total) + '</strong></div>' +
+        '<div class="ord-actions">' +
+          '<button type="button" class="btn ghost" data-ord-view="' + trackEsc(o.ref) + '">View details</button>' +
+          (isEd ? '<button type="button" class="btn" data-ord-resume>Continue editing</button><button type="button" class="btn ghost" data-ord-cancel>Cancel edit</button>'
+                : '<button type="button" class="btn" data-ord-edit="' + trackEsc(o.ref) + '">Edit order</button>') +
+        '</div></div>';
+    }).join("");
+  }
+
+  var orderModal = document.getElementById("orderModalOverlay");
+  function closeOrderModal(){ orderModal.classList.remove("show"); }
+  function viewOrder(ref){
+    var o = getOrder(ref); if(!o) return;
+    var c = o.cust || {}, rows = o.items.map(function(it){
+      var p = findProduct(it.id), b = p ? cartBits(it, p).join(" / ") : "";
+      return '<div class="ord-row"><span>' + trackEsc(p ? p.name : it.id) + '<small>' + (b ? trackEsc(b) + ' - ' : '') + 'x' + it.qty + '</small></span><span>' + (p ? fmt(itemPrice(p, it.design, it.printMethod) * it.qty) : "") + '</span></div>';
+    }).join("");
+    document.getElementById("orderModalBody").innerHTML =
+      '<h3 style="margin:0 0 4px;">Order ' + trackEsc(o.ref) + '</h3>' +
+      '<p class="copy" style="margin:0 0 14px;">Placed ' + orderDate(o.at) + (o.rev ? ' - updated ' + orderDate(o.upd) : '') + '</p>' + rows +
+      (o.code ? '<div class="ord-row"><span>Discount (' + trackEsc(showCode(o.code)) + ')</span><span>applied</span></div>' : '') +
+      '<div class="ord-row"><span>Delivery</span><span>FREE</span></div>' +
+      '<div class="ord-row" style="font-size:16px;"><strong>Total</strong><strong>' + fmt(o.total) + '</strong></div>' +
+      '<p class="copy" style="margin:16px 0 4px;"><strong>' + trackEsc(c.name || "") + '</strong> - ' + trackEsc(c.phone || "") + '<br>' + trackEsc(c.address || "") + ', ' + trackEsc(c.city || "") + '<br>Paid via ' + trackEsc(c.payment || "-") + '</p>' +
+      '<p class="copy" style="margin:10px 0 16px;font-size:13px;">Changes are sent to us as an update to this same order. Once an order has shipped it can no longer be changed.</p>' +
+      '<div class="ord-actions"><button type="button" class="btn" data-ord-edit="' + trackEsc(o.ref) + '">Edit order</button><button type="button" class="btn ghost" data-track-go="' + trackEsc(o.ref) + '">Track order</button></div>';
+    orderModal.classList.add("show");
+  }
+  document.getElementById("orderModalClose").addEventListener("click", closeOrderModal);
+  orderModal.addEventListener("click", function(e){ if(e.target === orderModal || e.target.closest("[data-track-go]")) closeOrderModal(); });
+  document.addEventListener("keydown", function(e){ if(e.key === "Escape") closeOrderModal(); });
+  document.addEventListener("click", function(e){
+    var b = e.target.closest("[data-ord-view],[data-ord-edit],[data-ord-resume],[data-ord-cancel]"); if(!b) return;
+    if(b.hasAttribute("data-ord-view")) viewOrder(b.getAttribute("data-ord-view"));
+    else if(b.hasAttribute("data-ord-edit")){ closeOrderModal(); startEdit(b.getAttribute("data-ord-edit")); }
+    else if(b.hasAttribute("data-ord-resume")) goTo("cart");
+    else if(b.hasAttribute("data-ord-cancel")) cancelEdit();
+  });
+  renderCart(); renderOrders();
+
   var orderForm = document.getElementById("orderForm");
   orderForm.addEventListener("submit", function(e){
     e.preventDefault();
@@ -2999,7 +3151,7 @@
       var unit = itemPrice(p, c.design, c.printMethod);
       return p.name + (bits.length ? " ("+bits.join(" / ")+")" : "") + " x" + c.qty + ", " + fmt(unit*c.qty);
     });
-    var orderId = newOrderId();
+    var ed = getOrder(editingRef), orderId = ed ? ed.ref : newOrderId();
     document.getElementById("orderIdField").value = orderId;
     var emailItems = cart.map(function(c){
       var p = findProduct(c.id); if(!p) return null;
@@ -3018,11 +3170,13 @@
       total: fmt(total),
       items: emailItems
     };
-    document.getElementById("orderDetailsField").value = lines.join(" | ");
-    document.getElementById("orderTotalField").value = fmt(total) + (appliedCode ? " (after " + showCode(appliedCode) + " discount)" : "");
+    var snap = snapOrder(orderId, ed, total);
+    document.getElementById("orderTypeField").value = ed ? "update" : "new";
+    document.getElementById("orderDetailsField").value = (ed ? "[UPDATE TO ORDER " + ed.ref + " - revised full list replaces the earlier one] " + diffText(ed, snap) + " || " : "") + lines.join(" | ");
+    document.getElementById("orderTotalField").value = fmt(total) + (appliedCode ? " (after " + showCode(appliedCode) + " discount)" : "") + (ed ? " | previous total " + fmt(ed.total) + ", extra to pay " + fmt(Math.max(0, total - ed.total)) : "");
     document.getElementById("orderDiscountCodeField").value = appliedCode ? showCode(appliedCode) : "none";
     document.getElementById("orderDiscountAmountField").value = appliedCode ? fmt(disc) : "EGP 0";
-    submitNetlifyForm(orderForm, document.getElementById("orderMsg"), function(){ createOrderRecord(emailPayload); sendOrderEmail(emailPayload); rememberOrder(emailPayload.orderId); showTrackCta(emailPayload.orderId); cart = []; appliedCode = null; appliedPct = 0; saveCode(); saveCart(); orderForm.reset(); prefillOrderEmail(); document.getElementById("discountInput").value = ""; discountMsg("", ""); }, "Thank you - your order has been placed! Your order number is " + orderId + " - track it anytime from the menu (Track Order). A confirmation email is on its way to " + emailPayload.email + ". If you don't see it within a few minutes, please check your spam or junk folder. We'll also contact you shortly to confirm the details.");
+    submitNetlifyForm(orderForm, document.getElementById("orderMsg"), function(){ if(ed){ finishOrder(snap, ed); } else { createOrderRecord(emailPayload); sendOrderEmail(emailPayload); rememberOrder(emailPayload.orderId); finishOrder(snap, null); appliedCode = null; appliedPct = 0; saveCode(); saveCart(); } showTrackCta(emailPayload.orderId); orderForm.reset(); prefillOrderEmail(); document.getElementById("discountInput").value = ""; discountMsg("", ""); }, ed ? ("Your update to order " + orderId + " was sent. We'll confirm the changes with you shortly.") : "Thank you - your order has been placed! Your order number is " + orderId + " - track it anytime from the menu (Track Order). A confirmation email is on its way to " + emailPayload.email + ". If you don't see it within a few minutes, please check your spam or junk folder. We'll also contact you shortly to confirm the details.");
   });
 
   var contactForm = document.getElementById("contactForm");
